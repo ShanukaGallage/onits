@@ -1,0 +1,18 @@
+# Dependency Trees Cache
+node_modules/
+.pnpm-store/
+
+# Local Environment Variables & Cleartext Credentials
+.env
+.env.local
+.env.development.local
+
+# Build Compilation Engines Outputs
+dist/
+build/
+.next/
+
+# IDE Workspace Local Registries
+.DS_Store
+.idea/
+.vscode/
