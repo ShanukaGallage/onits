@@ -1,18 +1,41 @@
-# Dependency Trees Cache
-node_modules/
-.pnpm-store/
+# # Dependency Trees Cache
+# node_modules/
+# .pnpm-store/
 
-# Local Environment Variables & Cleartext Credentials
+# # Local Environment Variables & Cleartext Credentials
+# .env
+# .env.local
+# .env.development.local
+
+# # Build Compilation Engines Outputs
+# dist/
+# build/
+# .next/
+
+# # IDE Workspace Local Registries
+# .DS_Store
+# .idea/
+# .vscode/
+
+cat >> .gitignore << 'EOF'
+
+# Environment files — NEVER commit these
 .env
 .env.local
-.env.development.local
+.env.*.local
+backend/.env
+frontend/.env.local
 
-# Build Compilation Engines Outputs
+# Docker volumes
+docker-volumes/
+
+# Build outputs
 dist/
 build/
-.next/
+backend/dist/
 
-# IDE Workspace Local Registries
-.DS_Store
-.idea/
-.vscode/
+# Prisma generated client
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+EOF

@@ -1,0 +1,66 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  OnIts — Docker Compose (Local Development)
+#  Owner: Shanuka (DevOps Lead)
+#
+#  HOW HOT-RELOAD WORKS WITH BIND VOLUMES:
+#  The `./backend:/app` mount maps your LOCAL backend folder into the container.
+#  When you edit a file in Cursor IDE, the container sees the change immediately.
+#  ts-node-dev (backend) / Vite HMR (frontend) detect the change and restart/refresh.
+#
+#  The `/app/node_modules` anonymous volume is CRITICAL:
+#  Without it, Docker would overwrite the container's node_modules with the empty
+#  node_modules from your local machine (or worse, Windows path-incompatible modules).
+#  The anonymous volume "shields" the container's node_modules from the bind mount.
+#
+#  NOTE: This setup connects directly to Neon cloud PostgreSQL.
+#  No local database container is needed — Neon is the database server.
+# ─────────────────────────────────────────────────────────────────────────────
+
+version: "3.9"
+
+services:
+
+  # ── Express + Prisma API ────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development          # Uses the development stage (ts-node-dev hot-reload)
+    container_name: onits_backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"               # API available at http://localhost:5000
+    volumes:
+      - ./backend:/app             # Bind mount: file changes reflect instantly
+      - /app/node_modules          # Anonymous volume: protects container node_modules
+    env_file:
+      - ./backend/.env             # LOCAL only — never committed (see .gitignore)
+    networks:
+      - onits_network
+
+  # ── React + Vite SPA ─────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development          # Uses the development stage (Vite HMR)
+    container_name: onits_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"               # SPA available at http://localhost:5173
+    volumes:
+      - ./frontend:/app            # Bind mount: Vite HMR detects file changes
+      - /app/node_modules          # Anonymous volume: protects container node_modules
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    networks:
+      - onits_network
+    depends_on:
+      - backend                    # Backend starts first (frontend needs the API ready)
+
+# ── Shared bridge network ──────────────────────────────────────────────────────
+# Both containers are on the same virtual network so they can reach each other
+# by container name (e.g., backend can call http://onits_frontend:5173 internally)
+networks:
+  onits_network:
+    driver: bridge

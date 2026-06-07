@@ -1,0 +1,210 @@
+// ─────────────────────────────────────────────────────────────────────────────
+//  OnIts — Prisma Schema
+//  Database: Neon PostgreSQL (ap-southeast-1 | Singapore)
+//  Owner: Shanuka (DB Lead)
+//
+//  SECURITY LAWS:
+//  1. ALL primary keys are UUID strings — integer autoincrement is BANNED (anti-IDOR)
+//  2. passwordHash is NEVER included in API responses — use safeUserSelect in db.ts
+//  3. Cascade deletes follow the ownership chain: Project → Tasks → Assignments/Comments/etc.
+//  4. Two compound indices for query performance: [projectId, status] and [userId, isRead]
+// ─────────────────────────────────────────────────────────────────────────────
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ENUMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  Admin
+  ProjectManager
+  Collaborator
+}
+
+enum UserStatus {
+  Active
+  Deactivated
+}
+
+enum Priority {
+  Low
+  Medium
+  High
+}
+
+enum TaskStatus {
+  ToDo
+  InProgress
+  Completed
+}
+
+enum NotificationType {
+  TaskAssigned
+  StatusChanged
+  CommentAdded
+  DeadlineApproach
+  AdminUpdate
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  MODELS
+// ─────────────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  // NEVER expose this field in API responses — always query with safeUserSelect
+  passwordHash String     @map("password_hash")
+  role         Role       @default(Collaborator)
+  status       UserStatus @default(Active)
+  // Forces password reset on first login — part of admin-created user flow
+  isFirstLogin Boolean    @default(true) @map("is_first_login")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  // @updatedAt: Prisma automatically refreshes this on every record update
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  createdProjects    Project[]        @relation("ProjectCreator")
+  projectMemberships ProjectMember[]
+  createdTasks       Task[]           @relation("TaskCreator")
+  taskAssignments    TaskAssignment[]
+  comments           Comment[]
+  attachments        Attachment[]
+  notifications      Notification[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdById String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  createdBy User            @relation("ProjectCreator", fields: [createdById], references: [id])
+  members   ProjectMember[]
+  tasks     Task[]
+
+  @@map("projects")
+}
+
+model ProjectMember {
+  projectId String   @map("project_id")
+  userId    String   @map("user_id")
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  // Cascade: deleting a Project removes all its memberships
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  // Cascade: deleting a User removes them from all projects
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Composite PK — no duplicate memberships, no unnecessary ID column
+  @@id([projectId, userId])
+  @@map("project_members")
+}
+
+model Task {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  dueDate     DateTime?  @map("due_date")
+  priority    Priority   @default(Medium)
+  status      TaskStatus @default(ToDo)
+  createdById String     @map("created_by")
+  projectId   String     @map("project_id")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  createdBy     User             @relation("TaskCreator", fields: [createdById], references: [id])
+  // Cascade: deleting a Project wipes all its Tasks (and their children below)
+  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignments   TaskAssignment[]
+  comments      Comment[]
+  attachments   Attachment[]
+  notifications Notification[]
+
+  // PERFORMANCE INDEX: Kanban board queries filter by project then group by status
+  // Without this, every board render does a full table scan
+  @@index([projectId, status])
+  @@map("tasks")
+}
+
+model TaskAssignment {
+  taskId     String   @map("task_id")
+  userId     String   @map("user_id")
+  assignedAt DateTime @default(now()) @map("assigned_at")
+
+  // Cascade: deleting a Task removes all its assignments
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  // Cascade: deleting a User removes all their task assignments
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+  @@map("task_assignments")
+}
+
+model Comment {
+  id          String   @id @default(uuid())
+  content     String
+  taskId      String   @map("task_id")
+  createdById String   @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Cascade: deleting a Task wipes all its Comments
+  task      Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  @@map("comments")
+}
+
+model Attachment {
+  id           String   @id @default(uuid())
+  fileName     String   @map("file_name")
+  // URL to cloud storage (e.g. Azure Blob Storage or a local /uploads path)
+  fileUrl      String   @map("file_url")
+  // Size in bytes — Int supports up to ~2.1GB which is sufficient for attachments
+  fileSize     Int      @map("file_size")
+  fileType     String   @map("file_type")
+  taskId       String   @map("task_id")
+  uploadedById String   @map("uploaded_by")
+  uploadedAt   DateTime @default(now()) @map("uploaded_at")
+
+  // Cascade: deleting a Task wipes all its Attachments
+  task       Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploadedBy User @relation(fields: [uploadedById], references: [id])
+
+  @@map("attachments")
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  type      NotificationType
+  message   String
+  isRead    Boolean          @default(false) @map("is_read")
+  userId    String           @map("user_id")
+  // Nullable: some admin notifications are not linked to a specific task
+  taskId    String?          @map("task_id")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  // Cascade: deleting a User removes all their notifications
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // SetNull: deleting a Task nullifies the taskId on notifications (keeps notification history)
+  task Task? @relation(fields: [taskId], references: [id], onDelete: SetNull)
+
+  // PERFORMANCE INDEX: Notification panel queries filter by user then group by read status
+  // This index is what makes the unread count badge query fast
+  @@index([userId, isRead])
+  @@map("notifications")
+}
