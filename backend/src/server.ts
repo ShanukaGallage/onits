@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import dotenv from 'dotenv';
+import authRouter from './routes/auth.routes';
 
 dotenv.config();
 
@@ -22,6 +23,9 @@ app.use(cors({
 // Body parsers
 app.use(express.json());
 app.use(cookieParser());
+
+// API Routes
+app.use('/api/auth', authRouter);
 
 // Swagger setup
 const swaggerSpec = swaggerJsdoc({
