@@ -1,32 +1,25 @@
 import { Request, Response, NextFunction } from "express";
-import { ZodSchema, ZodError } from "zod";
+import { ZodSchema } from "zod";
 
 const validate = (schema: ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    try {
-      schema.parse(req.body);
-      next();
-    } catch (error) {
-      if (error instanceof ZodError) {
-        const errors = error.errors.map((e) => ({
-          field: e.path.join("."),
-          message: e.message,
-        }));
+    const result = schema.safeParse(req.body);
 
-        res.status(400).json({
-          errorCode: 400,
-          message: "Validation failed",
-          description: errors,
-        });
-        return;
-      }
+    if (!result.success) {
+      const errors = result.error.issues.map((issue) => ({
+        field: issue.path.join("."),
+        message: issue.message,
+      }));
 
-      res.status(500).json({
-        errorCode: 500,
-        message: "Internal server error",
-        description: "An unexpected error occurred",
+      res.status(400).json({
+        errorCode: 400,
+        message: "Validation failed",
+        description: errors,
       });
+      return;
     }
+
+    next();
   };
 };
 
