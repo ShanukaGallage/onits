@@ -50,13 +50,22 @@ export default function LoginPage() {
 
           {/* Email */}
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '500', color: '#9ca3af' }}>
+            <label
+              htmlFor="email"
+              style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '500', color: '#9ca3af' }}
+            >
               EMAIL ADDRESS
             </label>
             <input
+              id="email"
+              name="email"
+              autoComplete="email"
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') void handleLogin();
+              }}
               placeholder="you@example.com"
               style={{ width: '100%', padding: '12px 14px', background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '10px', fontSize: '14px', color: 'white', boxSizing: 'border-box', outline: 'none' }}
             />
