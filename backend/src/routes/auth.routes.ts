@@ -20,7 +20,7 @@ const router = Router();
  *       properties:
  *         id:
  *           type: string
- *           example: "usr_12345"
+ *           example: "9f3c0b1e-7c9a-4d3c-9a1f-6a4d6e2b1c33"
  *         name:
  *           type: string
  *           example: "John Doe"
@@ -29,10 +29,10 @@ const router = Router();
  *           example: "john@example.com"
  *         role:
  *           type: string
- *           example: "USER"
+ *           example: "Collaborator"
  *         status:
  *           type: string
- *           example: "ACTIVE"
+ *           example: "Active"
  *         isFirstLogin:
  *           type: boolean
  *           example: false
