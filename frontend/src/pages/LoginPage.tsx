@@ -64,13 +64,22 @@ export default function LoginPage() {
 
           {/* Password */}
           <div style={{ marginBottom: '28px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '500', color: '#9ca3af' }}>
+            <label
+              htmlFor="password"
+              style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: '500', color: '#9ca3af' }}
+            >
               PASSWORD
             </label>
             <input
+              id="password"
+              name="password"
+              autoComplete="current-password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') void handleLogin();
+              }}
               placeholder="••••••••"
               style={{ width: '100%', padding: '12px 14px', background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '10px', fontSize: '14px', color: 'white', boxSizing: 'border-box', outline: 'none' }}
             />
