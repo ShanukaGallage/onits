@@ -21,6 +21,7 @@ export async function loginUser(
   // Find user by email — fetch passwordHash ONLY for bcrypt comparison
   const user = await prisma.user.findUnique({
     where: { email },
+    select: { id: true, role: true, status: true, passwordHash: true },
   });
 
   if (!user) {
