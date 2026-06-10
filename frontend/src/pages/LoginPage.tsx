@@ -45,8 +45,23 @@ export default function LoginPage() {
         <div style={{ background: '#111111', border: '1px solid #1f1f1f', borderRadius: '16px', padding: '32px' }}>
 
           {/* Error */}
-            <div role="alert" aria-live="polite" style={{ background: '#2d1515', border: '1px solid #7f1d1d', color: '#fca5a5', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
-          )}
+            {error && (
+  <div
+    role="alert"
+    aria-live="polite"
+    style={{
+      background: '#2d1515',
+      border: '1px solid #7f1d1d',
+      color: '#fca5a5',
+      padding: '12px',
+      borderRadius: '8px',
+      marginBottom: '20px',
+      fontSize: '14px'
+    }}
+  >
+    {error}
+  </div>
+)}
 
           {/* Email */}
           <div style={{ marginBottom: '20px' }}>
