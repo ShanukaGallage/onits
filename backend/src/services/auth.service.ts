@@ -48,7 +48,7 @@ export async function loginUser(
   const token = jwt.sign(
     { userId: user.id, role: user.role },
     jwtSecret,
-    { expiresIn: '7d' }
+    { expiresIn: process.env.JWT_EXPIRES_IN ?? "7d" }
   );
 
   // Return: { token, user } where user is fetched again using safeUserSelect
