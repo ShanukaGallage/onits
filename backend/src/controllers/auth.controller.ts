@@ -17,8 +17,10 @@ export async function login(req: Request, res: Response): Promise<void> {
       httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000
     });
     res.status(200).json({ message: 'Login successful', user });
-  } catch (error: any) {
-    res.status(401).json({ errorCode: 401, message: error.message });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unexpected error";
+    const status = message === "Invalid email or password" || message === "Your account has been deactivated" ? 401 : 500;
+    res.status(status).json({ errorCode: status, message: status === 500 ? "Internal server error" : message });
   }
 }
 
