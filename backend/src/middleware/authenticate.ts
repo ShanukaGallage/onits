@@ -62,13 +62,6 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 
     req.user = user;
     next();
-  } catch {
-    res.status(401).json({
-      error: "Unauthorized",
-      message: "Authentication required",
-    });
-  }
-};
   } catch (error) {
     res.status(401).json({
       error: "Unauthorized",

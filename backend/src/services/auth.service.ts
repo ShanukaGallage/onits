@@ -30,7 +30,7 @@ export const authService = {
     const { passwordHash: _passwordHash, ...user } = userWithPassword;
 
     const token = jwt.sign({ sub: user.id }, jwtSecret, {
-      expiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
+      expiresIn: (process.env.JWT_EXPIRES_IN ?? "7d") as any,
       algorithm: "HS256",
     });
 
