@@ -45,7 +45,7 @@ export default function LoginPage() {
         <div style={{ background: '#111111', border: '1px solid #1f1f1f', borderRadius: '16px', padding: '32px' }}>
 
           {/* Error */}
-            {error && (
+{error && (
   <div
     role="alert"
     aria-live="polite"
