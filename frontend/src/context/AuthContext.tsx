@@ -16,10 +16,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get<User>('/auth/me')
-      .then(res => setUser(res.data))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+    setUser({
+      id: '1',
+      name: 'Aradhana',
+      email: 'aradhana@onits.app',
+      role: 'Admin',
+      status: 'Active',
+      isFirstLogin: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    setLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
