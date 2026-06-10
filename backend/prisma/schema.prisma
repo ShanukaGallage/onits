@@ -10,6 +10,10 @@
 //  4. Two compound indices for query performance: [projectId, status] and [userId, isRead]
 // ─────────────────────────────────────────────────────────────────────────────
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
