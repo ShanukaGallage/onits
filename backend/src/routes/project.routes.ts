@@ -158,7 +158,7 @@ router.put(
  *     summary: Delete a project
  *     description: Permanently deletes a project. Restricted to Admins only.
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
