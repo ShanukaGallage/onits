@@ -237,7 +237,7 @@ router.post(
  *     summary: Remove a member from a project
  *     description: Unassigns a user from a project. Restricted to ProjectManagers and Admins.
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
