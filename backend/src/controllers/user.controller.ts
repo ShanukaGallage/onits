@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+
 import * as userService from '../services/user.service';
 import { ZodError } from 'zod';
 import {
@@ -112,3 +113,4 @@ export const changePassword = async (req: Request, res: Response) => {
     return handleError(res, error);
   }
 };
+
