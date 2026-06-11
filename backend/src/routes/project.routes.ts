@@ -47,7 +47,7 @@ const router = Router();
  *     summary: List all projects
  *     description: Returns every project visible to the authenticated user.
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: Array of project objects
