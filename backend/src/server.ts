@@ -8,6 +8,7 @@ import dotenv from 'dotenv';
 import authRouter from './routes/auth.routes';
 import userRouter from './routes/user.routes';
 import projectRouter from './routes/project.routes';
+import taskRouter from './routes/task.routes';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/projects', projectRouter);
+app.use('/api/tasks', taskRouter);
 
 // Swagger setup
 const swaggerSpec = swaggerJsdoc({
