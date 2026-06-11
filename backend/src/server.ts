@@ -7,7 +7,7 @@ import swaggerUi from 'swagger-ui-express';
 import dotenv from 'dotenv';
 import authRouter from './routes/auth.routes';
 import userRouter from './routes/user.routes';
-
+import projectRouter from './routes/project.routes';
 
 dotenv.config();
 
@@ -16,11 +16,13 @@ const app = express();
 // Security middleware
 app.use(helmet());
 
-// CORS — only allow the frontend origin, with credentials for cookie auth
-app.use(cors({
-  origin: process.env.FRONTEND_URL,
-  credentials: true,
-}));
+// CORS
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  })
+);
 
 // Body parsers
 app.use(express.json());
@@ -29,6 +31,7 @@ app.use(cookieParser());
 // API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
+app.use('/api/projects', projectRouter);
 
 // Swagger setup
 const swaggerSpec = swaggerJsdoc({
@@ -54,10 +57,14 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
  *         description: Server is running
  */
 app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date() });
+  res.json({
+    status: 'ok',
+    timestamp: new Date(),
+  });
 });
 
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`OnIts backend running on port ${PORT}`);
 });

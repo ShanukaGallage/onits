@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-// Import authService from service layer - Sajana will implement this
-import { authService } from "../services/auth.service";
+import { loginUser, getCurrentUser } from "../services/auth.service";
 
 /**
  * Handles user login.
@@ -18,7 +17,7 @@ export const loginController = async (req: Request, res: Response): Promise<void
       return;
     }
 
-    const { user, token } = await authService.login(email, password);
+    const { user, token } = await loginUser(email, password);
 
     // Set JWT as HttpOnly, SameSite=Strict cookie with 7-day expiry
     res.cookie("token", token, {
