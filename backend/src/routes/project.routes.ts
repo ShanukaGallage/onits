@@ -82,7 +82,7 @@ router.post(
  *     summary: Get a project by ID
  *     description: Retrieves a single project by its UUID. Any authenticated user may call this.
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
