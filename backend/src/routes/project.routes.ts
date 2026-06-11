@@ -114,7 +114,7 @@ router.get(
  *     summary: Update a project
  *     description: Updates an existing project's details. Restricted to ProjectManagers and Admins.
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
