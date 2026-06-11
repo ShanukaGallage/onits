@@ -20,6 +20,27 @@ import {
 const router = Router();
 
 /**
+ * @openapi
+ * components:
+ *   schemas:
+ *     CreateProjectInput:
+ *       type: object
+ *       required: [name]
+ *       properties:
+ *         name: { type: string, maxLength: 100 }
+ *         description: { type: string, maxLength: 1000 }
+ *     UpdateProjectInput:
+ *       type: object
+ *       properties:
+ *         name: { type: string, maxLength: 100 }
+ *         description: { type: string, maxLength: 1000 }
+ *     AddMemberInput:
+ *       type: object
+ *       required: [userId]
+ *       properties:
+ *         userId: { type: string, format: uuid }
+ */
+/**
  * @swagger
  * /api/projects:
  *   get:
