@@ -69,7 +69,7 @@ router.get(
  *     summary: Create a new project
  *     description: Creates a project. Restricted to ProjectManagers and Admins.
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
