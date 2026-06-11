@@ -1,104 +1,116 @@
 import { Request, Response } from 'express';
-// TODO: import { userService } from '../services/user.service';
-// Sajana will create this service file
 
-export const getAllUsers = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+import * as userService from '../services/user.service';
+import { ZodError } from 'zod';
+import {
+  createUserSchema,
+  updateUserSchema,
+  changePasswordSchema,
+} from '../validators/user.validator';
+
+/**
+ * Maps error occurrences to the standard JSON API response format:
+ * - 404 for User not found
+ * - 400 for known client/validation errors
+ * - 500 for internal errors without leaking internal system trace details
+ */
+const handleError = (res: Response, error: unknown) => {
+  if (error instanceof ZodError) {
+    return res.status(400).json({
+      errorCode: 400,
+      message: error.issues[0]?.message || 'Validation error',
+    });
+  }
+
+  const message = error instanceof Error ? error.message : '';
+
+  if (message === 'User not found') {
+    return res.status(404).json({ errorCode: 404, message });
+  }
+
+  if (message === 'Email already in use' || message === 'Current password is incorrect') {
+    return res.status(400).json({ errorCode: 400, message });
+  }
+
+  return res.status(500).json({ errorCode: 500, message: 'Internal server error' });
+};
+
+/**
+ * 1. getAllUsers: Returns a list of all users, filtered by search query if provided.
+ */
+export const getAllUsers = async (req: Request, res: Response) => {
   try {
-    const { role, status, search } = req.query;
-    // TODO: const users = await userService.getAllUsers({ role, status, search });
-    res.status(200).json({
-      message: 'getAllUsers endpoint ready — awaiting userService from Sajana',
-    });
+    const users = await userService.getAllUsers(req.query.search as string);
+    return res.status(200).json(users);
   } catch (error) {
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'Something went wrong',
-    });
+    return handleError(res, error);
   }
 };
 
-export const getUserById = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+/**
+ * 2. getUserById: Returns a single user by ID.
+ */
+export const getUserById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    // TODO: const user = await userService.getUserById(id);
-    // if (!user) { res.status(404).json({ error: 'Not Found', message: 'User not found' }); return; }
-    res.status(200).json({
-      message: `getUserById endpoint ready — awaiting userService from Sajana`,
-    });
+    const user = await userService.getUserById(req.params.id as string);
+    return res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'Something went wrong',
-    });
+    return handleError(res, error);
   }
 };
 
-export const createUser = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+/**
+ * 3. createUser: Validates input and creates a new user, returning 201.
+ */
+export const createUser = async (req: Request, res: Response) => {
   try {
-    const { name, email, role } = req.body;
-
-    if (!name || !email || !role) {
-      res.status(400).json({
-        error: 'Bad Request',
-        message: 'Name, email and role are required',
-      });
-      return;
-    }
-
-    // TODO: const user = await userService.createUser({ name, email, role });
-    res.status(201).json({
-      message: 'createUser endpoint ready — awaiting userService from Sajana',
-    });
+    const validated = createUserSchema.parse(req.body);
+    const user = await userService.createUser(validated);
+    return res.status(201).json(user);
   } catch (error) {
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'Something went wrong',
-    });
+    return handleError(res, error);
   }
 };
 
-export const updateUser = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+/**
+ * 4. updateUser: Validates input and updates allowed user fields.
+ */
+export const updateUser = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const { name, role, status } = req.body;
-    // TODO: const user = await userService.updateUser(id, { name, role, status });
-    res.status(200).json({
-      message: 'updateUser endpoint ready — awaiting userService from Sajana',
-    });
+    const validated = updateUserSchema.parse(req.body);
+    const user = await userService.updateUser(req.params.id as string, validated);
+    return res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'Something went wrong',
-    });
+    return handleError(res, error);
   }
 };
 
-export const deactivateUser = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+/**
+ * 5. deactivateUser: Sets status of specified user to Deactivated.
+ */
+export const deactivateUser = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    // TODO: const user = await userService.deactivateUser(id);
-    res.status(200).json({
-      message: 'deactivateUser endpoint ready — awaiting userService from Sajana',
-    });
+    const user = await userService.deactivateUser(req.params.id as string);
+    return res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'Something went wrong',
-    });
+    return handleError(res, error);
   }
 };
+
+/**
+ * 6. changePassword: Validates password input, compares current, hashes new, and updates.
+ */
+export const changePassword = async (req: Request, res: Response) => {
+  try {
+    const validated = changePasswordSchema.parse(req.body);
+    const user = await userService.changePassword(
+      req.params.id as string,
+      validated.currentPassword,
+      validated.newPassword
+    );
+    return res.status(200).json(user);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
