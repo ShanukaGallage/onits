@@ -193,7 +193,7 @@ router.delete(
  *     summary: Add a member to a project
  *     description: Assigns a user to a project. Restricted to ProjectManagers and Admins.
  *     security:
- *       - bearerAuth: []
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
