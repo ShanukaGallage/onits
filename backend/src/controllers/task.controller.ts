@@ -1,101 +1,152 @@
 import { Request, Response } from 'express';
+import * as taskService from '../services/task.service';
+import { SafeUser } from '../config/db';
+import { ZodError } from 'zod';
 import {
-  getTasksForProjectManager,
-  getTasksForCollaborator,
-  createTask as createTaskService,
-  getTaskById as getTaskByIdService,
-  updateTask as updateTaskService,
-  updateTaskStatus as updateTaskStatusService,
-  deleteTask as deleteTaskService,
-  assignUser as assignUserService,
-  unassignUser as unassignUserService,
-} from '../services/task.service';
+  createTaskSchema,
+  updateTaskSchema,
+  assignTaskSchema,
+} from '../validators/task.validator';
 
-export const getTasks = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const projectId = req.query.projectId as string;
-    const role = req.user?.role;
-    const userId = req.user?.id as string;
-
-    let tasks;
-    if (role === 'ProjectManager' || role === 'Admin') {
-      tasks = await getTasksForProjectManager(projectId);
-    } else {
-      tasks = await getTasksForCollaborator(projectId, userId);
+declare global {
+  namespace Express {
+    interface Request {
+      user?: SafeUser;
     }
-    res.status(200).json(tasks);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+  }
+}
+
+/**
+ * Centrally maps service or validation errors to the standard JSON API response:
+ * - 404: Task / User / Project not found
+ * - 400: Validation issues, assignment logic errors
+ * - 500: Internal server errors (prevents system details leakage)
+ */
+const handleError = (res: Response, error: unknown) => {
+  if (error instanceof ZodError) {
+    return res.status(400).json({
+      errorCode: 400,
+      message: error.issues[0]?.message || 'Validation error',
+    });
+  }
+
+  const message = error instanceof Error ? error.message : '';
+
+  if (
+    message === 'Task not found' ||
+    message === 'User not found' ||
+    message === 'Project not found'
+  ) {
+    return res.status(404).json({ errorCode: 404, message });
+  }
+
+  const badRequests = [
+    'User is already assigned to this task',
+    'User is not assigned to this task',
+  ];
+
+  if (badRequests.includes(message)) {
+    return res.status(400).json({ errorCode: 400, message });
+  }
+
+  return res.status(500).json({ errorCode: 500, message: 'Internal server error' });
+};
+
+/**
+ * 1. getAllTasks: Returns tasks for a project filtered by status and/or priority.
+ */
+export const getAllTasks = async (req: Request, res: Response) => {
+  try {
+    const { status, priority } = req.query;
+    const tasks = await taskService.getAllTasks(req.params.projectId, {
+      status: status as any,
+      priority: priority as any,
+    });
+    return res.status(200).json(tasks);
+  } catch (error) {
+    return handleError(res, error);
   }
 };
 
-export const createTask = async (req: Request, res: Response): Promise<void> => {
+/**
+ * 2. getTaskById: Returns a single task by its unique ID.
+ */
+export const getTaskById = async (req: Request, res: Response) => {
   try {
-    const task = await createTaskService(req.body, req.user?.id as string);
-    res.status(201).json(task);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    const task = await taskService.getTaskById(req.params.id);
+    return res.status(200).json(task);
+  } catch (error) {
+    return handleError(res, error);
   }
 };
 
-export const getTaskById = async (req: Request, res: Response): Promise<void> => {
+/**
+ * 3. createTask: Validates, parses, and creates a task with optional assignees.
+ */
+export const createTask = async (req: Request, res: Response) => {
   try {
-    const task = await getTaskByIdService(req.params.id);
-    if (!task) {
-      res.status(404).json({ error: 'Not Found', message: 'Task not found' });
-      return;
-    }
-    res.status(200).json(task);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    const { assigneeIds, dueDate, ...rest } = createTaskSchema.parse(req.body);
+    const task = await taskService.createTask(
+      { ...rest, dueDate: dueDate ? new Date(dueDate) : undefined },
+      req.user?.id as string,
+      assigneeIds
+    );
+    return res.status(201).json(task);
+  } catch (error) {
+    return handleError(res, error);
   }
 };
 
-export const updateTask = async (req: Request, res: Response): Promise<void> => {
+/**
+ * 4. updateTask: Validates and updates specific properties of an existing task.
+ */
+export const updateTask = async (req: Request, res: Response) => {
   try {
-    const task = await updateTaskService(req.params.id, req.body);
-    if (!task) {
-      res.status(404).json({ error: 'Not Found', message: 'Task not found' });
-      return;
-    }
-    res.status(200).json(task);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    const { dueDate, ...rest } = updateTaskSchema.parse(req.body);
+    const task = await taskService.updateTask(
+      req.params.id,
+      { ...rest, dueDate: dueDate ? new Date(dueDate) : undefined },
+      req.user?.id as string
+    );
+    return res.status(200).json(task);
+  } catch (error) {
+    return handleError(res, error);
   }
 };
 
-export const updateTaskStatus = async (req: Request, res: Response): Promise<void> => {
+/**
+ * 5. deleteTask: Deletes a task by ID.
+ */
+export const deleteTask = async (req: Request, res: Response) => {
   try {
-    const task = await updateTaskStatusService(req.params.id, req.body.status);
-    res.status(200).json(task);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    const result = await taskService.deleteTask(req.params.id);
+    return res.status(200).json(result);
+  } catch (error) {
+    return handleError(res, error);
   }
 };
 
-export const deleteTask = async (req: Request, res: Response): Promise<void> => {
+/**
+ * 6. assignTask: Assigns a user to a task.
+ */
+export const assignTask = async (req: Request, res: Response) => {
   try {
-    await deleteTaskService(req.params.id);
-    res.status(200).json({ message: 'Task deleted successfully' });
-  } catch (error: any) {
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    const { userId } = assignTaskSchema.parse(req.body);
+    const task = await taskService.assignTask(req.params.id, userId);
+    return res.status(200).json(task);
+  } catch (error) {
+    return handleError(res, error);
   }
 };
 
-export const assignUser = async (req: Request, res: Response): Promise<void> => {
+/**
+ * 7. unassignTask: Removes a user from a task assignment.
+ */
+export const unassignTask = async (req: Request, res: Response) => {
   try {
-    const result = await assignUserService(req.params.id, req.body.userId);
-    res.status(200).json(result);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
-  }
-};
-
-export const unassignUser = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const result = await unassignUserService(req.params.id, req.params.userId);
-    res.status(200).json(result);
-  } catch (error: any) {
-    res.status(500).json({ error: 'Internal Server Error', message: error.message });
+    const task = await taskService.unassignTask(req.params.id, req.params.userId);
+    return res.status(200).json(task);
+  } catch (error) {
+    return handleError(res, error);
   }
 };
