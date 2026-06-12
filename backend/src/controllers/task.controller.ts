@@ -53,12 +53,12 @@ const handleError = (res: Response, error: unknown) => {
 };
 
 /**
- * 1. getAllTasks: Returns tasks for a project filtered by status and/or priority.
+ * 1. getTasks: Returns tasks optionally filtered by projectId, status and/or priority.
  */
-export const getAllTasks = async (req: Request, res: Response) => {
+export const getTasks = async (req: Request, res: Response) => {
   try {
-    const { status, priority } = req.query;
-    const tasks = await taskService.getAllTasks(req.params.projectId, {
+    const { projectId, status, priority } = req.query;
+    const tasks = await taskService.getAllTasks(projectId as string, {
       status: status as any,
       priority: priority as any,
     });
@@ -67,6 +67,9 @@ export const getAllTasks = async (req: Request, res: Response) => {
     return handleError(res, error);
   }
 };
+
+/** @deprecated use getTasks */
+export const getAllTasks = getTasks;
 
 /**
  * 2. getTaskById: Returns a single task by its unique ID.
@@ -115,7 +118,23 @@ export const updateTask = async (req: Request, res: Response) => {
 };
 
 /**
- * 5. deleteTask: Deletes a task by ID.
+ * 5. updateTaskStatus: Updates only the status field of a task (any authenticated user).
+ */
+export const updateTaskStatus = async (req: Request, res: Response) => {
+  try {
+    const task = await taskService.updateTask(
+      req.params.id,
+      { status: req.body.status },
+      req.user?.id as string
+    );
+    return res.status(200).json(task);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+/**
+ * 6. deleteTask: Deletes a task by ID.
  */
 export const deleteTask = async (req: Request, res: Response) => {
   try {
@@ -127,22 +146,24 @@ export const deleteTask = async (req: Request, res: Response) => {
 };
 
 /**
- * 6. assignTask: Assigns a user to a task.
+ * 7. assignUser: Assigns a user to a task.
  */
-export const assignTask = async (req: Request, res: Response) => {
+export const assignUser = async (req: Request, res: Response) => {
   try {
-    const { userId } = assignTaskSchema.parse(req.body);
-    const task = await taskService.assignTask(req.params.id, userId);
+    const task = await taskService.assignTask(req.params.id, req.body.userId);
     return res.status(200).json(task);
   } catch (error) {
     return handleError(res, error);
   }
 };
 
+/** @deprecated use assignUser */
+export const assignTask = assignUser;
+
 /**
- * 7. unassignTask: Removes a user from a task assignment.
+ * 8. unassignUser: Removes a user from a task assignment.
  */
-export const unassignTask = async (req: Request, res: Response) => {
+export const unassignUser = async (req: Request, res: Response) => {
   try {
     const task = await taskService.unassignTask(req.params.id, req.params.userId);
     return res.status(200).json(task);
@@ -150,3 +171,6 @@ export const unassignTask = async (req: Request, res: Response) => {
     return handleError(res, error);
   }
 };
+
+/** @deprecated use unassignUser */
+export const unassignTask = unassignUser;
