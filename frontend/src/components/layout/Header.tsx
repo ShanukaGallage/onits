@@ -17,8 +17,11 @@ export default function Header() {
   const pageTitle = routeTitles[location.pathname] ?? 'OnIts';
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/login');
+    try {
+      await logout();
+    } finally {
+      navigate('/login');
+    }
   };
 
   return (
