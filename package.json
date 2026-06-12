@@ -3,17 +3,22 @@
     "private": true,
     "version": "1.0.0",
     "workspaces": [
-      "backend",
-      "frontend"
+        "backend",
+        "frontend"
     ],
     "scripts": {
-      "install:all": "npm install",
-      "dev:native": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
-      "db:migrate": "npm run db:migrate --workspace=backend",
-      "db:seed": "npm run db:seed --workspace=backend",
-      "db:studio": "npm run db:studio --workspace=backend"
+        "install:all": "npm install",
+        "dev:native": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+        "db:migrate": "npm run db:migrate --workspace=backend",
+        "db:seed": "npm run db:seed --workspace=backend",
+        "db:studio": "npm run db:studio --workspace=backend"
     },
     "devDependencies": {
-      "concurrently": "^8.2.2"
+        "concurrently": "^8.2.2"
+    },
+    "dependencies": {
+        "@hookform/resolvers": "^5.4.0",
+        "react-hook-form": "^7.78.0",
+        "zod": "^4.4.3"
     }
-  }
+}
