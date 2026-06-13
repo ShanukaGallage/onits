@@ -8,6 +8,7 @@ import ProjectsPage from '@/pages/ProjectsPage';
 import TasksPage from '@/pages/TasksPage';
 import UsersPage from '@/pages/UsersPage';
 import NotFoundPage from '@/pages/NotFoundPage';
+import ProjectDetailPage from '@/pages/ProjectDetailPage';
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/projects"  element={<ProjectsPage />} />
+            <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
             <Route path="/tasks"     element={<TasksPage />} />
 
             <Route element={<RoleRoute allowedRoles={['Admin']} />}>
