@@ -1,13 +1,12 @@
 import { Router } from 'express';
 import {
-  getTasks,
+  getAllTasks,
   createTask,
   getTaskById,
   updateTask,
-  updateTaskStatus,
   deleteTask,
-  assignUser,
-  unassignUser,
+  assignTask,
+  unassignTask,
 } from '../controllers/task.controller';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
@@ -15,28 +14,39 @@ import validate from '../middleware/validate';
 import {
   createTaskSchema,
   updateTaskSchema,
-  updateTaskStatusSchema,
-  assignUserSchema,
-} from '../validators/task.validators';
+  assignTaskSchema,
+} from '../validators/task.validator';
 
 const router = Router();
 
 /**
  * @swagger
- * /api/tasks:
+ * /api/tasks/project/{projectId}:
  *   get:
- *     summary: Get tasks
+ *     summary: Get tasks for a project
  *     description: ProjectManagers and Admins see all tasks in the project. Collaborators see only their assigned tasks.
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
+ *       - in: path
  *         name: projectId
- *         required: false
+ *         required: true
  *         schema:
  *           type: string
  *           format: uuid
  *         description: Filter tasks by project ID
+ *       - in: query
+ *         name: status
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Filter tasks by status
+ *       - in: query
+ *         name: priority
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: Filter tasks by priority
  *     responses:
  *       200:
  *         description: Array of task objects
@@ -45,7 +55,7 @@ const router = Router();
  *       500:
  *         description: Internal server error
  */
-router.get('/', authenticate, getTasks);
+router.get('/project/:projectId', authenticate, getAllTasks);
 
 /**
  * @swagger
@@ -155,47 +165,6 @@ router.put(
 
 /**
  * @swagger
- * /api/tasks/{id}/status:
- *   patch:
- *     summary: Update task status
- *     description: Updates only the status of a task. All authenticated roles can do this.
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *         description: The task UUID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/UpdateTaskStatusInput'
- *     responses:
- *       200:
- *         description: Task status updated
- *       400:
- *         description: Validation error
- *       401:
- *         description: Unauthenticated
- *       404:
- *         description: Task not found
- *       500:
- *         description: Internal server error
- */
-router.patch(
-  '/:id/status',
-  authenticate,
-  validate(updateTaskStatusSchema),
-  updateTaskStatus
-);
-
-/**
- * @swagger
  * /api/tasks/{id}:
  *   delete:
  *     summary: Delete a task
@@ -250,7 +219,7 @@ router.delete(
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/AssignUserInput'
+ *             $ref: '#/components/schemas/AssignTaskInput'
  *     responses:
  *       200:
  *         description: User assigned successfully
@@ -269,8 +238,8 @@ router.post(
   '/:id/assign',
   authenticate,
   authorize(['ProjectManager', 'Admin']),
-  validate(assignUserSchema),
-  assignUser
+  validate(assignTaskSchema),
+  assignTask
 );
 
 /**
@@ -312,7 +281,7 @@ router.delete(
   '/:id/assign/:userId',
   authenticate,
   authorize(['ProjectManager', 'Admin']),
-  unassignUser
+  unassignTask
 );
 
 export default router;
