@@ -1,7 +1,14 @@
- import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { Plus } from 'lucide-react';
+import CreateProjectModal from '../features/projects/components/CreateProjectModal';
+import DashboardStats from '../features/dashboard/components/DashboardStats';
+import RecentTasks from '../features/dashboard/components/RecentTasks';
+import ProjectOverview from '../features/dashboard/components/ProjectOverview';
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const [createOpen, setCreateOpen] = useState(false);
 
   return (
     <div>
@@ -15,24 +22,23 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
-        {[
-          { label: 'Total Projects', value: '—', color: '#6366f1' },
-          { label: 'Active Tasks', value: '—', color: '#8b5cf6' },
-          { label: 'Completed', value: '—', color: '#10b981' },
-          { label: 'Team Members', value: '—', color: '#f59e0b' },
-        ].map(stat => (
-          <div key={stat.label} style={{ background: '#111111', border: '1px solid #1f1f1f', borderRadius: '12px', padding: '20px' }}>
-            <p style={{ color: '#6b7280', fontSize: '13px', margin: '0 0 8px', fontWeight: '500' }}>{stat.label}</p>
-            <p style={{ color: stat.color, fontSize: '28px', fontWeight: '700', margin: 0 }}>{stat.value}</p>
-          </div>
-        ))}
+      <DashboardStats />
+      <RecentTasks />
+      <ProjectOverview />
+
+      {/* Projects */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-white">Projects</h2>
+        <button
+          onClick={() => setCreateOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all"
+        >
+          <Plus className="w-4 h-4" />
+          New Project
+        </button>
       </div>
 
-      {/* Tharushan: place <DashboardStats /> here to replace stat cards above */}
-      {/* Tharushan: place <RecentTasks /> here */}
-      {/* Tharushan: place <ProjectOverview /> here */}
+      <CreateProjectModal open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   );
 }
