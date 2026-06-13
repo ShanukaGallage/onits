@@ -16,12 +16,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // On mount, check if there's an active session (cookie-based auth)
   useEffect(() => {
-    api.get<User>('/auth/me')
-      .then(res => setUser(res.data))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+    
+    // setUser({
+    //   id: '1',
+    //   name: 'Aradhana',
+    //   email: 'aradhana@onits.app',
+    //   role: 'Admin',
+    //   status: 'Active',
+    //   isFirstLogin: false,
+    //   createdAt: new Date().toISOString(),
+    //   updatedAt: new Date().toISOString(),
+    // });
+    setLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -30,14 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    try {
-      await api.post('/auth/logout');
-    } catch {
-      // Even if the server call fails (e.g. cookie already expired),
-      // clear the local user state so the UI reflects logged-out.
-    } finally {
-      setUser(null);
-    }
+    await api.post('/auth/logout');
+    setUser(null);
   };
 
   return (

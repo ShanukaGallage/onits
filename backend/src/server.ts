@@ -9,6 +9,8 @@ import authRouter from './routes/auth.routes';
 import userRouter from './routes/user.routes';
 import projectRouter from './routes/project.routes';
 import taskRouter from './routes/task.routes';
+import commentRouter from './routes/comment.routes';
+import attachmentRouter from './routes/attachment.routes';
 
 dotenv.config();
 
@@ -34,6 +36,8 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/projects', projectRouter);
 app.use('/api/tasks', taskRouter);
+app.use('/api/tasks/:taskId/comments', commentRouter);
+app.use('/api/tasks/:taskId/attachments', attachmentRouter);
 
 // Swagger setup
 const swaggerSpec = swaggerJsdoc({
