@@ -40,16 +40,27 @@ export interface UpdateTaskPayload {
  * Fetch all tasks for a project, with optional status/priority filters.
  * Enabled only when projectId is not empty.
  */
-export function useTasks(projectId: string, filters?: { status?: string; priority?: string }) {
+export function useTasks(
+  projectId: string,
+  filters?: {
+    status?: string;
+    priority?: string;
+  }
+) {
   return useQuery({
     queryKey: ['tasks', projectId, filters],
-    queryFn: () => {
-      const params: Record<string, string> = { projectId };
-      if (filters?.status) params.status = filters.status;
-      if (filters?.priority) params.priority = filters.priority;
-
-      return api.get<TaskWithDetails[]>('/tasks', { params }).then((r) => r.data);
-    },
+    queryFn: () =>
+      api
+        .get<TaskWithDetails[]>(
+          `/tasks/project/${projectId}`,
+          {
+            params: {
+              status: filters?.status,
+              priority: filters?.priority,
+            },
+          }
+        )
+        .then((r) => r.data),
     enabled: !!projectId,
   });
 }
@@ -89,9 +100,20 @@ export function useUpdateTaskStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: TaskStatus }) =>
-      api.patch<TaskWithDetails>(`/tasks/${id}/status`, { status }).then((r) => r.data),
-    onMutate: async ({ id, status }) => {
+    mutationFn: ({
+      taskId,
+      status,
+    }: 
+    
+    {taskId: string;
+     status: TaskStatus;
+}) =>
+      api.patch<TaskWithDetails>(
+  `/tasks/${taskId}/status`, { status }).then((r) => r.data),
+    onMutate: async ({
+  taskId,
+  status,
+}) => {
       // Cancel outgoing queries
       await queryClient.cancelQueries({ queryKey: ['tasks'] });
 
@@ -102,7 +124,7 @@ export function useUpdateTaskStatus() {
       queryClient.setQueriesData<TaskWithDetails[]>({ queryKey: ['tasks'] }, (old) => {
         if (!old) return old;
         return old.map((task) =>
-          task.id === id ? { ...task, status } : task
+          task.id === taskId ? { ...task, status } : task
         );
       });
 
