@@ -58,9 +58,9 @@ export async function loginUser(
   //      Destructure it out so `user` contains only the safe fields.
   const { passwordHash: _discarded, ...user } = userWithHash;
 
-  // ── 6. Sign the JWT with a payload of { id, email, role } ─────────────────
+  // ── 6. Sign the JWT with a payload of { sub, email, role } ─────────────────
   const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
+    { sub: user.id, email: user.email, role: user.role },
     jwtSecret,
     { expiresIn: (process.env.JWT_EXPIRES_IN ?? "7d") as jwt.SignOptions["expiresIn"] }
   );
