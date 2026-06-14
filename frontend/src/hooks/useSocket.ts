@@ -11,6 +11,12 @@ export function useSocket() {
 
     socketRef.current = io('http://localhost:5000', {
       withCredentials: true,
+      // NFR-11: Reconnection strategies with retry and exponential backoff
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      randomizationFactor: 0.5,
     });
 
     return () => {
