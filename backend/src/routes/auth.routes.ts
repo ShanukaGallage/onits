@@ -1,7 +1,8 @@
 import { Router } from "express";
 import validate from "../middleware/validate";
 import { loginSchema } from "../validators/auth.validator";
-import { loginController, logoutController, meController, refreshController } from "../controllers/auth.controller";
+import { changePasswordSchema } from "../validators/user.validator";
+import { loginController, logoutController, meController, refreshController, changePasswordController } from "../controllers/auth.controller";
 import { authenticate } from "../middleware/authenticate";
 
 const router = Router();
@@ -141,5 +142,42 @@ router.post("/refresh", refreshController);
  *         description: Internal server error
  */
 router.get("/me", authenticate, meController);
+
+/**
+ * @openapi
+ * /api/auth/change-password:
+ *   post:
+ *     summary: Change the authenticated user's password
+ *     tags: [Authentication]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPassword, newPassword]
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 description: Must be at least 8 characters and include uppercase, lowercase, number, and special character.
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SafeUser'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized or incorrect current password
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/change-password", authenticate, validate(changePasswordSchema), changePasswordController);
 
 export default router;

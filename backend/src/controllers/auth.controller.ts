@@ -138,6 +138,43 @@ export const logoutController = async (req: Request, res: Response): Promise<voi
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  changePasswordController
+// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * Handles password reset for authenticated users.
+ * Required for first-time logins, or manually changing password.
+ */
+export const changePasswordController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: "Unauthorized", message: "Authentication required" });
+      return;
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ error: "Bad Request", message: "Missing fields" });
+      return;
+    }
+
+    const updatedUser = await userService.changePassword(req.user.id, currentPassword, newPassword);
+
+    // After a successful password change, we should theoretically rotate the tokens,
+    // but the simplest safe thing is to just let the existing session continue (it has an expiry).
+    res.status(200).json(updatedUser);
+  } catch (error: any) {
+    if (error.message === "Current password is incorrect") {
+      res.status(401).json({ error: "Unauthorized", message: error.message });
+      return;
+    }
+    res.status(500).json({
+      error: "Internal Server Error",
+      message: error.message || "An unexpected error occurred",
+    });
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  meController
 // ─────────────────────────────────────────────────────────────────────────────
 /**

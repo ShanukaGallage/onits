@@ -13,5 +13,9 @@ export default function ProtectedRoute() {
 
   if (!isLoading && !user) return <Navigate to="/login" replace />;
 
+  if (user?.isFirstLogin && window.location.pathname !== '/force-password-reset') {
+    return <Navigate to="/force-password-reset" replace />;
+  }
+
   return <Outlet />;
 }
