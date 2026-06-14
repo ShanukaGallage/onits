@@ -5,6 +5,7 @@ import {
   createUser,
   updateUser,
   deactivateUser,
+  reactivateUser,
 } from '../controllers/user.controller';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
@@ -49,6 +50,14 @@ router.patch(
   authenticate,
   authorize(['Admin']),
   deactivateUser
+);
+
+// PATCH /api/users/:id/reactivate
+router.patch(
+  '/:id/reactivate',
+  authenticate,
+  authorize(['Admin']),
+  reactivateUser
 );
 
 export default router;

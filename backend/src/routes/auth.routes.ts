@@ -1,7 +1,7 @@
 import { Router } from "express";
 import validate from "../middleware/validate";
 import { loginSchema } from "../validators/auth.validator";
-import { loginController, logoutController, meController } from "../controllers/auth.controller";
+import { loginController, logoutController, meController, refreshController } from "../controllers/auth.controller";
 import { authenticate } from "../middleware/authenticate";
 
 const router = Router();
@@ -101,6 +101,24 @@ router.post("/login", validate(loginSchema), loginController);
  *         description: Internal server error
  */
 router.post("/logout", authenticate, logoutController);
+
+/**
+ * @openapi
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Refresh the access token using the refresh token cookie
+ *     tags: [Authentication]
+ *     responses:
+ *       200:
+ *         description: New access token issued, returns logged-in user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SafeUser'
+ *       401:
+ *         description: Invalid or expired refresh token — user must log in again
+ */
+router.post("/refresh", refreshController);
 
 /**
  * @openapi
