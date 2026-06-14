@@ -98,6 +98,18 @@ export const deactivateUser = async (req: Request, res: Response) => {
 };
 
 /**
+ * 6. reactivateUser: Sets status of specified user back to Active.
+ */
+export const reactivateUser = async (req: Request, res: Response) => {
+  try {
+    const user = await userService.reactivateUser(req.params.id as string);
+    return res.status(200).json(user);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+/**
  * 6. changePassword: Validates password input, compares current, hashes new, and updates.
  */
 export const changePassword = async (req: Request, res: Response) => {

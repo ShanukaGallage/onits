@@ -1,7 +1,8 @@
 import { Router } from "express";
 import validate from "../middleware/validate";
 import { loginSchema } from "../validators/auth.validator";
-import { loginController, logoutController, meController } from "../controllers/auth.controller";
+import { changePasswordSchema } from "../validators/user.validator";
+import { loginController, logoutController, meController, refreshController, changePasswordController } from "../controllers/auth.controller";
 import { authenticate } from "../middleware/authenticate";
 
 const router = Router();
@@ -104,6 +105,24 @@ router.post("/logout", authenticate, logoutController);
 
 /**
  * @openapi
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Refresh the access token using the refresh token cookie
+ *     tags: [Authentication]
+ *     responses:
+ *       200:
+ *         description: New access token issued, returns logged-in user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SafeUser'
+ *       401:
+ *         description: Invalid or expired refresh token — user must log in again
+ */
+router.post("/refresh", refreshController);
+
+/**
+ * @openapi
  * /api/auth/me:
  *   get:
  *     summary: Get current authenticated user details
@@ -123,5 +142,42 @@ router.post("/logout", authenticate, logoutController);
  *         description: Internal server error
  */
 router.get("/me", authenticate, meController);
+
+/**
+ * @openapi
+ * /api/auth/change-password:
+ *   post:
+ *     summary: Change the authenticated user's password
+ *     tags: [Authentication]
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPassword, newPassword]
+ *             properties:
+ *               currentPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 description: Must be at least 8 characters and include uppercase, lowercase, number, and special character.
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SafeUser'
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized or incorrect current password
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/change-password", authenticate, validate(changePasswordSchema), changePasswordController);
 
 export default router;

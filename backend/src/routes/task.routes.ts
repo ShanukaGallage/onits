@@ -4,6 +4,7 @@ import {
   createTask,
   getTaskById,
   updateTask,
+  updateTaskStatus,
   deleteTask,
   assignTask,
   unassignTask,
@@ -14,6 +15,7 @@ import validate from '../middleware/validate';
 import {
   createTaskSchema,
   updateTaskSchema,
+  updateTaskStatusSchema,
   assignTaskSchema,
 } from '../validators/task.validator';
 
@@ -161,6 +163,52 @@ router.put(
   authorize(['ProjectManager', 'Admin']),
   validate(updateTaskSchema),
   updateTask
+);
+
+/**
+ * @swagger
+ * /api/tasks/{id}/status:
+ *   patch:
+ *     summary: Update task status
+ *     description: Updates only the status field of a task. Available to any authenticated user (including Collaborators) as long as they are assigned to the task or are an Admin/ProjectManager.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The task UUID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [ToDo, InProgress, Completed]
+ *     responses:
+ *       200:
+ *         description: Updated task object
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthenticated
+ *       404:
+ *         description: Task not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch(
+  '/:id/status',
+  authenticate,
+  validate(updateTaskStatusSchema),
+  updateTaskStatus
 );
 
 /**

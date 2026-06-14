@@ -70,7 +70,7 @@ export default function LoginForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-md border border-gray-200 p-8">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-md border border-gray-200 p-8 text-gray-900">
         {/* Branding */}
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold tracking-tight text-gray-900">
@@ -83,14 +83,15 @@ export default function LoginForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
           {/* Email */}
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
+          <div className="space-y-1.5 text-left">
+            <Label htmlFor="email" className="text-gray-900">Email</Label>
             <Input
               id="email"
               type="email"
               placeholder="you@onits.app"
               autoComplete="email"
               aria-describedby={errors.email ? 'email-error' : undefined}
+              className="text-gray-900 bg-white border-gray-300 placeholder:text-gray-400"
               {...register('email')}
             />
             {errors.email && (
@@ -101,14 +102,15 @@ export default function LoginForm() {
           </div>
 
           {/* Password */}
-          <div className="space-y-1.5">
-            <Label htmlFor="password">Password</Label>
+          <div className="space-y-1.5 text-left">
+            <Label htmlFor="password" className="text-gray-900">Password</Label>
             <Input
               id="password"
               type="password"
               placeholder="••••••••"
               autoComplete="current-password"
               aria-describedby={errors.password ? 'password-error' : undefined}
+              className="text-gray-900 bg-white border-gray-300 placeholder:text-gray-400"
               {...register('password')}
             />
             {errors.password && (
@@ -129,7 +131,7 @@ export default function LoginForm() {
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
           >
             {isSubmitting ? 'Signing in…' : 'Sign in'}
           </Button>

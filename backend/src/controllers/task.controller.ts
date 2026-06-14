@@ -57,11 +57,18 @@ const handleError = (res: Response, error: unknown) => {
  */
 export const getTasks = async (req: Request, res: Response) => {
   try {
-    const { projectId, status, priority } = req.query;
-    const tasks = await taskService.getAllTasks(projectId as string, {
-      status: status as any,
-      priority: priority as any,
-    });
+    const { projectId, status, priority, sortBy, sortOrder } = req.query;
+    const tasks = await taskService.getAllTasks(
+      projectId as string, 
+      {
+        status: status as any,
+        priority: priority as any,
+      },
+      {
+        sortBy: sortBy as string,
+        sortOrder: sortOrder as 'asc' | 'desc',
+      }
+    );
     return res.status(200).json(tasks);
   } catch (error) {
     return handleError(res, error);

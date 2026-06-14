@@ -82,6 +82,7 @@ model User {
   comments           Comment[]
   attachments        Attachment[]
   notifications      Notification[]
+  refreshTokens      RefreshToken[]
 
   @@map("users")
 }
@@ -211,4 +212,25 @@ model Notification {
   // This index is what makes the unread count badge query fast
   @@index([userId, isRead])
   @@map("notifications")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  RefreshToken — issued on login, rotated on every /auth/refresh call
+//  tokenHash: bcrypt hash of the raw token — raw value never persisted
+// ─────────────────────────────────────────────────────────────────────────────
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  // bcrypt hash of the raw refresh token — the raw value is only held in memory
+  tokenHash String   @map("token_hash")
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Cascade: deleting a User removes all their refresh tokens
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Fast lookup: find all tokens for a user on login/logout/rotation
+  @@index([userId])
+  @@map("refresh_tokens")
 }

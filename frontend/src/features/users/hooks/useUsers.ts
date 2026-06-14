@@ -83,3 +83,19 @@ export function useDeactivateUser() {
     },
   });
 }
+
+/**
+ * Reactivate a user by ID (sets status back to 'Active').
+ * Invalidates the users list on success.
+ */
+export function useReactivateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      api.patch<User>(`/users/${id}/reactivate`).then((r) => r.data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: USERS_KEY });
+    },
+  });
+}

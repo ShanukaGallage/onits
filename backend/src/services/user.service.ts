@@ -132,6 +132,28 @@ export async function deactivateUser(id: string): Promise<SafeUser> {
 }
 
 /**
+ * Sets user status to Active and returns updated user with select: safeUserSelect.
+ * Throws an error if the user is not found.
+ */
+export async function reactivateUser(id: string): Promise<SafeUser> {
+  const existingUser = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!existingUser) {
+    throw new Error('User not found');
+  }
+
+  return prisma.user.update({
+    where: { id },
+    data: {
+      status: 'Active',
+    },
+    select: safeUserSelect,
+  });
+}
+
+/**
  * Updates user passwordHash and resets isFirstLogin to false after confirming currentPassword.
  * Returns the updated user with select: safeUserSelect.
  * Throws an error if the user is not found or password validation fails.

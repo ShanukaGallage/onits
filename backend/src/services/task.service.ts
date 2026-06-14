@@ -14,13 +14,18 @@ async function createNotification(userId: string, type: NotificationType, messag
 }
 
 /**
- * Returns all tasks for a project, optionally filtered by status and priority.
+ * Returns all tasks for a project, optionally filtered by status and priority, and optionally sorted.
  */
 export async function getAllTasks(
   projectId: string,
-  filters?: { status?: TaskStatus; priority?: Priority }
+  filters?: { status?: TaskStatus; priority?: Priority },
+  sort?: { sortBy?: string; sortOrder?: 'asc' | 'desc' }
 ) {
-  const where: any = { projectId };
+  const where: any = {};
+  if (projectId) {
+    where.projectId = projectId;
+  }
+  
   if (filters?.status) {
     where.status = filters.status;
   }
@@ -28,8 +33,20 @@ export async function getAllTasks(
     where.priority = filters.priority;
   }
 
+  // Allowed fields for sorting to prevent injection
+  const allowedSortFields = ['createdAt', 'dueDate', 'priority', 'status', 'title'];
+  const orderBy: any = {};
+  
+  if (sort?.sortBy && allowedSortFields.includes(sort.sortBy)) {
+    orderBy[sort.sortBy] = sort.sortOrder === 'desc' ? 'desc' : 'asc';
+  } else {
+    // Default sort
+    orderBy['createdAt'] = 'desc';
+  }
+
   return prisma.task.findMany({
     where,
+    orderBy,
     include: {
       createdBy: {
         select: safeUserSelect,

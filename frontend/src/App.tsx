@@ -9,6 +9,7 @@ import TasksPage from '@/pages/TasksPage';
 import UsersPage from '@/pages/UsersPage';
 import NotFoundPage from '@/pages/NotFoundPage';
 import ProjectDetailPage from '@/pages/ProjectDetailPage';
+import ForcePasswordResetPage from '@/pages/ForcePasswordResetPage';
 
 export default function App() {
   return (
@@ -18,6 +19,8 @@ export default function App() {
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
         <Route element={<ProtectedRoute />}>
+          <Route path="/force-password-reset" element={<ForcePasswordResetPage />} />
+
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/projects"  element={<ProjectsPage />} />
