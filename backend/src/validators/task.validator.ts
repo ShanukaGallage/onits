@@ -17,6 +17,10 @@ export const updateTaskSchema = z.object({
   status: z.enum(['ToDo', 'InProgress', 'Completed'] as const).optional(),
 });
 
+export const updateTaskStatusSchema = z.object({
+  status: z.enum(['ToDo', 'InProgress', 'Completed'] as const),
+});
+
 export const assignTaskSchema = z.object({
   userId: z.string().uuid('userId must be a valid UUID'),
 });
