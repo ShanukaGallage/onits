@@ -60,6 +60,7 @@ export const safeUserSelect = {
   id: true,
   name: true,
   email: true,
+  username: true,
   role: true,
   status: true,
   isFirstLogin: true,
