@@ -49,7 +49,7 @@ function parseExpiresIn(expiresIn: string): Date {
  * @throws  A descriptive Error (with a `.status` property) on any failure.
  */
 export async function loginUser(
-  email: string,
+  identifier: string,
   password: string
 ): Promise<{ token: string; refreshToken: string; user: SafeUser }> {
   // ── 1. Validate env config ────────────────────────────────────────────────
@@ -60,8 +60,13 @@ export async function loginUser(
   if (!refreshSecret) throw new Error("Server misconfiguration: REFRESH_TOKEN_SECRET is not set.");
 
   // ── 2. Fetch the full user record (including passwordHash) ────────────────
-  const userWithHash = await prisma.user.findUnique({
-    where: { email: email.toLowerCase().trim() },
+  const userWithHash = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: identifier },
+        { username: identifier },
+      ],
+    },
     select: { ...safeUserSelect, passwordHash: true },
   });
 
@@ -85,7 +90,7 @@ export async function loginUser(
 
   // ── 6. Sign the access JWT ─────────────────────────────────────────────────
   const token = jwt.sign(
-    { sub: user.id, email: user.email, role: user.role },
+    { sub: user.id, email: user.email, username: user.username, role: user.role },
     jwtSecret,
     { expiresIn: (process.env.JWT_EXPIRES_IN ?? "15m") as jwt.SignOptions["expiresIn"] }
   );

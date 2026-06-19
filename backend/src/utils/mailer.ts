@@ -14,7 +14,7 @@ export const transporter = nodemailer.createTransport({
 /**
  * Sends a welcome email to a new user with their temporary password.
  */
-export async function sendWelcomeEmail(to: string, name: string, tempPassword: string): Promise<void> {
+export async function sendWelcomeEmail(to: string, name: string, username: string, tempPassword: string): Promise<void> {
   const mailOptions = {
     from: `"OnIts Support" <${process.env.SMTP_USER || 'no-reply@onits.com'}>`,
     to,
@@ -26,23 +26,13 @@ export async function sendWelcomeEmail(to: string, name: string, tempPassword: s
           <p style="color: #64748b; margin: 5px 0 0 0; font-size: 14px;">Your Task Management SaaS Workspace</p>
         </div>
         <div style="color: #334155; line-height: 1.6; font-size: 16px;">
-          <p>Hi <strong>${name}</strong>,</p>
-          <p>An account has been created for you on OnIts. You can now log in and start managing your tasks efficiently.</p>
-          
-          <div style="background-color: #f8fafc; border-left: 4px solid #6366f1; padding: 15px; margin: 20px 0; border-radius: 4px;">
-            <p style="margin: 0 0 8px 0; font-weight: 600; color: #475569;">Temporary Credentials</p>
-            <p style="margin: 0; font-family: monospace; font-size: 15px; color: #0f172a;">
-              <strong>Email:</strong> ${to}<br/>
-              <strong>Password:</strong> ${tempPassword}
-            </p>
-          </div>
-          
-          <p style="color: #ef4444; font-weight: 600; margin: 20px 0 10px 0;">
-            ⚠️ Crucial Next Step:
-          </p>
-          <p style="margin-top: 0; color: #64748b;">
-            For security reasons, you will be required to change this temporary password upon your very first login.
-          </p>
+          <p>Hello ${name},</p>
+          <p>Your OnIts account has been created by an administrator.</p>
+          <p><strong>Username:</strong> ${username}</p>
+          <p><strong>Temporary Password:</strong> ${tempPassword}</p>
+          <p>Log in at <a href="https://onits.app">onits.app</a> using your username or email address.</p>
+          <p>You will be required to change your password on first login.</p>
+          <p>Your username is permanent and cannot be changed.</p>
         </div>
         <div style="text-align: center; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 15px; color: #94a3b8; font-size: 12px;">
           <p style="margin: 0;">&copy; ${new Date().getFullYear()} OnIts Task Management. All rights reserved.</p>

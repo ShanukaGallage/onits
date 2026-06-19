@@ -57,7 +57,7 @@ export async function getUserById(id: string): Promise<SafeUser> {
  * Creates a new user with generated temporary password, hashes it, trigger welcome email,
  * and returns the created user using select: safeUserSelect.
  */
-export async function createUser(data: { name: string; email: string; role: Role }): Promise<SafeUser> {
+export async function createUser(data: { name: string; username: string; email: string; role: Role }): Promise<SafeUser> {
   const existingUser = await prisma.user.findUnique({
     where: { email: data.email },
   });
@@ -72,6 +72,7 @@ export async function createUser(data: { name: string; email: string; role: Role
   const user = await prisma.user.create({
     data: {
       name: data.name,
+      username: data.username,
       email: data.email,
       role: data.role,
       passwordHash,
@@ -81,7 +82,7 @@ export async function createUser(data: { name: string; email: string; role: Role
   });
 
   // Call welcome email utility with the plain password
-  await sendWelcomeEmail(user.email, user.name, tempPassword);
+  await sendWelcomeEmail(user.email, user.name, user.username, tempPassword);
 
   return user;
 }
@@ -90,6 +91,7 @@ export async function createUser(data: { name: string; email: string; role: Role
  * Updates allowed fields (name, role) of a user and returns updated user with select: safeUserSelect.
  * Throws an error if the user is not found.
  */
+// username is intentionally excluded — it is permanent and cannot be updated
 export async function updateUser(id: string, data: { name?: string; role?: Role }): Promise<SafeUser> {
   const existingUser = await prisma.user.findUnique({
     where: { id },
@@ -183,4 +185,26 @@ export async function changePassword(id: string, currentPassword: string, newPas
     },
     select: safeUserSelect,
   });
+}
+
+/**
+ * Finds a user by username and adds them as a member of the given project.
+ * Throws if the user does not exist or is already a member.
+ */
+export async function addProjectMemberByUsername(projectId: string, username: string): Promise<SafeUser> {
+  const user = await prisma.user.findUnique({
+    where: { username },
+    select: safeUserSelect,
+  });
+  if (!user) throw new Error('User not found');
+
+  const existing = await prisma.projectMember.findFirst({
+    where: { projectId, userId: user.id },
+  });
+  if (existing) throw new Error('User is already a member of this project');
+
+  await prisma.projectMember.create({
+    data: { projectId, userId: user.id },
+  });
+  return user;
 }
