@@ -11,6 +11,19 @@ export const transporter = nodemailer.createTransport({
 });
 
 /**
+ * In development, Resend's onboarding@resend.dev sender can only deliver to
+ * the verified account owner's address. Set DEV_EMAIL_OVERRIDE in .env to
+ * your own email to receive all test emails regardless of the real recipient.
+ * In production (NODE_ENV=production), emails go to the real recipient.
+ */
+function resolveRecipient(realTo: string): string {
+  if (process.env.NODE_ENV !== 'production' && process.env.DEV_EMAIL_OVERRIDE) {
+    return process.env.DEV_EMAIL_OVERRIDE;
+  }
+  return realTo;
+}
+
+/**
  * Sends a welcome email to a newly created user with their temporary credentials.
  */
 export async function sendWelcomeEmail(
@@ -19,10 +32,13 @@ export async function sendWelcomeEmail(
   username: string,
   tempPassword: string
 ): Promise<void> {
+  const recipient = resolveRecipient(to);
   const mailOptions = {
-    from: `"OnIts" <onboarding@resend.dev>`,
-    to,
-    subject: 'Welcome to OnIts — Your Account is Ready',
+    from: `"OnIts" <noreply@onits.app>`,
+    to: recipient,
+    subject: recipient !== to
+      ? `[DEV → ${to}] Welcome to OnIts — Your Account is Ready`
+      : 'Welcome to OnIts — Your Account is Ready',
     html: `
 <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px;background:#0F172A;color:#E2E8F0;border-radius:12px">
   <h1 style="color:#4FACFE;font-size:24px;margin:0 0 8px">Welcome to OnIts</h1>
@@ -66,10 +82,13 @@ export async function sendDeadlineWarningEmail(
     minute: '2-digit',
   });
 
+  const recipient = resolveRecipient(to);
   const mailOptions = {
-    from: `"OnIts" <onboarding@resend.dev>`,
-    to,
-    subject: `⚠️ Task Due Tomorrow — ${taskTitle}`,
+    from: `"OnIts" <noreply@onits.app>`,
+    to: recipient,
+    subject: recipient !== to
+      ? `[DEV → ${to}] ⚠️ Task Due Tomorrow — ${taskTitle}`
+      : `⚠️ Task Due Tomorrow — ${taskTitle}`,
     html: `
 <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px;background:#0F172A;color:#E2E8F0;border-radius:12px">
   <h1 style="color:#FBBF24;font-size:24px;margin:0 0 8px">⚠️ Task Due Tomorrow</h1>
@@ -103,10 +122,13 @@ export async function sendDeadlineWarningEmail(
  * Sends a security notification email when a user's password has been changed.
  */
 export async function sendPasswordChangedEmail(to: string, name: string): Promise<void> {
+  const recipient = resolveRecipient(to);
   const mailOptions = {
-    from: `"OnIts" <onboarding@resend.dev>`,
-    to,
-    subject: 'OnIts — Your Password Has Been Changed',
+    from: `"OnIts" <noreply@onits.app>`,
+    to: recipient,
+    subject: recipient !== to
+      ? `[DEV → ${to}] OnIts — Your Password Has Been Changed`
+      : 'OnIts — Your Password Has Been Changed',
     html: `
 <div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px;background:#0F172A;color:#E2E8F0;border-radius:12px">
   <h1 style="color:#4FACFE;font-size:24px;margin:0 0 8px">Password Changed</h1>

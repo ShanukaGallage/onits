@@ -1,7 +1,7 @@
 import { prisma, safeUserSelect } from '../config/db';
 import type { SafeUser } from '../config/db';
 import bcrypt from 'bcryptjs';
-import { sendWelcomeEmail } from '../utils/mailer';
+import { sendWelcomeEmail, sendPasswordChangedEmail } from '../utils/mailer';
 import { Role } from '@prisma/client';
 
 /**
@@ -183,7 +183,7 @@ export async function changePassword(id: string, currentPassword: string, newPas
 
   const newHash = await bcrypt.hash(newPassword, 12);
 
-  return prisma.user.update({
+  const updatedUser = await prisma.user.update({
     where: { id },
     data: {
       passwordHash: newHash,
@@ -191,6 +191,16 @@ export async function changePassword(id: string, currentPassword: string, newPas
     },
     select: safeUserSelect,
   });
+
+  // Notify user their password was changed — isolated so a mail failure never
+  // prevents the password update from being returned to the caller.
+  try {
+    await sendPasswordChangedEmail(user.email, user.name);
+  } catch (emailError) {
+    console.error('Password changed email failed to send:', emailError);
+  }
+
+  return updatedUser;
 }
 
 /**
