@@ -16,10 +16,9 @@ import { cn } from '@/lib/utils';
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 const addMemberSchema = z.object({
-  userId: z
+  username: z
     .string()
-    .min(1, 'User ID is required.')
-    .uuid('Must be a valid UUID format.'),
+    .min(1, 'Username is required.'),
 });
 
 type AddMemberFormValues = z.infer<typeof addMemberSchema>;
@@ -53,13 +52,13 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   } = useForm<AddMemberFormValues>({
     resolver: zodResolver(addMemberSchema),
     defaultValues: {
-      userId: '',
+      username: '',
     },
   });
 
   const handleAddMemberSubmit = (data: AddMemberFormValues) => {
     addMember.mutate(
-      { projectId, userId: data.userId },
+      { projectId, username: data.username },
       {
         onSuccess: () => {
           toast.success('Member added to the project successfully.');
@@ -312,19 +311,19 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
                 noValidate
               >
                 <div className="space-y-1.5">
-                  <Label htmlFor="add-member-user-id" className="text-xs font-medium text-neutral-300">
-                    User UUID <span className="text-indigo-400">*</span>
+                  <Label htmlFor="add-member-username" className="text-xs font-medium text-neutral-300">
+                    Username <span className="text-indigo-400">*</span>
                   </Label>
                   <Input
-                    id="add-member-user-id"
-                    placeholder="Enter user's UUID"
+                    id="add-member-username"
+                    placeholder="e.g. johndoe"
                     className="border-neutral-800 bg-neutral-900/30 text-white placeholder:text-neutral-500 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
-                    aria-describedby={errors.userId ? 'add-member-user-id-error' : undefined}
-                    {...register('userId')}
+                    aria-describedby={errors.username ? 'add-member-username-error' : undefined}
+                    {...register('username')}
                   />
-                  {errors.userId && (
-                    <p id="add-member-user-id-error" className="text-[11px] text-red-600 leading-tight">
-                      {errors.userId.message}
+                  {errors.username && (
+                    <p id="add-member-username-error" className="text-[11px] text-red-600 leading-tight">
+                      {errors.username.message}
                     </p>
                   )}
                 </div>

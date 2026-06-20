@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
+  identifier: z.string().min(1, { message: 'Email or username is required.' }),
   password: z.string().min(1, { message: 'Password is required.' }),
 });
 
@@ -38,7 +38,7 @@ export default function LoginForm() {
   const onSubmit = async (data: LoginFormValues) => {
     setServerError(null);
     try {
-      await login(data.email, data.password);
+      await login(data.identifier, data.password);
       navigate('/dashboard');
     } catch (err: unknown) {
       if (
@@ -82,21 +82,21 @@ export default function LoginForm() {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
-          {/* Email */}
+          {/* Email or Username */}
           <div className="space-y-1.5 text-left">
-            <Label htmlFor="email" className="text-gray-900">Email</Label>
+            <Label htmlFor="identifier" className="text-gray-900">Email or Username</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="you@onits.app"
-              autoComplete="email"
-              aria-describedby={errors.email ? 'email-error' : undefined}
+              id="identifier"
+              type="text"
+              placeholder="you@onits.app or johndoe"
+              autoComplete="username"
+              aria-describedby={errors.identifier ? 'identifier-error' : undefined}
               className="text-gray-900 bg-white border-gray-300 placeholder:text-gray-400"
-              {...register('email')}
+              {...register('identifier')}
             />
-            {errors.email && (
-              <p id="email-error" className="text-xs text-red-600">
-                {errors.email.message}
+            {errors.identifier && (
+              <p id="identifier-error" className="text-xs text-red-600">
+                {errors.identifier.message}
               </p>
             )}
           </div>

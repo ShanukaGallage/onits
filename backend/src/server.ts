@@ -11,6 +11,8 @@ import projectRouter from './routes/project.routes';
 import taskRouter from './routes/task.routes';
 import commentRouter from './routes/comment.routes';
 import attachmentRouter from './routes/attachment.routes';
+import { startCronJobs } from './utils/cron';
+import { verifyMailer } from './utils/mailer';
 
 dotenv.config();
 
@@ -73,6 +75,8 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`OnIts backend running on port ${PORT}`);
+  verifyMailer();   // Confirm SMTP connection on startup
+  startCronJobs();  // Start the deadline warning scheduler
 });
 
 export default app;

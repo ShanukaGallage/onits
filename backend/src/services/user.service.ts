@@ -81,8 +81,14 @@ export async function createUser(data: { name: string; username: string; email: 
     select: safeUserSelect,
   });
 
-  // Call welcome email utility with the plain password
-  await sendWelcomeEmail(user.email, user.name, user.username, tempPassword);
+  // Send welcome email — wrapped in its own try/catch so a mail failure
+  // never rolls back the already-persisted user record.
+  try {
+    await sendWelcomeEmail(data.email, data.name, data.username, tempPassword);
+  } catch (emailError) {
+    console.error('Welcome email failed to send:', emailError);
+    // User is already created — do not throw, just log
+  }
 
   return user;
 }

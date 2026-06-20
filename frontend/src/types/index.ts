@@ -7,6 +7,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  username: string;
   role: Role;
   status: UserStatus;
   isFirstLogin: boolean;

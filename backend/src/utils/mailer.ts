@@ -1,10 +1,9 @@
 import nodemailer from 'nodemailer';
 
-// Configure transporter from environment variables
 export const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'localhost',
-  port: parseInt(process.env.SMTP_PORT || '587', 10),
-  secure: process.env.SMTP_PORT === '465',
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -12,87 +11,141 @@ export const transporter = nodemailer.createTransport({
 });
 
 /**
- * Sends a welcome email to a new user with their temporary password.
+ * Sends a welcome email to a newly created user with their temporary credentials.
  */
-export async function sendWelcomeEmail(to: string, name: string, username: string, tempPassword: string): Promise<void> {
+export async function sendWelcomeEmail(
+  to: string,
+  name: string,
+  username: string,
+  tempPassword: string
+): Promise<void> {
   const mailOptions = {
-    from: `"OnIts Support" <${process.env.SMTP_USER || 'no-reply@onits.com'}>`,
+    from: `"OnIts" <onboarding@resend.dev>`,
     to,
-    subject: 'Welcome to OnIts! Set Up Your Account',
+    subject: 'Welcome to OnIts — Your Account is Ready',
     html: `
-      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
-        <div style="text-align: center; border-bottom: 2px solid #6366f1; padding-bottom: 15px; margin-bottom: 20px;">
-          <h1 style="color: #4f46e5; margin: 0; font-size: 24px;">Welcome to OnIts</h1>
-          <p style="color: #64748b; margin: 5px 0 0 0; font-size: 14px;">Your Task Management SaaS Workspace</p>
-        </div>
-        <div style="color: #334155; line-height: 1.6; font-size: 16px;">
-          <p>Hello ${name},</p>
-          <p>Your OnIts account has been created by an administrator.</p>
-          <p><strong>Username:</strong> ${username}</p>
-          <p><strong>Temporary Password:</strong> ${tempPassword}</p>
-          <p>Log in at <a href="https://onits.app">onits.app</a> using your username or email address.</p>
-          <p>You will be required to change your password on first login.</p>
-          <p>Your username is permanent and cannot be changed.</p>
-        </div>
-        <div style="text-align: center; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 15px; color: #94a3b8; font-size: 12px;">
-          <p style="margin: 0;">&copy; ${new Date().getFullYear()} OnIts Task Management. All rights reserved.</p>
-        </div>
-      </div>
+<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px;background:#0F172A;color:#E2E8F0;border-radius:12px">
+  <h1 style="color:#4FACFE;font-size:24px;margin:0 0 8px">Welcome to OnIts</h1>
+  <p style="color:#94A3B8;margin:0 0 24px">Your account has been created by an administrator.</p>
+  <div style="background:#1E293B;border-radius:8px;padding:20px;margin-bottom:24px">
+    <p style="margin:0 0 12px"><span style="color:#64748B;font-size:12px;text-transform:uppercase;letter-spacing:.08em">Name</span><br><strong>${name}</strong></p>
+    <p style="margin:0 0 12px"><span style="color:#64748B;font-size:12px;text-transform:uppercase;letter-spacing:.08em">Username</span><br><strong style="color:#4FACFE">${username}</strong></p>
+    <p style="margin:0"><span style="color:#64748B;font-size:12px;text-transform:uppercase;letter-spacing:.08em">Temporary Password</span><br><strong style="color:#FBBF24">${tempPassword}</strong></p>
+  </div>
+  <p style="color:#94A3B8;font-size:14px">You can log in using your <strong>username or email address</strong>.</p>
+  <p style="color:#EF4444;font-size:13px">You will be required to change your password on first login. Your username is permanent and cannot be changed.</p>
+  <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" style="display:inline-block;background:#3B82F6;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:16px">Sign In to OnIts →</a>
+  <p style="color:#334155;font-size:12px;margin-top:32px">© 2026 OnIts. This is an automated message.</p>
+</div>
     `,
   };
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log(`Welcome email successfully sent to ${to}: ${info.messageId}`);
+    console.log(`[Mailer] Welcome email sent to ${to} — messageId: ${info.messageId}`);
   } catch (error) {
-    console.error(`Error sending welcome email to ${to}:`, error);
+    console.error(`[Mailer] Failed to send welcome email to ${to}:`, error);
   }
 }
 
 /**
- * Sends a deadline warning email with the task name and its due date.
+ * Sends a deadline warning email notifying the user that a task is due within 24 hours.
  */
-export async function sendDeadlineWarningEmail(to: string, name: string, taskTitle: string, dueDate: Date): Promise<void> {
-  const formattedDate = new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'full',
-    timeStyle: 'short',
-  }).format(dueDate);
+export async function sendDeadlineWarningEmail(
+  to: string,
+  name: string,
+  taskTitle: string,
+  dueDate: Date
+): Promise<void> {
+  const formattedDate = dueDate.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   const mailOptions = {
-    from: `"OnIts Notifications" <${process.env.SMTP_USER || 'no-reply@onits.com'}>`,
+    from: `"OnIts" <onboarding@resend.dev>`,
     to,
-    subject: `⚠️ Deadline Approaching: ${taskTitle}`,
+    subject: `⚠️ Task Due Tomorrow — ${taskTitle}`,
     html: `
-      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #ffffff;">
-        <div style="text-align: center; border-bottom: 2px solid #ef4444; padding-bottom: 15px; margin-bottom: 20px;">
-          <h1 style="color: #dc2626; margin: 0; font-size: 24px;">Task Deadline Warning</h1>
-          <p style="color: #64748b; margin: 5px 0 0 0; font-size: 14px;">OnIts Notification Center</p>
-        </div>
-        <div style="color: #334155; line-height: 1.6; font-size: 16px;">
-          <p>Hi <strong>${name}</strong>,</p>
-          <p>This is a friendly reminder that a task assigned to you has an upcoming deadline.</p>
-          
-          <div style="background-color: #fff5f5; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 4px;">
-            <p style="margin: 0 0 8px 0; font-weight: 600; color: #991b1b;">Task Information</p>
-            <p style="margin: 0; color: #7f1d1d;">
-              <strong>Title:</strong> ${taskTitle}<br/>
-              <strong>Due Date:</strong> ${formattedDate}
-            </p>
-          </div>
-          
-          <p>Please review the task progress and update its status accordingly.</p>
-        </div>
-        <div style="text-align: center; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 15px; color: #94a3b8; font-size: 12px;">
-          <p style="margin: 0;">&copy; ${new Date().getFullYear()} OnIts Task Management. All rights reserved.</p>
-        </div>
-      </div>
+<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px;background:#0F172A;color:#E2E8F0;border-radius:12px">
+  <h1 style="color:#FBBF24;font-size:24px;margin:0 0 8px">⚠️ Task Due Tomorrow</h1>
+  <p style="color:#94A3B8;margin:0 0 24px">Hi <strong>${name}</strong>, a task assigned to you is due within 24 hours.</p>
+  <div style="background:#1E293B;border-radius:8px;padding:20px;margin-bottom:24px;border-left:4px solid #FBBF24">
+    <p style="margin:0 0 12px">
+      <span style="color:#64748B;font-size:12px;text-transform:uppercase;letter-spacing:.08em">Task</span><br>
+      <strong style="font-size:18px;color:#E2E8F0">${taskTitle}</strong>
+    </p>
+    <p style="margin:0">
+      <span style="color:#64748B;font-size:12px;text-transform:uppercase;letter-spacing:.08em">Due Date</span><br>
+      <strong style="color:#EF4444">${formattedDate}</strong>
+    </p>
+  </div>
+  <p style="color:#94A3B8;font-size:14px">Please ensure this task is completed on time to keep the project on track.</p>
+  <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/tasks" style="display:inline-block;background:#FBBF24;color:#0F172A;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;margin-top:16px">View Task →</a>
+  <p style="color:#334155;font-size:12px;margin-top:32px">© 2026 OnIts. This is an automated message.</p>
+</div>
     `,
   };
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log(`Deadline warning email successfully sent to ${to}: ${info.messageId}`);
+    console.log(`[Mailer] Deadline warning email sent to ${to} — messageId: ${info.messageId}`);
   } catch (error) {
-    console.error(`Error sending deadline warning email to ${to}:`, error);
+    console.error(`[Mailer] Failed to send deadline warning email to ${to}:`, error);
+  }
+}
+
+/**
+ * Sends a security notification email when a user's password has been changed.
+ */
+export async function sendPasswordChangedEmail(to: string, name: string): Promise<void> {
+  const mailOptions = {
+    from: `"OnIts" <onboarding@resend.dev>`,
+    to,
+    subject: 'OnIts — Your Password Has Been Changed',
+    html: `
+<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px;background:#0F172A;color:#E2E8F0;border-radius:12px">
+  <h1 style="color:#4FACFE;font-size:24px;margin:0 0 8px">Password Changed</h1>
+  <p style="color:#94A3B8;margin:0 0 24px">Hi <strong>${name}</strong>,</p>
+  <div style="background:#1E293B;border-radius:8px;padding:20px;margin-bottom:24px;border-left:4px solid #22C55E">
+    <p style="margin:0;color:#E2E8F0;font-size:15px">
+      ✅ &nbsp;Your OnIts account password has been <strong>successfully changed</strong>.
+    </p>
+  </div>
+  <p style="color:#94A3B8;font-size:14px">
+    If you made this change yourself, no further action is required.
+  </p>
+  <div style="background:#1E293B;border-radius:8px;padding:16px;margin-bottom:24px;border-left:4px solid #EF4444">
+    <p style="margin:0;color:#EF4444;font-size:14px">
+      🔒 &nbsp;<strong>If you did not make this change</strong>, please contact your administrator immediately as your account may be compromised.
+    </p>
+  </div>
+  <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/login" style="display:inline-block;background:#3B82F6;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:8px">Sign In to OnIts →</a>
+  <p style="color:#334155;font-size:12px;margin-top:32px">© 2026 OnIts. This is an automated message.</p>
+</div>
+    `,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[Mailer] Password changed email sent to ${to} — messageId: ${info.messageId}`);
+  } catch (error) {
+    console.error(`[Mailer] Failed to send password changed email to ${to}:`, error);
+  }
+}
+
+/**
+ * Verifies the SMTP transporter connection. Call this on server startup.
+ */
+export async function verifyMailer(): Promise<void> {
+  try {
+    await transporter.verify();
+    console.log('[Mailer] ✅ Mailer ready — SMTP connection verified.');
+  } catch (error) {
+    console.error('[Mailer] ❌ SMTP connection failed:', error);
   }
 }
