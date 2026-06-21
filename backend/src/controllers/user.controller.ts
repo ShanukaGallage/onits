@@ -148,3 +148,14 @@ export const uploadAvatar = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * 8. removeAvatar: Sets the user's avatarUrl to null in the DB.
+ */
+export const removeAvatar = async (req: Request, res: Response) => {
+  try {
+    const user = await userService.updateAvatar(req.user!.id, null);
+    return res.status(200).json(user);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};

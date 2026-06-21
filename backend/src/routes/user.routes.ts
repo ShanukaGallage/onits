@@ -7,6 +7,7 @@ import {
   deactivateUser,
   reactivateUser,
   uploadAvatar,
+  removeAvatar,
 } from '../controllers/user.controller';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
@@ -28,6 +29,13 @@ router.post(
   authenticate,
   uploadMiddleware.single('avatar'),
   uploadAvatar
+);
+
+// DELETE /api/users/me/avatar
+router.delete(
+  '/me/avatar',
+  authenticate,
+  removeAvatar
 );
 
 // POST /api/users

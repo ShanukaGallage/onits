@@ -121,7 +121,7 @@ export async function updateUser(id: string, data: { name?: string; role?: Role 
  * Updates a user's avatar URL and returns updated user with select: safeUserSelect.
  * Throws an error if the user is not found.
  */
-export async function updateAvatar(id: string, avatarUrl: string): Promise<SafeUser> {
+export async function updateAvatar(id: string, avatarUrl: string | null): Promise<SafeUser> {
   const existingUser = await prisma.user.findUnique({
     where: { id },
   });

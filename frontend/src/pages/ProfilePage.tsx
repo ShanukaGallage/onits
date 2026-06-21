@@ -41,8 +41,17 @@ export default function ProfilePage() {
     }
   };
 
-  const handleRemovePhoto = () => {
-    toast.info("Profile picture removal coming soon!");
+  const handleRemovePhoto = async () => {
+    setIsUploading(true);
+    try {
+      const res = await api.delete('/users/me/avatar');
+      mutateUser(res.data);
+      toast.success('Profile picture removed!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to remove image');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSaveProfile = () => {
