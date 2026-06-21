@@ -9,116 +9,52 @@ function ProjectCard({ project }: { project: { id: string; name: string; descrip
   const navigate = useNavigate();
   const { data: tasks } = useTasks(project.id);
 
-  const total      = tasks?.length ?? 0;
-  const completed  = tasks?.filter((t) => t.status === 'Completed').length ?? 0;
-  const progress   = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const members    = new Set(tasks?.flatMap((t) => t.assignments.map((a) => a.userId)) ?? []).size;
-  const initial    = project.name.charAt(0).toUpperCase();
+  const total     = tasks?.length ?? 0;
+  const completed = tasks?.filter((t) => t.status === 'Completed').length ?? 0;
+  const progress  = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const members   = new Set(tasks?.flatMap((t) => t.assignments.map((a) => a.userId)) ?? []).size;
+  const initial   = project.name.charAt(0).toUpperCase();
 
   return (
     <div
       onClick={() => navigate(`/projects/${project.id}`)}
-      style={{
-        background: '#111111',
-        border: '1px solid #1f1f1f',
-        borderRadius: '12px',
-        padding: '18px 20px',
-        cursor: 'pointer',
-        transition: 'border-color 0.2s, background 0.2s',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '14px',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = '#6366f1';
-        e.currentTarget.style.background = '#131313';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = '#1f1f1f';
-        e.currentTarget.style.background = '#111111';
-      }}
+      className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-ip-lg p-5 cursor-pointer hover:border-ip-primary/40 hover:shadow-[0_4px_16px_rgba(70,72,212,0.1)] transition-all duration-200 flex flex-col gap-4"
     >
       {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div
-          style={{
-            width: '36px',
-            height: '36px',
-            borderRadius: '9px',
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'white',
-            fontWeight: '700',
-            fontSize: '15px',
-            flexShrink: 0,
-          }}
-        >
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-ip-base flex items-center justify-center text-ip-on-primary font-bold text-sm flex-shrink-0 bg-gradient-to-br from-ip-primary to-ip-primary-container shadow-[0_2px_6px_rgba(70,72,212,0.25)]">
           {initial}
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p
-            style={{
-              color: 'white',
-              fontWeight: '600',
-              fontSize: '14px',
-              margin: '0 0 2px',
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {project.name}
-          </p>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-ip-on-surface truncate">{project.name}</p>
           {project.description && (
-            <p
-              style={{
-                color: '#6b7280',
-                fontSize: '12px',
-                margin: 0,
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {project.description}
-            </p>
+            <p className="text-xs text-ip-on-surface-variant truncate mt-0.5">{project.description}</p>
           )}
         </div>
-        <ArrowRight size={15} color="#4b5563" style={{ flexShrink: 0 }} />
+        <ArrowRight size={14} className="text-ip-outline flex-shrink-0" />
       </div>
 
       {/* Progress bar */}
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-          <span style={{ color: '#6b7280', fontSize: '12px' }}>
-            {completed}/{total} tasks
-          </span>
-          <span style={{ color: '#6366f1', fontSize: '12px', fontWeight: '600' }}>
-            {progress}%
-          </span>
+        <div className="flex justify-between mb-1.5">
+          <span className="text-xs text-ip-on-surface-variant">{completed}/{total} tasks</span>
+          <span className="text-xs font-semibold text-ip-primary">{progress}%</span>
         </div>
-        <div style={{ height: '4px', background: '#1f1f1f', borderRadius: '99px', overflow: 'hidden' }}>
+        <div className="h-1.5 bg-ip-surface-container-high rounded-full overflow-hidden">
           <div
-            style={{
-              height: '100%',
-              width: `${progress}%`,
-              background: 'linear-gradient(90deg, #6366f1, #8b5cf6)',
-              borderRadius: '99px',
-              transition: 'width 0.4s ease',
-            }}
+            className="h-full bg-gradient-to-r from-ip-primary to-ip-primary-container rounded-full transition-all duration-500"
+            style={{ width: `${progress}%` }}
           />
         </div>
       </div>
 
       {/* Footer meta */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#6b7280', fontSize: '12px' }}>
+      <div className="flex items-center gap-4">
+        <span className="flex items-center gap-1 text-xs text-ip-on-surface-variant">
           <Users size={12} />
           {members} {members === 1 ? 'member' : 'members'}
         </span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#6b7280', fontSize: '12px' }}>
+        <span className="flex items-center gap-1 text-xs text-ip-on-surface-variant">
           <CalendarDays size={12} />
           {new Date(project.createdAt).toLocaleDateString()}
         </span>
@@ -132,31 +68,17 @@ export default function ProjectOverview() {
   const navigate = useNavigate();
   const { data: projects, isLoading } = useProjects();
 
-  // Show at most 6 on the dashboard overview
   const visible = projects?.slice(0, 6) ?? [];
 
   return (
-    <div style={{ marginBottom: '24px' }}>
+    <div className="mb-6">
       {/* Section header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-        <h2 style={{ fontSize: '16px', fontWeight: '600', color: 'white', margin: 0 }}>
-          Project Overview
-        </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-bold text-ip-on-surface">Project Overview</h2>
         {projects && projects.length > 6 && (
           <button
             onClick={() => navigate('/projects')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              color: '#6366f1',
-              fontSize: '13px',
-              fontWeight: '500',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 0,
-            }}
+            className="flex items-center gap-1 text-ip-primary text-xs font-semibold hover:text-ip-on-primary-fixed-variant transition-colors"
           >
             View all <ArrowRight size={13} />
           </button>
@@ -165,21 +87,18 @@ export default function ProjectOverview() {
 
       {/* Loading skeletons */}
       {isLoading && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              style={{ background: '#111111', border: '1px solid #1f1f1f', borderRadius: '12px', padding: '18px 20px' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-                <Skeleton className="h-9 w-9 rounded-lg bg-neutral-800" />
-                <div style={{ flex: 1 }}>
-                  <Skeleton className="h-3.5 w-2/3 bg-neutral-800 mb-2" />
-                  <Skeleton className="h-3 w-1/2 bg-neutral-800" />
+            <div key={i} className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-ip-lg p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <Skeleton className="h-9 w-9 rounded-ip-base bg-ip-surface-container" />
+                <div className="flex-1">
+                  <Skeleton className="h-3.5 w-2/3 bg-ip-surface-container mb-2" />
+                  <Skeleton className="h-3 w-1/2 bg-ip-surface-container" />
                 </div>
               </div>
-              <Skeleton className="h-2 w-full rounded-full bg-neutral-800 mb-3" />
-              <Skeleton className="h-3 w-1/3 bg-neutral-800" />
+              <Skeleton className="h-1.5 w-full rounded-full bg-ip-surface-container mb-3" />
+              <Skeleton className="h-3 w-1/3 bg-ip-surface-container" />
             </div>
           ))}
         </div>
@@ -187,24 +106,15 @@ export default function ProjectOverview() {
 
       {/* Empty state */}
       {!isLoading && visible.length === 0 && (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '40px',
-            background: '#111111',
-            border: '1px dashed #1f1f1f',
-            borderRadius: '12px',
-            color: '#4b5563',
-          }}
-        >
-          <FolderOpen size={28} style={{ margin: '0 auto 8px' }} />
-          <p style={{ fontSize: '14px', margin: 0 }}>No projects yet. Create your first project above.</p>
+        <div className="flex flex-col items-center justify-center py-10 bg-ip-surface-container-lowest border border-dashed border-ip-outline-variant rounded-ip-lg text-ip-on-surface-variant">
+          <FolderOpen size={26} className="mb-2 opacity-40" />
+          <p className="text-sm">No projects yet. Create your first project above.</p>
         </div>
       )}
 
       {/* Grid of project cards */}
       {!isLoading && visible.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {visible.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}

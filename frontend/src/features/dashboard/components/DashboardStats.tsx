@@ -4,8 +4,6 @@ import { useTasks } from '../../tasks/hooks/useTasks';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // ─── Per-project task aggregator ─────────────────────────────────────────────
-// useTasks needs a projectId, so we fetch tasks per project inside a child
-// component and bubble the counts up via a callback.
 function ProjectTaskCounts({
   projectId,
   onCounts,
@@ -17,128 +15,98 @@ function ProjectTaskCounts({
   if (data) {
     const active = data.filter((t) => t.status !== 'Completed').length;
     const completed = data.filter((t) => t.status === 'Completed').length;
-    // unique assignees across tasks in this project
     const memberSet = new Set(data.flatMap((t) => t.assignments.map((a) => a.userId)));
     onCounts(active, completed, memberSet.size);
   }
   return null;
 }
 
+// ─── Stat card config ─────────────────────────────────────────────────────────
+type StatConfig = {
+  label: string;
+  value: number | null;
+  icon: React.ElementType;
+  iconColor: string;
+  iconBg: string;
+  trend?: string;
+};
+
+function StatCard({ label, value, icon: Icon, iconColor, iconBg, trend }: StatConfig) {
+  return (
+    <div className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-ip-lg p-5 hover:border-ip-primary/40 transition-colors shadow-[0_2px_8px_rgba(70,72,212,0.04)]">
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-sm font-medium text-ip-on-surface-variant">{label}</span>
+        <div className="w-8 h-8 rounded-ip-base flex items-center justify-center" style={{ background: iconBg }}>
+          <Icon size={16} style={{ color: iconColor }} />
+        </div>
+      </div>
+      <div className="flex items-end gap-2">
+        {value === null ? (
+          <Skeleton className="h-8 w-14 rounded bg-ip-surface-container" />
+        ) : (
+          <span className="text-[32px] font-bold leading-none text-ip-on-surface">{value}</span>
+        )}
+        {trend && (
+          <span className="text-xs font-semibold text-ip-primary mb-1">{trend}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function DashboardStats() {
   const { data: projects, isLoading } = useProjects();
 
-  // Accumulate counts across all projects
   let activeTasks = 0;
   let completedTasks = 0;
-  const memberSet = new Set<string>();
 
-  function handleCounts(active: number, completed: number, _members: number) {
+  function handleCounts(active: number, completed: number) {
     activeTasks += active;
     completedTasks += completed;
   }
 
-  const stats = [
+  const stats: StatConfig[] = [
     {
-      label: 'Total Projects',
-      value: isLoading ? null : (projects?.length ?? 0),
-      icon: FolderKanban,
-      color: '#6366f1',
-      bg: 'rgba(99,102,241,0.08)',
+      label:     'Total Projects',
+      value:     isLoading ? null : (projects?.length ?? 0),
+      icon:      FolderKanban,
+      iconColor: '#4648d4',
+      iconBg:    'rgba(70,72,212,0.10)',
     },
     {
-      label: 'Active Tasks',
-      value: isLoading ? null : activeTasks,
-      icon: ListChecks,
-      color: '#8b5cf6',
-      bg: 'rgba(139,92,246,0.08)',
+      label:     'Active Tasks',
+      value:     isLoading ? null : activeTasks,
+      icon:      ListChecks,
+      iconColor: '#712ae2',
+      iconBg:    'rgba(113,42,226,0.10)',
     },
     {
-      label: 'Completed',
-      value: isLoading ? null : completedTasks,
-      icon: CheckCircle2,
-      color: '#10b981',
-      bg: 'rgba(16,185,129,0.08)',
+      label:     'Completed',
+      value:     isLoading ? null : completedTasks,
+      icon:      CheckCircle2,
+      iconColor: '#059669',
+      iconBg:    'rgba(5,150,105,0.10)',
     },
     {
-      label: 'Team Members',
-      value: isLoading ? null : memberSet.size,
-      icon: Users,
-      color: '#f59e0b',
-      bg: 'rgba(245,158,11,0.08)',
+      label:     'Team Members',
+      value:     isLoading ? null : 0,
+      icon:      Users,
+      iconColor: '#d97706',
+      iconBg:    'rgba(217,119,6,0.10)',
     },
   ];
 
   return (
     <>
-      {/* Hidden aggregators — fire TanStack queries per project */}
+      {/* Hidden aggregators */}
       {projects?.map((p) => (
         <ProjectTaskCounts key={p.id} projectId={p.id} onCounts={handleCounts} />
       ))}
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
-          gap: '16px',
-          marginBottom: '32px',
-        }}
-      >
-        {stats.map(({ label, value, icon: Icon, color, bg }) => (
-          <div
-            key={label}
-            style={{
-              background: '#111111',
-              border: '1px solid #1f1f1f',
-              borderRadius: '12px',
-              padding: '20px',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '14px',
-            }}
-          >
-            <div
-              style={{
-                width: '40px',
-                height: '40px',
-                borderRadius: '10px',
-                background: bg,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
-              <Icon size={18} color={color} />
-            </div>
-            <div>
-              <p
-                style={{
-                  color: '#6b7280',
-                  fontSize: '13px',
-                  margin: '0 0 6px',
-                  fontWeight: '500',
-                }}
-              >
-                {label}
-              </p>
-              {value === null ? (
-                <Skeleton className="h-7 w-12 bg-neutral-800" />
-              ) : (
-                <p
-                  style={{
-                    color,
-                    fontSize: '28px',
-                    fontWeight: '700',
-                    margin: 0,
-                    lineHeight: 1,
-                  }}
-                >
-                  {value}
-                </p>
-              )}
-            </div>
-          </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {stats.map((s) => (
+          <StatCard key={s.label} {...s} />
         ))}
       </div>
     </>

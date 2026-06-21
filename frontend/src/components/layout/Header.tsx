@@ -1,71 +1,86 @@
- import { Bell, LogOut } from 'lucide-react';
+import { Bell, LogOut, Search } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 
 const routeTitles: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/projects': 'Projects',
-  '/tasks': 'Tasks',
-  '/users': 'Users',
+  '/dashboard': 'Home',
+  '/my-tasks':  'My Tasks',
+  '/inbox':     'Inbox',
+  '/profile':   'Profile',
+  '/projects':  'Project Manage',
+  '/users':     'User Manage',
 };
 
 export default function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { data: notifications } = useNotifications();
 
-  const pageTitle = routeTitles[location.pathname] ?? 'OnIts';
+  const unreadCount = notifications?.filter((n) => !n.isRead).length ?? 0;
+
+  // Match /projects/:id too
+  let pageTitle = routeTitles[location.pathname] ?? 'OnIts';
+  if (location.pathname.startsWith('/projects/')) pageTitle = 'Project';
 
   const handleLogout = async () => {
-    try {
-      await logout();
-    } finally {
-      navigate('/login');
-    }
+    try { await logout(); } finally { navigate('/login'); }
   };
 
   return (
-    <div className="h-full flex items-center justify-between px-6">
+    <div className="h-full flex items-center justify-between px-6 font-jakarta">
 
-      {/* Page Title */}
-      <h2 className="text-white font-semibold text-lg">{pageTitle}</h2>
+      {/* Page title */}
+      <h2 className="text-ip-on-surface font-bold text-base">{pageTitle}</h2>
 
-      {/* Right Side */}
-      <div className="flex items-center gap-3">
+      {/* Right */}
+      <div className="flex items-center gap-2">
+
+        {/* Search */}
+        <div className="relative hidden sm:block">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ip-outline" />
+          <input
+            type="text"
+            placeholder="Search..."
+            className="pl-9 pr-4 py-1.5 w-52 bg-ip-surface-container-low border border-ip-outline-variant rounded-ip-base text-sm text-ip-on-surface placeholder:text-ip-on-surface-variant/50 focus:outline-none focus:border-ip-primary focus:ring-1 focus:ring-ip-primary/30 transition-all duration-150"
+          />
+        </div>
 
         {/* Notification Bell */}
-        <div className="relative">
-          <button className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-            <Bell size={18} />
-          </button>
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-            0
-          </span>
-        </div>
+        <button
+          onClick={() => navigate('/inbox')}
+          className="relative w-9 h-9 rounded-ip-base flex items-center justify-center text-ip-on-surface-variant hover:bg-ip-surface-container-low hover:text-ip-on-surface transition-colors"
+        >
+          <Bell size={18} />
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 rounded-full bg-ip-error text-ip-on-error text-[9px] font-bold flex items-center justify-center">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
 
-        {/* Divider */}
-        <div className="w-px h-6 bg-slate-800" />
+        <div className="w-px h-6 bg-ip-outline-variant mx-1" />
 
-        {/* User Info + Logout */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold" style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}>
-              {user?.name?.charAt(0).toUpperCase() ?? '?'}
-            </div>
-            <div className="hidden sm:block">
-              <p className="text-white text-sm font-medium leading-none">{user?.name ?? 'User'}</p>
-              <p className="text-slate-500 text-xs mt-0.5">{user?.role ?? ''}</p>
-            </div>
+        {/* User */}
+        <button onClick={() => navigate('/profile')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-ip-on-primary text-sm font-semibold bg-gradient-to-br from-ip-primary to-ip-primary-container flex-shrink-0">
+            {user?.name?.charAt(0).toUpperCase() ?? '?'}
           </div>
+          <div className="hidden sm:block text-left">
+            <p className="text-ip-on-surface text-sm font-semibold leading-none">{user?.name ?? 'User'}</p>
+            <p className="text-ip-on-surface-variant text-xs mt-0.5">{user?.role ?? ''}</p>
+          </div>
+        </button>
 
-          <button
-            onClick={handleLogout}
-            className="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-800 hover:text-red-400 transition-colors"
-            title="Logout"
-          >
-            <LogOut size={16} />
-          </button>
-        </div>
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="w-9 h-9 rounded-ip-base flex items-center justify-center text-ip-on-surface-variant hover:bg-ip-error-container hover:text-ip-on-error-container transition-colors"
+          title="Logout"
+        >
+          <LogOut size={16} />
+        </button>
       </div>
     </div>
   );

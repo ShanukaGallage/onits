@@ -5,20 +5,19 @@ import { useProjects } from '../../projects/hooks/useProjects';
 import { useTasks, type TaskWithDetails } from '../../tasks/hooks/useTasks';
 import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import CreateTaskModal from '../../tasks/components/CreateTaskModal';
 
 // ─── Priority colours ─────────────────────────────────────────────────────────
-const PRIORITY_STYLES: Record<string, { label: string; color: string; bg: string }> = {
-  High:   { label: 'High',   color: '#ef4444', bg: 'rgba(239,68,68,0.12)'   },
-  Medium: { label: 'Medium', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)'  },
-  Low:    { label: 'Low',    color: '#6b7280', bg: 'rgba(107,114,128,0.12)' },
+const PRIORITY_STYLES: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  High:   { label: 'High',   color: '#ba1a1a', bg: '#ffdad6', border: 'rgba(186,26,26,0.2)'  },
+  Medium: { label: 'Medium', color: '#b45309', bg: '#fef3c7', border: 'rgba(180,83,9,0.2)'   },
+  Low:    { label: 'Low',    color: '#464554', bg: '#e0e1f4', border: 'rgba(70,69,84,0.2)'   },
 };
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
-  ToDo:       <Circle     size={14} className="text-neutral-500" />,
-  InProgress: <Clock      size={14} className="text-indigo-400" />,
-  Completed:  <CheckCircle2 size={14} className="text-emerald-400" />,
+  ToDo:       <Circle      size={14} className="text-ip-outline" />,
+  InProgress: <Clock       size={14} className="text-ip-primary" />,
+  Completed:  <CheckCircle2 size={14} className="text-emerald-500" />,
 };
 
 // ─── Per-project task fetcher ─────────────────────────────────────────────────
@@ -45,63 +44,28 @@ export default function RecentTasks() {
   const { data: projects, isLoading } = useProjects();
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
 
-  // Only Admin and ProjectManager may create tasks
   const canCreateTask = user?.role === 'Admin' || user?.role === 'ProjectManager';
 
   const allTasks: (TaskWithDetails & { projectName: string })[] = [];
-
   function collectTasks(tasks: (TaskWithDetails & { projectName: string })[]) {
     allTasks.push(...tasks);
   }
 
-  // Sort by createdAt descending, take 5
   const recentTasks = [...allTasks]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
   return (
-    <div
-      style={{
-        background: '#111111',
-        border: '1px solid #1f1f1f',
-        borderRadius: '12px',
-        padding: '24px',
-        marginBottom: '24px',
-      }}
-    >
+    <div className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-ip-lg overflow-hidden shadow-[0_2px_8px_rgba(70,72,212,0.04)] mb-6">
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <h2 style={{ fontSize: '16px', fontWeight: '600', color: 'white', margin: 0 }}>
-          Recent Tasks
-        </h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* + Add Task — Admin & ProjectManager only */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-ip-outline-variant">
+        <h2 className="text-sm font-bold text-ip-on-surface tracking-tight">Recent Tasks</h2>
+        <div className="flex items-center gap-3">
           {canCreateTask && (
             <button
               id="add-task-btn"
               onClick={() => setCreateTaskOpen(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '5px 10px',
-                borderRadius: '7px',
-                background: 'rgba(99,102,241,0.15)',
-                border: '1px solid rgba(99,102,241,0.3)',
-                color: '#818cf8',
-                fontSize: '12px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'background 0.15s, border-color 0.15s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(99,102,241,0.25)';
-                e.currentTarget.style.borderColor = 'rgba(99,102,241,0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(99,102,241,0.15)';
-                e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)';
-              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-ip-base bg-ip-secondary-container text-ip-on-surface text-xs font-semibold hover:bg-ip-primary-container/20 hover:text-ip-primary transition-colors"
             >
               <Plus size={13} />
               Add Task
@@ -109,18 +73,7 @@ export default function RecentTasks() {
           )}
           <button
             onClick={() => navigate('/tasks')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              color: '#6366f1',
-              fontSize: '13px',
-              fontWeight: '500',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 0,
-            }}
+            className="flex items-center gap-1 text-ip-primary text-xs font-semibold hover:text-ip-on-primary-fixed-variant transition-colors"
           >
             View all <ArrowRight size={13} />
           </button>
@@ -134,15 +87,15 @@ export default function RecentTasks() {
 
       {/* Loading */}
       {isLoading && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="p-4 space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Skeleton className="h-4 w-4 rounded-full bg-neutral-800" />
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <Skeleton className="h-3.5 w-3/5 bg-neutral-800" />
-                <Skeleton className="h-3 w-1/4 bg-neutral-800" />
+            <div key={i} className="flex items-center gap-3 px-2 py-1">
+              <Skeleton className="h-4 w-4 rounded-full bg-ip-surface-container" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-3.5 w-3/5 bg-ip-surface-container" />
+                <Skeleton className="h-3 w-1/4 bg-ip-surface-container" />
               </div>
-              <Skeleton className="h-5 w-14 rounded-full bg-neutral-800" />
+              <Skeleton className="h-5 w-14 rounded-full bg-ip-surface-container" />
             </div>
           ))}
         </div>
@@ -150,56 +103,40 @@ export default function RecentTasks() {
 
       {/* Empty */}
       {!isLoading && recentTasks.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '32px 0', color: '#4b5563' }}>
-          <AlertCircle size={28} style={{ margin: '0 auto 8px' }} />
-          <p style={{ fontSize: '14px', margin: 0 }}>No tasks yet. Create a task inside any project.</p>
+        <div className="flex flex-col items-center justify-center py-10 text-ip-on-surface-variant">
+          <AlertCircle size={26} className="mb-2 opacity-40" />
+          <p className="text-sm">No tasks yet. Create a task inside any project.</p>
         </div>
       )}
 
       {/* Task rows */}
       {!isLoading && recentTasks.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        <div className="divide-y divide-ip-outline-variant/50">
           {recentTasks.map((task) => {
             const prio = PRIORITY_STYLES[task.priority] ?? PRIORITY_STYLES.Low;
+            const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== 'Completed';
             return (
               <div
                 key={task.id}
                 onClick={() => navigate(`/projects/${task.projectId}`)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 8px',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  transition: 'background 0.15s',
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#1a1a1a')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                className="flex items-center gap-3 px-6 py-3.5 hover:bg-ip-surface-container-low transition-colors cursor-pointer"
               >
                 {/* Status icon */}
-                <span style={{ flexShrink: 0 }}>{STATUS_ICONS[task.status]}</span>
+                <span className="flex-shrink-0">{STATUS_ICONS[task.status]}</span>
 
                 {/* Title + project */}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p
-                    style={{
-                      color: task.status === 'Completed' ? '#6b7280' : 'white',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      margin: '0 0 2px',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      textDecoration: task.status === 'Completed' ? 'line-through' : 'none',
-                    }}
-                  >
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-medium truncate ${
+                    task.status === 'Completed'
+                      ? 'text-ip-on-surface-variant line-through'
+                      : 'text-ip-on-surface'
+                  }`}>
                     {task.title}
                   </p>
-                  <p style={{ color: '#4b5563', fontSize: '12px', margin: 0 }}>
+                  <p className="text-xs text-ip-on-surface-variant mt-0.5 truncate">
                     {task.projectName}
                     {task.dueDate && (
-                      <span style={{ color: new Date(task.dueDate) < new Date() ? '#ef4444' : '#6b7280', marginLeft: '8px' }}>
+                      <span className={`ml-2 ${isOverdue ? 'text-ip-error' : 'text-ip-on-surface-variant'}`}>
                         · Due {new Date(task.dueDate).toLocaleDateString()}
                       </span>
                     )}
@@ -207,25 +144,18 @@ export default function RecentTasks() {
                 </div>
 
                 {/* Priority badge */}
-                <Badge
-                  style={{
-                    background: prio.bg,
-                    color: prio.color,
-                    border: 'none',
-                    fontSize: '11px',
-                    fontWeight: '500',
-                    flexShrink: 0,
-                  }}
+                <span
+                  className="text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                  style={{ background: prio.bg, color: prio.color, border: `1px solid ${prio.border}` }}
                 >
                   {prio.label}
-                </Badge>
+                </span>
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Create Task Modal — rendered here so it's outside the card scroll area */}
       <CreateTaskModal open={createTaskOpen} onOpenChange={setCreateTaskOpen} />
     </div>
   );
