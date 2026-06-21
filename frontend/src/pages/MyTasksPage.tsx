@@ -1,32 +1,12 @@
 import { useState } from 'react';
-import { List, LayoutDashboard, Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { Plus, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import KanbanBoard from '@/features/tasks/components/KanbanBoard';
 import TaskTable from '@/features/tasks/components/TaskTable';
-import { useProjects } from '@/features/projects/hooks/useProjects';
 import { useAuth } from '@/context/AuthContext';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
 import type { TaskWithDetails } from '@/features/tasks/hooks/useTasks';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
-
-type Tab = 'list' | 'board' | 'calendar';
-
-// ─── Tab button ───────────────────────────────────────────────────────────────
-function TabBtn({ active, onClick, icon: Icon, label }: { active: boolean; onClick: () => void; icon: React.ElementType; label: string }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2 rounded-ip-base text-sm font-medium transition-all duration-150 ${
-        active
-          ? 'bg-ip-primary text-ip-on-primary shadow-[0_2px_8px_rgba(70,72,212,0.25)]'
-          : 'text-ip-on-surface-variant hover:bg-ip-surface-container-low hover:text-ip-on-surface'
-      }`}
-    >
-      <Icon size={15} />
-      {label}
-    </button>
-  );
-}
 
 // ─── Calendar View ─────────────────────────────────────────────────────────────
 function CalendarView({ projectId }: { projectId: string }) {
@@ -127,64 +107,28 @@ function CalendarView({ projectId }: { projectId: string }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function MyTasksPage() {
   const { user } = useAuth();
-  const { data: projects, isLoading } = useProjects();
-  const [tab, setTab] = useState<Tab>('list');
-  const [projectId, setProjectId] = useState('');
-
-  if (isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="w-6 h-6 animate-spin text-ip-primary" />
-      </div>
-    );
-  }
+  const [searchParams] = useSearchParams();
+  
+  const tab = searchParams.get('tab') || 'list';
+  const projectId = ''; // We fetch ALL tasks when projectId is empty, handled by the hook/backend
 
   return (
-    <div className="font-jakarta space-y-5">
+    <div className="font-jakarta max-w-[1600px] w-full mx-auto">
       {/* Page header */}
-      <div>
-        <h1 className="text-[22px] font-bold text-ip-on-surface tracking-tight">My Tasks</h1>
-        <p className="text-sm text-ip-on-surface-variant mt-1">
-          Tasks across all your projects, {user?.name?.split(' ')[0]}.
-        </p>
-      </div>
-
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        {/* Tabs */}
-        <div className="flex items-center gap-1 p-1 bg-ip-surface-container-low border border-ip-outline-variant rounded-ip-base">
-          <TabBtn active={tab === 'list'}     onClick={() => setTab('list')}     icon={List}            label="List" />
-          <TabBtn active={tab === 'board'}    onClick={() => setTab('board')}    icon={LayoutDashboard} label="Board" />
-          <TabBtn active={tab === 'calendar'} onClick={() => setTab('calendar')} icon={CalendarIcon}    label="Calendar" />
-        </div>
-
-        {/* Project selector */}
-        <Select value={projectId} onValueChange={setProjectId}>
-          <SelectTrigger className="w-[220px] bg-ip-surface-container-lowest border-ip-outline-variant text-ip-on-surface text-sm rounded-ip-base">
-            <SelectValue placeholder="Select a project…" />
-          </SelectTrigger>
-          <SelectContent>
-            {projects?.map((p) => (
-              <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-ip-on-surface tracking-tight">My Tasks</h2>
+        <button className="bg-ip-primary text-ip-on-primary px-4 py-2 rounded-ip-lg text-sm font-semibold hover:bg-ip-primary-container hover:text-ip-on-primary-container transition-colors shadow-[0_2px_8px_rgba(70,72,212,0.25)] flex items-center gap-1.5">
+          <Plus size={18} />
+          New Task
+        </button>
       </div>
 
       {/* Content */}
-      {!projectId ? (
-        <div className="flex flex-col items-center justify-center py-20 border border-dashed border-ip-outline-variant rounded-ip-lg text-ip-on-surface-variant bg-ip-surface-container-lowest">
-          <List size={28} className="mb-3 opacity-30" />
-          <p className="text-sm font-medium">Select a project to view tasks</p>
-          <p className="text-xs mt-1 opacity-60">Use the dropdown above to choose a project</p>
-        </div>
-      ) : (
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-          {tab === 'list'     && <TaskTable   projectId={projectId} />}
-          {tab === 'board'    && <KanbanBoard projectId={projectId} />}
-          {tab === 'calendar' && <CalendarView projectId={projectId} />}
-        </div>
-      )}
+      <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+        {tab === 'list'     && <TaskTable   projectId={projectId} />}
+        {tab === 'board'    && <KanbanBoard projectId={projectId} />}
+        {tab === 'calendar' && <CalendarView projectId={projectId} />}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { Bell, LogOut, Search } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 
@@ -16,9 +16,11 @@ export default function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { data: notifications } = useNotifications();
 
   const unreadCount = notifications?.filter((n) => !n.isRead).length ?? 0;
+  const currentTab = searchParams.get('tab') || 'list';
 
   // Match /projects/:id too
   let pageTitle = routeTitles[location.pathname] ?? 'OnIts';
@@ -31,8 +33,31 @@ export default function Header() {
   return (
     <div className="h-full flex items-center justify-between px-6 font-jakarta">
 
-      {/* Page title */}
-      <h2 className="text-ip-on-surface font-bold text-base">{pageTitle}</h2>
+      {/* Left side: Page title or custom navigation */}
+      {location.pathname === '/my-tasks' ? (
+        <nav className="flex items-center gap-6 h-full pt-4">
+          <Link
+            to="?tab=list"
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${currentTab === 'list' ? 'text-ip-primary border-ip-primary' : 'text-ip-on-surface-variant border-transparent hover:text-ip-primary'}`}
+          >
+            List
+          </Link>
+          <Link
+            to="?tab=board"
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${currentTab === 'board' ? 'text-ip-primary border-ip-primary' : 'text-ip-on-surface-variant border-transparent hover:text-ip-primary'}`}
+          >
+            Board
+          </Link>
+          <Link
+            to="?tab=calendar"
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${currentTab === 'calendar' ? 'text-ip-primary border-ip-primary' : 'text-ip-on-surface-variant border-transparent hover:text-ip-primary'}`}
+          >
+            Calendar
+          </Link>
+        </nav>
+      ) : (
+        <h2 className="text-ip-on-surface font-bold text-base">{pageTitle}</h2>
+      )}
 
       {/* Right */}
       <div className="flex items-center gap-2">
