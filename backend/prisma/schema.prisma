@@ -71,6 +71,7 @@ model User {
   username     String     @unique
   // NEVER expose this field in API responses — always query with safeUserSelect
   passwordHash String     @map("password_hash")
+  avatarUrl    String?    @map("avatar_url")
   role         Role       @default(Collaborator)
   status       UserStatus @default(Active)
   // Forces password reset on first login — part of admin-created user flow

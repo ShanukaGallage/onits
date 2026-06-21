@@ -10,6 +10,7 @@ export interface User {
   username: string;
   role: Role;
   status: UserStatus;
+  avatarUrl?: string;
   isFirstLogin: boolean;
   createdAt: string;
   updatedAt: string;

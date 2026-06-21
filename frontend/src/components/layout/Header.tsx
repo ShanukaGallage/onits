@@ -102,9 +102,17 @@ export default function Header() {
 
         {/* User */}
         <button onClick={() => navigate('/profile')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-ip-on-primary text-sm font-semibold bg-gradient-to-br from-ip-primary to-ip-primary-container flex-shrink-0">
-            {user?.name?.charAt(0).toUpperCase() ?? '?'}
-          </div>
+          {user?.avatarUrl ? (
+            <img 
+              src={user.avatarUrl.startsWith('http') ? user.avatarUrl : `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${user.avatarUrl}`}
+              alt="Profile"
+              className="w-8 h-8 rounded-full border border-ip-outline-variant object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-ip-on-primary text-sm font-semibold bg-gradient-to-br from-ip-primary to-ip-primary-container flex-shrink-0">
+              {user?.name?.charAt(0).toUpperCase() ?? '?'}
+            </div>
+          )}
           <div className="hidden sm:block text-left">
             <p className="text-ip-on-surface text-sm font-semibold leading-none">{user?.name ?? 'User'}</p>
             <p className="text-ip-on-surface-variant text-xs mt-0.5">{user?.role ?? ''}</p>

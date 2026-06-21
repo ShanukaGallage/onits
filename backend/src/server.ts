@@ -15,13 +15,19 @@ import channelRouter from './routes/channel.routes';
 import messageRouter from './routes/message.routes';
 import { startCronJobs } from './utils/cron';
 import { verifyMailer } from './utils/mailer';
+import path from 'path';
 
 dotenv.config();
 
 const app = express();
 
+// Serve static uploads (e.g. avatars)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" } // Required to allow images to load externally
+}));
 
 // CORS
 app.use(

@@ -6,9 +6,11 @@ import {
   updateUser,
   deactivateUser,
   reactivateUser,
+  uploadAvatar,
 } from '../controllers/user.controller';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
+import { uploadAvatar as uploadMiddleware } from '../middleware/upload';
 
 const router = Router();
 
@@ -18,6 +20,14 @@ router.get(
   authenticate,
   authorize(['Admin']),
   getAllUsers
+);
+
+// POST /api/users/me/avatar
+router.post(
+  '/me/avatar',
+  authenticate,
+  uploadMiddleware.single('avatar'),
+  uploadAvatar
 );
 
 // POST /api/users

@@ -126,3 +126,25 @@ export const changePassword = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * 7. uploadAvatar: Handles profile picture upload and updates DB record.
+ */
+export const uploadAvatar = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ errorCode: 400, message: 'No file uploaded' });
+    }
+
+    // The file is saved in uploads/avatars by Multer. 
+    // We construct the public URL path for the frontend to access.
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    
+    // Using req.user!.id (set by authenticate middleware)
+    const user = await userService.updateAvatar(req.user!.id, avatarUrl);
+    
+    return res.status(200).json(user);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+

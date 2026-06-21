@@ -1,222 +1,243 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { toast } from 'sonner';
+import { useRef, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { Camera, Upload, Trash2, Mail, Shield, User, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import api from '@/lib/axios';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Lock, User, Mail, Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
 
-// ─── Schema ───────────────────────────────────────────────────────────────────
-const changePasswordSchema = z
-  .object({
-    currentPassword:  z.string().min(1, 'Current password is required'),
-    newPassword: z
-      .string()
-      .min(8, 'Must be at least 8 characters')
-      .regex(/[A-Z]/, 'Must contain an uppercase letter')
-      .regex(/[a-z]/, 'Must contain a lowercase letter')
-      .regex(/[0-9]/, 'Must contain a number')
-      .regex(/[^A-Za-z0-9]/, 'Must contain a special character'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-  })
-  .refine((d) => d.newPassword === d.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
-
-type ChangePasswordValues = z.infer<typeof changePasswordSchema>;
-
-// ─── Role badge colours ───────────────────────────────────────────────────────
-const ROLE_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  Admin:          { bg: 'bg-ip-primary/10',   text: 'text-ip-primary',    label: 'Admin' },
-  ProjectManager: { bg: 'bg-ip-tertiary/10',  text: 'text-ip-tertiary',   label: 'Project Manager' },
-  Collaborator:   { bg: 'bg-ip-secondary-container', text: 'text-ip-on-secondary-container', label: 'Collaborator' },
-};
-
-// ─── Section wrapper ──────────────────────────────────────────────────────────
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-ip-lg overflow-hidden shadow-[0_2px_8px_rgba(70,72,212,0.04)]">
-      <div className="px-6 py-4 border-b border-ip-outline-variant">
-        <h2 className="text-sm font-bold text-ip-on-surface">{title}</h2>
-      </div>
-      <div className="p-6">{children}</div>
-    </div>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ProfilePage() {
-  const { user } = useAuth();
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user, mutateUser } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ChangePasswordValues>({
-    resolver: zodResolver(changePasswordSchema),
-  });
+  const handleUpdatePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
 
-  const roleStyle = ROLE_STYLES[user?.role ?? 'Collaborator'];
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const onSubmit = async (data: ChangePasswordValues) => {
-    setIsSubmitting(true);
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    setIsUploading(true);
     try {
-      await api.post('/auth/change-password', {
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword,
+      const res = await api.post('/users/me/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      toast.success('Password changed successfully');
-      reset();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to change password');
+      // The backend returns the updated user object
+      mutateUser(res.data);
+      toast.success('Profile picture updated!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to upload image');
     } finally {
-      setIsSubmitting(false);
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
+  const handleRemovePhoto = () => {
+    toast.info("Profile picture removal coming soon!");
+  };
+
+  const handleSaveProfile = () => {
+    toast.info("Profile updates coming soon!");
+  };
+
+  const handleChangePassword = () => {
+    toast.info("Password change flow coming soon!");
+  };
+
+  // Get initials for the fallback avatar
+  const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
+  // Construct full URL if needed (axios usually handles relative to base URL, but for images we need the full host)
+  // Assuming the backend is running on the API base URL port
+  const getAvatarUrl = (path: string) => {
+    // If the path is already a full URL, return it
+    if (path.startsWith('http')) return path;
+    // Otherwise prepend the backend origin (e.g. http://localhost:5000)
+    // We can infer this from import.meta.env.VITE_API_URL, dropping the /api part
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    const baseUrl = apiUrl.replace('/api', '');
+    return `${baseUrl}${path}`;
+  };
+
   return (
-    <div className="font-jakarta space-y-5 max-w-2xl">
-      {/* Header */}
-      <div>
-        <h1 className="text-[22px] font-bold text-ip-on-surface tracking-tight">Profile</h1>
-        <p className="text-sm text-ip-on-surface-variant mt-1">Manage your account settings.</p>
+    <div className="font-jakarta pb-24 md:pb-6">
+      <div className="mb-8">
+        <h2 className="text-[24px] font-bold text-ip-on-surface mb-1 tracking-tight">Profile Settings</h2>
+        <p className="text-sm text-ip-on-surface-variant">Manage your account details and security preferences.</p>
       </div>
 
-      {/* Profile info */}
-      <Section title="Account Information">
-        <div className="flex items-center gap-5 mb-6">
-          {/* Avatar */}
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center text-ip-on-primary text-2xl font-bold bg-gradient-to-br from-ip-primary to-ip-primary-container shadow-[0_4px_16px_rgba(70,72,212,0.25)]">
-              {user?.name?.charAt(0).toUpperCase() ?? '?'}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column: Profile Card & Photo */}
+        <div className="flex flex-col gap-6 lg:col-span-1">
+          {/* Account Settings (Photo) */}
+          <section className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(70,72,212,0.04)] p-6">
+            <h3 className="text-lg font-bold text-ip-on-surface mb-6">Account Profile</h3>
+            
+            <div className="flex flex-col items-center mb-6">
+              <input 
+                type="file" 
+                accept="image/jpeg, image/png, image/webp" 
+                ref={fileInputRef} 
+                className="hidden" 
+                onChange={handleFileChange}
+              />
+              <div className="relative mb-4 group cursor-pointer" onClick={handleUpdatePhotoClick}>
+                {user?.avatarUrl ? (
+                  <img 
+                    src={getAvatarUrl(user.avatarUrl)} 
+                    alt="Profile Avatar" 
+                    className="w-24 h-24 rounded-full border border-ip-outline-variant object-cover shadow-md"
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full border border-ip-outline-variant flex items-center justify-center text-ip-on-primary text-3xl font-bold bg-gradient-to-br from-ip-primary to-ip-primary-container shadow-md">
+                    {initials}
+                  </div>
+                )}
+                <div className={`absolute inset-0 bg-ip-on-surface/40 rounded-full flex items-center justify-center transition-opacity ${isUploading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                  {isUploading ? <Loader2 className="text-ip-surface-container-lowest animate-spin" size={24} /> : <Camera className="text-ip-surface-container-lowest" size={24} />}
+                </div>
+              </div>
+              <h4 className="text-lg font-bold text-ip-on-surface">{user?.name}</h4>
+              <p className="text-sm text-ip-on-surface-variant">@{user?.username}</p>
             </div>
-          </div>
-          <div>
-            <p className="text-lg font-bold text-ip-on-surface">{user?.name}</p>
-            <p className="text-sm text-ip-on-surface-variant">@{user?.username}</p>
-            <span className={`inline-flex items-center gap-1 mt-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full ${roleStyle.bg} ${roleStyle.text}`}>
-              <Shield size={10} />
-              {roleStyle.label}
-            </span>
-          </div>
+            
+            <div className="space-y-2 w-full">
+              <button 
+                onClick={handleUpdatePhotoClick}
+                disabled={isUploading}
+                className="w-full bg-ip-surface border border-ip-outline-variant text-ip-on-surface py-2 px-4 rounded-lg text-sm font-medium hover:bg-ip-surface-container-low transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />} 
+                {isUploading ? 'Uploading...' : 'Update Photo'}
+              </button>
+              <button 
+                onClick={handleRemovePhoto}
+                className="w-full bg-ip-surface border border-ip-error text-ip-error py-2 px-4 rounded-lg text-sm font-medium hover:bg-ip-error-container transition-colors flex items-center justify-center gap-2"
+              >
+                <Trash2 size={16} /> Remove Photo
+              </button>
+            </div>
+          </section>
+
+          {/* System Preferences Minimal */}
+          <section className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(70,72,212,0.04)] p-6">
+            <h3 className="text-lg font-bold text-ip-on-surface mb-6">Preferences</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-ip-on-surface">Email Notifications</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" defaultChecked />
+                  <div className="w-9 h-5 bg-ip-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-ip-primary"></div>
+                </label>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-ip-on-surface">Dark Mode</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" className="sr-only peer" />
+                  <div className="w-9 h-5 bg-ip-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-ip-primary"></div>
+                </label>
+              </div>
+            </div>
+          </section>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-widest text-ip-on-surface">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ip-outline" />
-              <Input
-                value={user?.name ?? ''}
-                readOnly
-                className="pl-10 h-10 bg-ip-surface-container-low border-ip-outline-variant text-ip-on-surface text-sm rounded-ip-base cursor-not-allowed opacity-60"
-              />
+        {/* Right Column: Forms */}
+        <div className="flex flex-col gap-6 lg:col-span-2">
+          
+          {/* Profile Information */}
+          <section className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(70,72,212,0.04)] p-6">
+            <h3 className="text-lg font-bold text-ip-on-surface mb-6 border-b border-ip-outline-variant pb-2">Profile Information</h3>
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSaveProfile(); }}>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-ip-on-surface-variant uppercase tracking-wider">Full Name</label>
+                  <input 
+                    type="text" 
+                    defaultValue={user?.name}
+                    className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-lg px-3 py-2 text-sm text-ip-on-surface focus:outline-none focus:border-ip-primary focus:ring-1 focus:ring-ip-primary transition-colors"
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-ip-on-surface-variant uppercase tracking-wider">Username</label>
+                  <input 
+                    type="text" 
+                    defaultValue={user?.username}
+                    readOnly
+                    className="bg-ip-surface-container-low border border-ip-outline-variant rounded-lg px-3 py-2 text-sm text-ip-on-surface opacity-70 cursor-not-allowed focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-ip-on-surface-variant uppercase tracking-wider">Email Address</label>
+                <input 
+                  type="email" 
+                  defaultValue={user?.email}
+                  readOnly
+                  className="bg-ip-surface-container-low border border-ip-outline-variant rounded-lg px-3 py-2 text-sm text-ip-on-surface opacity-70 cursor-not-allowed focus:outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-ip-on-surface-variant uppercase tracking-wider">Role</label>
+                <input 
+                  type="text" 
+                  defaultValue={user?.role}
+                  readOnly
+                  className="bg-ip-surface-container-low border border-ip-outline-variant rounded-lg px-3 py-2 text-sm text-ip-on-surface opacity-70 cursor-not-allowed focus:outline-none"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-ip-on-surface-variant uppercase tracking-wider">Bio</label>
+                <textarea 
+                  rows={3}
+                  placeholder="Tell us about yourself..."
+                  className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-lg px-3 py-2 text-sm text-ip-on-surface focus:outline-none focus:border-ip-primary focus:ring-1 focus:ring-ip-primary transition-colors resize-none"
+                />
+              </div>
+
+              <div className="pt-4 flex justify-end">
+                <button 
+                  type="submit"
+                  className="bg-ip-primary text-ip-on-primary py-2 px-6 rounded-lg text-sm font-bold hover:bg-ip-on-primary-fixed-variant transition-colors shadow-sm hover:shadow-md"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </section>
+
+          {/* Security */}
+          <section className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-xl overflow-hidden shadow-[0_2px_8px_rgba(70,72,212,0.04)] p-6">
+            <h3 className="text-lg font-bold text-ip-on-surface mb-6 border-b border-ip-outline-variant pb-2">Security</h3>
+            
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h4 className="text-base text-ip-on-surface font-bold mb-1">Password</h4>
+                <p className="text-sm text-ip-on-surface-variant">Update your password regularly to keep your account secure.</p>
+              </div>
+              <button 
+                onClick={handleChangePassword}
+                className="bg-ip-surface border border-ip-outline-variant text-ip-on-surface py-2 px-4 rounded-lg text-sm font-medium hover:bg-ip-surface-container-low transition-colors shrink-0"
+              >
+                Change Password
+              </button>
             </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-semibold uppercase tracking-widest text-ip-on-surface">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ip-outline" />
-              <Input
-                value={user?.email ?? ''}
-                readOnly
-                className="pl-10 h-10 bg-ip-surface-container-low border-ip-outline-variant text-ip-on-surface text-sm rounded-ip-base cursor-not-allowed opacity-60"
-              />
-            </div>
-          </div>
+            
+          </section>
+
         </div>
-
-        <p className="text-xs text-ip-on-surface-variant mt-3 opacity-60">
-          To update your name or email, contact your administrator.
-        </p>
-      </Section>
-
-      {/* Change password */}
-      <Section title="Change Password">
-        <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
-
-          {/* Current */}
-          <div className="space-y-1.5">
-            <label className="block text-[11px] font-semibold uppercase tracking-widest text-ip-on-surface">
-              Current Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ip-outline" />
-              <Input
-                type={showCurrent ? 'text' : 'password'}
-                placeholder="Enter current password"
-                className="pl-10 pr-10 h-10 bg-ip-surface-container-low border-ip-outline-variant text-ip-on-surface text-sm rounded-ip-base focus-visible:ring-2 focus-visible:ring-ip-primary/30 focus-visible:border-ip-primary transition-all"
-                {...register('currentPassword')}
-              />
-              <button type="button" onClick={() => setShowCurrent((v) => !v)} tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ip-outline hover:text-ip-on-surface-variant transition-colors">
-                {showCurrent ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
-            {errors.currentPassword && (
-              <p className="text-xs font-medium text-ip-error">· {errors.currentPassword.message}</p>
-            )}
-          </div>
-
-          {/* New */}
-          <div className="space-y-1.5">
-            <label className="block text-[11px] font-semibold uppercase tracking-widest text-ip-on-surface">
-              New Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ip-outline" />
-              <Input
-                type={showNew ? 'text' : 'password'}
-                placeholder="Create a strong password"
-                className="pl-10 pr-10 h-10 bg-ip-surface-container-low border-ip-outline-variant text-ip-on-surface text-sm rounded-ip-base focus-visible:ring-2 focus-visible:ring-ip-primary/30 focus-visible:border-ip-primary transition-all"
-                {...register('newPassword')}
-              />
-              <button type="button" onClick={() => setShowNew((v) => !v)} tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ip-outline hover:text-ip-on-surface-variant transition-colors">
-                {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
-            {errors.newPassword && (
-              <p className="text-xs font-medium text-ip-error">· {errors.newPassword.message}</p>
-            )}
-          </div>
-
-          {/* Confirm */}
-          <div className="space-y-1.5">
-            <label className="block text-[11px] font-semibold uppercase tracking-widest text-ip-on-surface">
-              Confirm New Password
-            </label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ip-outline" />
-              <Input
-                type={showConfirm ? 'text' : 'password'}
-                placeholder="Re-enter new password"
-                className="pl-10 pr-10 h-10 bg-ip-surface-container-low border-ip-outline-variant text-ip-on-surface text-sm rounded-ip-base focus-visible:ring-2 focus-visible:ring-ip-primary/30 focus-visible:border-ip-primary transition-all"
-                {...register('confirmPassword')}
-              />
-              <button type="button" onClick={() => setShowConfirm((v) => !v)} tabIndex={-1}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-ip-outline hover:text-ip-on-surface-variant transition-colors">
-                {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
-              </button>
-            </div>
-            {errors.confirmPassword && (
-              <p className="text-xs font-medium text-ip-error">· {errors.confirmPassword.message}</p>
-            )}
-          </div>
-
-          <Button
-            type="submit"
-            disabled={isSubmitting}
-            className="h-10 px-6 bg-ip-primary hover:bg-ip-on-primary-fixed-variant text-ip-on-primary font-semibold text-sm rounded-ip-base shadow-[0_2px_8px_rgba(70,72,212,0.25)] hover:shadow-[0_4px_16px_rgba(70,72,212,0.35)] transition-all"
-          >
-            {isSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving…</> : 'Change Password'}
-          </Button>
-        </form>
-      </Section>
+      </div>
     </div>
   );
 }
