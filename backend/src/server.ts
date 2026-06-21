@@ -11,6 +11,8 @@ import projectRouter from './routes/project.routes';
 import taskRouter from './routes/task.routes';
 import commentRouter from './routes/comment.routes';
 import attachmentRouter from './routes/attachment.routes';
+import channelRouter from './routes/channel.routes';
+import messageRouter from './routes/message.routes';
 import { startCronJobs } from './utils/cron';
 import { verifyMailer } from './utils/mailer';
 
@@ -40,6 +42,8 @@ app.use('/api/projects', projectRouter);
 app.use('/api/tasks', taskRouter);
 app.use('/api/tasks/:taskId/comments', commentRouter);
 app.use('/api/tasks/:taskId/attachments', attachmentRouter);
+app.use('/api/channels', channelRouter);
+app.use('/api/channels/:channelId/messages', messageRouter);
 
 // Swagger setup
 const swaggerSpec = swaggerJsdoc({

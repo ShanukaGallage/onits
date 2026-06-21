@@ -55,6 +55,11 @@ enum NotificationType {
   AdminUpdate
 }
 
+enum ChannelType {
+  Project
+  Thread
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  MODELS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -83,6 +88,8 @@ model User {
   attachments        Attachment[]
   notifications      Notification[]
   refreshTokens      RefreshToken[]
+  createdChannels    Channel[]        @relation("ChannelCreator")
+  sentMessages       Message[]        @relation("MessageSender")
 
   @@map("users")
 }
@@ -99,6 +106,7 @@ model Project {
   createdBy User            @relation("ProjectCreator", fields: [createdById], references: [id])
   members   ProjectMember[]
   tasks     Task[]
+  channels  Channel[]
 
   @@map("projects")
 }
@@ -233,4 +241,40 @@ model RefreshToken {
   // Fast lookup: find all tokens for a user on login/logout/rotation
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Channels & Messages — Inbox
+// ─────────────────────────────────────────────────────────────────────────────
+
+model Channel {
+  id          String      @id @default(uuid())
+  name        String
+  type        ChannelType
+  projectId   String?     @map("project_id")
+  createdById String      @map("created_by")
+  createdAt   DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  project   Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User      @relation("ChannelCreator", fields: [createdById], references: [id])
+  messages  Message[]
+
+  @@map("channels")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String
+  channelId String   @map("channel_id")
+  senderId  String   @map("sender_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  sender  User    @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([channelId])
+  @@map("messages")
 }
