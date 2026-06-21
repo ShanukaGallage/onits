@@ -35,26 +35,39 @@ export default function Header() {
 
       {/* Left side: Page title or custom navigation */}
       {location.pathname === '/my-tasks' ? (
-        <nav className="flex items-center gap-6 h-full pt-4">
-          <Link
-            to="?tab=list"
-            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${currentTab === 'list' ? 'text-ip-primary border-ip-primary' : 'text-ip-on-surface-variant border-transparent hover:text-ip-primary'}`}
-          >
-            List
-          </Link>
-          <Link
-            to="?tab=board"
-            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${currentTab === 'board' ? 'text-ip-primary border-ip-primary' : 'text-ip-on-surface-variant border-transparent hover:text-ip-primary'}`}
-          >
-            Board
-          </Link>
-          <Link
-            to="?tab=calendar"
-            className={`pb-3 text-sm font-bold border-b-2 transition-colors ${currentTab === 'calendar' ? 'text-ip-primary border-ip-primary' : 'text-ip-on-surface-variant border-transparent hover:text-ip-primary'}`}
-          >
-            Calendar
-          </Link>
-        </nav>
+        <div className="flex items-center justify-between flex-1 mr-6">
+          <nav className="flex items-center gap-6 h-full pt-4">
+            <Link
+              to="?tab=list"
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${currentTab === 'list' ? 'text-ip-primary border-ip-primary' : 'text-ip-on-surface-variant border-transparent hover:text-ip-primary'}`}
+            >
+              List
+            </Link>
+            <Link
+              to="?tab=board"
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${currentTab === 'board' ? 'text-ip-primary border-ip-primary' : 'text-ip-on-surface-variant border-transparent hover:text-ip-primary'}`}
+            >
+              Board
+            </Link>
+            <Link
+              to="?tab=calendar"
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors ${currentTab === 'calendar' ? 'text-ip-primary border-ip-primary' : 'text-ip-on-surface-variant border-transparent hover:text-ip-primary'}`}
+            >
+              Calendar
+            </Link>
+          </nav>
+          
+          <div className="flex items-center gap-2 mt-2">
+            <button className="text-ip-on-surface-variant hover:text-ip-primary transition-colors flex items-center gap-1 text-xs font-semibold bg-ip-surface-container px-2 py-1 rounded">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
+              Filter
+            </button>
+            <button className="text-ip-on-surface-variant hover:text-ip-primary transition-colors flex items-center gap-1 text-xs font-semibold bg-ip-surface-container px-2 py-1 rounded">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" /></svg>
+              Sort
+            </button>
+          </div>
+        </div>
       ) : (
         <h2 className="text-ip-on-surface font-bold text-base">{pageTitle}</h2>
       )}

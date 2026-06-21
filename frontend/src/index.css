@@ -52,4 +52,34 @@
     font-size: 14px;
     line-height: 20px;
   }
+
+  /* Custom scrollbar for kanban board */
+  .kanban-board::-webkit-scrollbar {
+      height: 8px;
+  }
+  .kanban-board::-webkit-scrollbar-track {
+      background: transparent; 
+      border-radius: 4px;
+  }
+  .kanban-board::-webkit-scrollbar-thumb {
+      background: #c7c4d7; /* ip-outline-variant */
+      border-radius: 4px;
+  }
+  .kanban-board::-webkit-scrollbar-thumb:hover {
+      background: #767586; /* ip-outline */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #e6e7f8; /* ip-surface-container-high */
+      border-radius: 4px;
+  }
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+      background: #c7c4d7; /* ip-outline-variant */
+  }
 }
