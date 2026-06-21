@@ -7,6 +7,7 @@ import {
   deleteProject,
   addMember,
   removeMember,
+  updateProjectStatus,
 } from '../controllers/project.controller';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';

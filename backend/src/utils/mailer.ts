@@ -161,6 +161,43 @@ export async function sendPasswordChangedEmail(to: string, name: string): Promis
 }
 
 /**
+ * Sends a task assignment email.
+ */
+export async function sendTaskAssignedEmail(to: string, name: string, taskTitle: string): Promise<void> {
+  const recipient = resolveRecipient(to);
+  const mailOptions = {
+    from: `"OnIts" <noreply@onits.app>`,
+    to: recipient,
+    subject: recipient !== to
+      ? `[DEV → ${to}] OnIts — You've been assigned to a new task`
+      : 'OnIts — You\'ve been assigned to a new task',
+    html: `
+<div style="font-family:sans-serif;max-width:520px;margin:auto;padding:32px;background:#0F172A;color:#E2E8F0;border-radius:12px">
+  <h1 style="color:#4FACFE;font-size:24px;margin:0 0 8px">New Task Assignment</h1>
+  <p style="color:#94A3B8;margin:0 0 24px">Hi <strong>${name}</strong>,</p>
+  <div style="background:#1E293B;border-radius:8px;padding:20px;margin-bottom:24px;border-left:4px solid #3B82F6">
+    <p style="margin:0;color:#E2E8F0;font-size:15px">
+      You have been assigned to the following task:
+    </p>
+    <p style="margin:12px 0 0;font-size:18px;font-weight:bold;color:#4FACFE">
+      ${taskTitle}
+    </p>
+  </div>
+  <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/tasks" style="display:inline-block;background:#3B82F6;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;margin-top:8px">View Task Details →</a>
+  <p style="color:#334155;font-size:12px;margin-top:32px">© 2026 OnIts. This is an automated message.</p>
+</div>
+    `,
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[Mailer] Task assigned email sent to ${to} — messageId: ${info.messageId}`);
+  } catch (error) {
+    console.error(`[Mailer] Failed to send task assigned email to ${to}:`, error);
+  }
+}
+
+/**
  * Verifies the SMTP transporter connection. Call this on server startup.
  */
 export async function verifyMailer(): Promise<void> {

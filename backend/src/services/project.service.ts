@@ -38,6 +38,7 @@ export async function getProjectById(id: string) {
           },
         },
       },
+      tasks: true,
     },
   });
 
@@ -61,6 +62,13 @@ export async function createProject(data: { name: string; description?: string }
       members: {
         create: {
           userId: createdById,
+        },
+      },
+      channels: {
+        create: {
+          name: `${data.name} General`,
+          type: 'Project',
+          createdById,
         },
       },
     },
@@ -97,6 +105,39 @@ export async function updateProject(id: string, data: { name?: string; descripti
     data: {
       name: data.name,
       description: data.description,
+    },
+    include: {
+      createdBy: {
+        select: safeUserSelect,
+      },
+      members: {
+        include: {
+          user: {
+            select: safeUserSelect,
+          },
+        },
+      },
+    },
+  });
+}
+
+/**
+ * Updates a project's status and returns the updated project with createdBy and members.
+ * Throws an error if not found.
+ */
+export async function updateProjectStatus(id: string, status: any) {
+  const existing = await prisma.project.findUnique({
+    where: { id },
+  });
+
+  if (!existing) {
+    throw new Error('Project not found');
+  }
+
+  return prisma.project.update({
+    where: { id },
+    data: {
+      status: status,
     },
     include: {
       createdBy: {

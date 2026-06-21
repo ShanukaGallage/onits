@@ -342,7 +342,7 @@ function SystemStatus() {
 export default function DashboardPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: projects, isLoading: projectsLoading } = useProjects();
+  const { projects, isLoading: projectsLoading } = useProjects();
   const firstName = user?.name?.split(' ')[0] ?? 'there';
 
   // Collect all tasks across all projects

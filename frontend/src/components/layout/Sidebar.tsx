@@ -19,7 +19,7 @@ type NavItem = {
 
 export default function Sidebar() {
   const { user } = useAuth();
-  const { data: projects } = useProjects();
+  const { projects } = useProjects();
   const { data: notifications } = useNotifications();
   const [projectsExpanded, setProjectsExpanded] = useState(true);
 
@@ -80,7 +80,7 @@ export default function Sidebar() {
         ))}
 
         {/* Divider + Projects section */}
-        {projects && projects.length > 0 && (
+        {projects && (
           <div className="pt-3 mt-1">
             <div className="border-t border-ip-outline-variant pt-3">
               <button
@@ -88,7 +88,7 @@ export default function Sidebar() {
                 className="flex items-center justify-between w-full px-3 mb-1.5 group"
               >
                 <span className="text-[10px] font-bold uppercase tracking-widest text-ip-on-surface-variant">
-                  My Projects
+                  Active Projects
                 </span>
                 <ChevronDown
                   size={12}
@@ -100,27 +100,37 @@ export default function Sidebar() {
 
               {projectsExpanded && (
                 <div className="space-y-0.5">
-                  {projects.slice(0, 8).map((p) => (
-                    <NavLink
-                      key={p.id}
-                      to={`/projects/${p.id}`}
-                      className={({ isActive }) =>
-                        `flex items-center gap-2.5 px-3 py-2 rounded-ip-base text-xs font-medium transition-all duration-150 truncate ${
-                          isActive
-                            ? 'bg-ip-secondary-container text-ip-on-surface font-semibold'
-                            : 'text-ip-on-surface-variant hover:bg-ip-surface-container-low hover:text-ip-on-surface'
-                        }`
-                      }
-                    >
-                      <FolderDot size={13} className="flex-shrink-0 text-ip-primary" />
-                      <span className="truncate">{p.name}</span>
-                    </NavLink>
-                  ))}
-                  {projects.length > 8 && (
-                    <p className="px-3 py-1.5 text-[11px] text-ip-on-surface-variant">
-                      +{projects.length - 8} more projects…
-                    </p>
-                  )}
+                  {(() => {
+                    const activeProjects = projects.filter(p => p.status === 'Planning' || p.status === 'InProgress');
+                    if (activeProjects.length === 0) {
+                      return <p className="px-3 py-1.5 text-[11px] text-ip-on-surface-variant italic">No active projects</p>;
+                    }
+                    return (
+                      <>
+                        {activeProjects.slice(0, 8).map((p) => (
+                          <NavLink
+                            key={p.id}
+                            to={`/projects/${p.id}`}
+                            className={({ isActive }) =>
+                              `flex items-center gap-2.5 px-3 py-2 rounded-ip-base text-xs font-medium transition-all duration-150 truncate ${
+                                isActive
+                                  ? 'bg-ip-secondary-container text-ip-on-surface font-semibold'
+                                  : 'text-ip-on-surface-variant hover:bg-ip-surface-container-low hover:text-ip-on-surface'
+                              }`
+                            }
+                          >
+                            <FolderDot size={13} className="flex-shrink-0 text-ip-primary" />
+                            <span className="truncate">{p.name}</span>
+                          </NavLink>
+                        ))}
+                        {activeProjects.length > 8 && (
+                          <p className="px-3 py-1.5 text-[11px] text-ip-on-surface-variant">
+                            +{activeProjects.length - 8} more projects…
+                          </p>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
               )}
             </div>
@@ -128,18 +138,7 @@ export default function Sidebar() {
         )}
       </nav>
 
-      {/* User footer */}
-      <div className="px-4 py-4 border-t border-ip-outline-variant flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-ip-on-primary text-sm font-semibold bg-gradient-to-br from-ip-primary to-ip-primary-container flex-shrink-0">
-            {user?.name?.charAt(0).toUpperCase() ?? '?'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-ip-on-surface text-sm font-semibold truncate">{user?.name ?? 'User'}</p>
-            <p className="text-ip-on-surface-variant text-xs truncate">{user?.role ?? ''}</p>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 }

@@ -1,141 +1,110 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import useSWR from 'swr';
 import api from '@/lib/axios';
-import type { User, Project } from '@/types';
+import type { Project, ProjectStatus } from '@/types';
 
-// ─── Payload/Extended Types ──────────────────────────────────────────────────
+const fetcher = (url: string) => api.get(url).then(res => res.data);
 
-export interface ProjectMember {
-  projectId: string;
-  userId: string;
-  joinedAt: string;
-  user: User;
-}
-
-export interface ProjectWithDetails extends Project {
-  createdBy: User;
-  members: ProjectMember[];
-}
-
-export interface CreateProjectPayload {
-  name: string;
-  description?: string;
-}
-
-export interface UpdateProjectPayload {
-  id: string;
-  name?: string;
-  description?: string;
-}
-
-export interface AddMemberPayload {
-  projectId: string;
-  userId: string;
-}
-
-export interface RemoveMemberPayload {
-  projectId: string;
-  userId: string;
-}
-
-// ─── Query Keys ─────────────────────────────────────────────────────────────
-
-const PROJECTS_KEY = ['projects'] as const;
-
-// ─── Hooks ──────────────────────────────────────────────────────────────────
-
-/**
- * Fetch all projects visible to the authenticated user.
- */
 export function useProjects() {
-  return useQuery({
-    queryKey: PROJECTS_KEY,
-    queryFn: () =>
-      api.get<ProjectWithDetails[]>('/projects').then((r) => r.data),
-  });
+  const { data, error, isLoading, mutate } = useSWR<Project[]>('/projects', fetcher);
+
+  const updateStatus = async (projectId: string, status: ProjectStatus) => {
+    // Optimistic UI update
+    if (data) {
+      mutate(data.map(p => p.id === projectId ? { ...p, status } : p), false);
+    }
+    
+    try {
+      await api.patch(`/projects/${projectId}/status`, { status });
+      mutate(); // Re-fetch to ensure sync
+    } catch (err) {
+      mutate(); // Revert on failure
+      throw err;
+    }
+  };
+
+  return {
+    projects: data,
+    isLoading,
+    isError: error,
+    mutate,
+    updateStatus
+  };
 }
 
-/**
- * Fetch a single project by ID.
- * Enabled only when projectId is not empty.
- */
-export function useProject(projectId: string) {
-  return useQuery({
-    queryKey: [...PROJECTS_KEY, projectId],
-    queryFn: () =>
-      api.get<ProjectWithDetails>(`/projects/${projectId}`).then((r) => r.data),
-    enabled: !!projectId,
-  });
-}
-
-/**
- * Create a new project.
- * Invalidates the projects list on success.
- */
 export function useCreateProject() {
-  const queryClient = useQueryClient();
+  const [isPending, setIsPending] = useState(false);
 
-  return useMutation({
-    mutationFn: (payload: CreateProjectPayload) =>
-      api.post<ProjectWithDetails>('/projects', payload).then((r) => r.data),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: PROJECTS_KEY });
-    },
-  });
+  const mutate = async (
+    data: { name: string; description?: string },
+    options?: { onSuccess?: (data: Project) => void; onError?: (err: unknown) => void }
+  ) => {
+    setIsPending(true);
+    try {
+      const res = await api.post<Project>('/projects', data);
+      options?.onSuccess?.(res.data);
+    } catch (err) {
+      options?.onError?.(err);
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { mutate, isPending };
 }
 
-/**
- * Update an existing project's details.
- * Invalidates the projects list and the specific project query on success.
- */
-export function useUpdateProject() {
-  const queryClient = useQueryClient();
+export function useProject(id?: string) {
+  const { data, error, isLoading, mutate } = useSWR<Project>(
+    id ? `/projects/${id}` : null,
+    fetcher
+  );
 
-  return useMutation({
-    mutationFn: ({ id, ...payload }: UpdateProjectPayload) =>
-      api.put<ProjectWithDetails>(`/projects/${id}`, payload).then((r) => r.data),
-    onSuccess: (_data, variables) => {
-      void queryClient.invalidateQueries({ queryKey: PROJECTS_KEY });
-      void queryClient.invalidateQueries({ queryKey: [...PROJECTS_KEY, variables.id] });
-    },
-  });
+  return {
+    project: data,
+    isLoading,
+    isError: error,
+    mutate,
+  };
 }
 
-/**
- * Add a member to a project.
- * Invalidates the specific project query on success.
- */
 export function useAddMember() {
-  const queryClient = useQueryClient();
+  const [isPending, setIsPending] = useState(false);
 
-  return useMutation({
-    mutationFn: ({ projectId, userId }: AddMemberPayload) =>
-      api
-        .post<ProjectWithDetails>(`/projects/${projectId}/members`, { userId })
-        .then((r) => r.data),
-    onSuccess: (_data, variables) => {
-      void queryClient.invalidateQueries({
-        queryKey: [...PROJECTS_KEY, variables.projectId],
-      });
-    },
-  });
+  const mutate = async (
+    data: { projectId: string; userId: string },
+    options?: { onSuccess?: () => void; onError?: (err: unknown) => void }
+  ) => {
+    setIsPending(true);
+    try {
+      await api.post(`/projects/${data.projectId}/members`, { userId: data.userId });
+      options?.onSuccess?.();
+    } catch (err) {
+      options?.onError?.(err);
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { mutate, isPending };
 }
 
-/**
- * Remove a member from a project.
- * Invalidates the specific project query on success.
- */
 export function useRemoveMember() {
-  const queryClient = useQueryClient();
+  const [isPending, setIsPending] = useState(false);
 
-  return useMutation({
-    mutationFn: ({ projectId, userId }: RemoveMemberPayload) =>
-      api
-        .delete<ProjectWithDetails>(`/projects/${projectId}/members/${userId}`)
-        .then((r) => r.data),
-    onSuccess: (_data, variables) => {
-      void queryClient.invalidateQueries({
-        queryKey: [...PROJECTS_KEY, variables.projectId],
-      });
-    },
-  });
+  const mutate = async (
+    data: { projectId: string; userId: string },
+    options?: { onSuccess?: () => void; onError?: (err: unknown) => void }
+  ) => {
+    setIsPending(true);
+    try {
+      await api.delete(`/projects/${data.projectId}/members/${data.userId}`);
+      options?.onSuccess?.();
+    } catch (err) {
+      options?.onError?.(err);
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { mutate, isPending };
 }

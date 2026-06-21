@@ -139,3 +139,19 @@ export const removeMember = async (req: Request, res: Response) => {
     return handleError(res, error);
   }
 };
+
+/**
+ * 8. updateProjectStatus: Validates input and updates status of a project.
+ */
+export const updateProjectStatus = async (req: Request, res: Response) => {
+  try {
+    const { status } = req.body;
+    if (!['Planning', 'InProgress', 'Completed', 'Archived'].includes(status)) {
+      return res.status(400).json({ errorCode: 400, message: 'Invalid status' });
+    }
+    const project = await projectService.updateProjectStatus(req.params.id as string, status);
+    return res.status(200).json(project);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};

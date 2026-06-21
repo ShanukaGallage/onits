@@ -2,6 +2,7 @@
 export type UserStatus = 'Active' | 'Deactivated';
 export type Priority = 'Low' | 'Medium' | 'High';
 export type TaskStatus = 'ToDo' | 'InProgress' | 'Completed';
+export type ProjectStatus = 'Planning' | 'InProgress' | 'Completed' | 'Archived';
 
 export interface User {
   id: string;
@@ -16,11 +17,22 @@ export interface User {
   updatedAt: string;
 }
 
+export interface ProjectMember {
+  projectId: string;
+  userId: string;
+  joinedAt: string;
+  user?: User; // Depending on how we include it
+}
+
 export interface Project {
   id: string;
   name: string;
   description?: string;
+  status: ProjectStatus;
   createdById: string;
+  createdBy?: User;
+  members?: ProjectMember[];
+  tasks?: Task[];
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +46,7 @@ export interface Task {
   status: TaskStatus;
   createdById: string;
   projectId: string;
+  tags?: string[];
   createdAt: string;
   updatedAt: string;
 }

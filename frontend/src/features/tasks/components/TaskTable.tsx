@@ -77,8 +77,7 @@ export default function TaskTable({ projectId }: TaskTableProps) {
 function TaskRow({ task, onClick }: { task: TaskWithDetails; onClick: () => void }) {
   const isDone = task.status === 'Completed';
 
-  // Extract fake tags from title for visual consistency with the design mock
-  const tags = task.title.split(' ').filter(w => w.length > 5).slice(0, 2);
+  const tags = task.tags || [];
 
   // Status Chip config
   let statusBadge = { label: 'To Do', cls: 'bg-ip-surface-container-high text-ip-on-surface-variant' };

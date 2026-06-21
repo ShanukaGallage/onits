@@ -20,8 +20,7 @@ export default function KanbanCard({ task, isOverlay = false }: KanbanCardProps)
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
 
-  // Fake tags from title
-  const tags = task.title.split(' ').filter((w) => w.length > 5).slice(0, 2);
+  const tags = task.tags || [];
 
   // Priority UI
   let prioBg = 'bg-ip-surface-container text-ip-on-surface-variant';

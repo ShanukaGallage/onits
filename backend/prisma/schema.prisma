@@ -60,6 +60,13 @@ enum ChannelType {
   Thread
 }
 
+enum ProjectStatus {
+  Planning
+  InProgress
+  Completed
+  Archived
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 //  MODELS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -96,12 +103,13 @@ model User {
 }
 
 model Project {
-  id          String   @id @default(uuid())
+  id          String        @id @default(uuid())
   name        String
   description String?
-  createdById String   @map("created_by")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  status      ProjectStatus @default(Planning)
+  createdById String        @map("created_by")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
 
   // Relations
   createdBy User            @relation("ProjectCreator", fields: [createdById], references: [id])
@@ -136,6 +144,7 @@ model Task {
   status      TaskStatus @default(ToDo)
   createdById String     @map("created_by")
   projectId   String     @map("project_id")
+  tags        String[]   @default([])
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
 

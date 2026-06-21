@@ -95,10 +95,10 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md border-neutral-800 bg-neutral-950 text-foreground">
+      <DialogContent className="sm:max-w-md border-ip-outline-variant bg-ip-surface-container-lowest font-jakarta shadow-lg rounded-2xl">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold tracking-tight text-white">Create new project</DialogTitle>
-          <DialogDescription className="text-neutral-400 text-sm">
+          <DialogTitle className="text-xl font-bold tracking-tight text-ip-on-surface">Create new project</DialogTitle>
+          <DialogDescription className="text-ip-on-surface-variant text-sm">
             Set up a new workspace for your team. You can add project members once the project is created.
           </DialogDescription>
         </DialogHeader>
@@ -111,18 +111,18 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
         >
           {/* Project Name */}
           <div className="space-y-1.5">
-            <Label htmlFor="cp-name" className="text-sm font-medium text-neutral-200">
-              Project Name <span className="text-indigo-400">*</span>
+            <Label htmlFor="cp-name" className="text-sm font-bold text-ip-on-surface">
+              Project Name <span className="text-ip-error">*</span>
             </Label>
             <Input
               id="cp-name"
               placeholder="e.g. Acme Website Redesign"
-              className="border-neutral-800 bg-neutral-900/30 text-white placeholder:text-neutral-500 focus-visible:border-indigo-500 focus-visible:ring-indigo-500/20"
+              className="border-ip-outline-variant bg-ip-surface text-ip-on-surface placeholder:text-ip-on-surface-variant/50 focus-visible:border-ip-primary focus-visible:ring-ip-primary/20 transition-all rounded-lg"
               aria-describedby={errors.name ? 'cp-name-error' : undefined}
               {...register('name')}
             />
             {errors.name && (
-              <p id="cp-name-error" className="text-xs text-red-600">
+              <p id="cp-name-error" className="text-xs text-ip-error font-medium">
                 {errors.name.message}
               </p>
             )}
@@ -130,7 +130,7 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
           {/* Description */}
           <div className="space-y-1.5">
-            <Label htmlFor="cp-description" className="text-sm font-medium text-neutral-200">
+            <Label htmlFor="cp-description" className="text-sm font-bold text-ip-on-surface">
               Description
             </Label>
             <textarea
@@ -138,25 +138,25 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
               placeholder="Provide a brief overview of the goals, timeline, or scope of this project."
               rows={4}
               className={cn(
-                "w-full min-w-0 rounded-lg border border-neutral-800 bg-neutral-900/30 px-2.5 py-1.5 text-base transition-colors outline-none placeholder:text-neutral-500 focus-visible:border-indigo-500 focus-visible:ring-3 focus-visible:ring-indigo-500/20 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm text-white resize-none"
+                "w-full min-w-0 rounded-lg border border-ip-outline-variant bg-ip-surface px-3 py-2 text-sm transition-colors outline-none placeholder:text-ip-on-surface-variant/50 focus-visible:border-ip-primary focus-visible:ring-2 focus-visible:ring-ip-primary/20 text-ip-on-surface resize-none disabled:opacity-50"
               )}
               aria-describedby={errors.description ? 'cp-description-error' : undefined}
               {...register('description')}
             />
             {errors.description && (
-              <p id="cp-description-error" className="text-xs text-red-600">
+              <p id="cp-description-error" className="text-xs text-ip-error font-medium">
                 {errors.description.message}
               </p>
             )}
           </div>
         </form>
 
-        <DialogFooter className="gap-2 sm:gap-0 border-t border-neutral-900/50 pt-4">
+        <DialogFooter className="gap-2 sm:gap-0 border-t border-ip-outline-variant pt-4 mt-2">
           <Button 
             variant="outline" 
             onClick={() => handleClose(false)} 
             disabled={isPending}
-            className="border-neutral-800 text-neutral-300 hover:bg-neutral-900 hover:text-white"
+            className="border-ip-outline-variant text-ip-on-surface-variant hover:bg-ip-surface-container-low hover:text-ip-on-surface font-semibold rounded-lg"
           >
             Cancel
           </Button>
@@ -165,7 +165,7 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
             type="submit"
             form="create-project-form"
             disabled={isPending}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white"
+            className="bg-ip-primary hover:bg-ip-on-primary-fixed-variant text-ip-on-primary font-bold shadow-sm hover:shadow-md rounded-lg"
           >
             {isPending ? 'Creating…' : 'Create project'}
           </Button>
