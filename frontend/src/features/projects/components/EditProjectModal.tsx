@@ -3,9 +3,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
-import { useCreateProject } from '../hooks/useProjects';
-import { useUsers } from '@/features/users/hooks/useUsers';
+import { useUpdateProject } from '../hooks/useProjects';
+import type { Project } from '@/types';
 import { format } from 'date-fns';
 import { 
   Calendar as CalendarIcon, 
@@ -14,10 +13,8 @@ import {
   FileText,
   Link as LinkIcon,
   Plus,
-  Users,
   Palette,
   Check,
-  ChevronsUpDown,
   Lock,
   Globe
 } from 'lucide-react';
@@ -27,7 +24,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import {
   Dialog,
   DialogContent,
@@ -40,7 +36,7 @@ import { cn } from '@/lib/utils';
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
-const createProjectSchema = z.object({
+const editProjectSchema = z.object({
   name: z.string().min(1, 'Project name is required').max(100),
   description: z.string().max(1000).optional(),
   projectKey: z.string().min(2, 'At least 2 characters').max(6),
@@ -48,7 +44,7 @@ const createProjectSchema = z.object({
   colorCode: z.string().optional(),
 });
 
-type CreateProjectFormValues = z.infer<typeof createProjectSchema>;
+type EditProjectFormValues = z.infer<typeof editProjectSchema>;
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -67,70 +63,60 @@ const PRESET_COLORS = [
   '#64748b', // Slate
 ];
 
-interface CreateProjectModalProps {
+interface EditProjectModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  project: Project;
 }
 
-export default function CreateProjectModal({ open, onOpenChange }: CreateProjectModalProps) {
-  const createProject = useCreateProject();
-  const navigate = useNavigate();
-  const { data: users } = useUsers();
+export default function EditProjectModal({ open, onOpenChange, project }: EditProjectModalProps) {
+  const updateProject = useUpdateProject();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form State
-  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting, dirtyFields } } = useForm<CreateProjectFormValues>({
-    resolver: zodResolver(createProjectSchema),
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<EditProjectFormValues>({
+    resolver: zodResolver(editProjectSchema),
     defaultValues: {
-      name: '',
-      description: '',
-      projectKey: '',
-      visibility: 'PUBLIC',
-      colorCode: '#4648d4',
+      name: project.name,
+      description: project.description || '',
+      projectKey: project.projectKey,
+      visibility: project.visibility || 'PUBLIC',
+      colorCode: project.colorCode || '#4648d4',
     },
   });
 
-  const projectName = watch('name');
-  const isKeyDirty = dirtyFields.projectKey;
-
   // Additional State
-  const [date, setDate] = useState<Date>();
-  const [tags, setTags] = useState<string[]>([]);
+  const [date, setDate] = useState<Date | undefined>(
+    project.estimatedCompletionDate ? new Date(project.estimatedCompletionDate) : undefined
+  );
+  const [tags, setTags] = useState<string[]>(project.tags || []);
   const [tagInput, setTagInput] = useState('');
-  const [links, setLinks] = useState<string[]>([]);
+  const [links, setLinks] = useState<string[]>(project.externalLinks || []);
   const [linkInput, setLinkInput] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [files, setFiles] = useState<File[]>([]);
-  const [userSearchOpen, setUserSearchOpen] = useState(false);
+  
+  // We only track new files to upload for this basic edit implementation
+  const [newFiles, setNewFiles] = useState<File[]>([]);
 
-  // Auto-generate Project Key
+  // Reset form when opened with new project data
   useEffect(() => {
-    if (projectName && !isKeyDirty) {
-      const words = projectName.trim().split(/\s+/);
-      let suggestedKey = '';
-      
-      if (words.length === 1) {
-        // For a single word, take up to 4 characters
-        suggestedKey = words[0].substring(0, 4).toUpperCase();
-      } else {
-        // For multiple words, take the first letter of the first 4 words
-        suggestedKey = words.slice(0, 4).map(w => w[0]).join('').toUpperCase();
-      }
-
-      if (suggestedKey.length > 0) {
-        setValue('projectKey', suggestedKey, { shouldValidate: true });
-      }
+    if (open) {
+      reset({
+        name: project.name,
+        description: project.description || '',
+        projectKey: project.projectKey,
+        visibility: project.visibility || 'PUBLIC',
+        colorCode: project.colorCode || '#4648d4',
+      });
+      setDate(project.estimatedCompletionDate ? new Date(project.estimatedCompletionDate) : undefined);
+      setTags(project.tags || []);
+      setLinks(project.externalLinks || []);
+      setNewFiles([]);
     }
-  }, [projectName, isKeyDirty, setValue]);
+  }, [open, project, reset]);
 
   function handleClose(nextOpen: boolean) {
     if (!nextOpen) {
-      reset();
-      setDate(undefined);
-      setTags([]);
-      setLinks([]);
-      setFiles([]);
-      setSelectedUsers([]);
+      setNewFiles([]);
     }
     onOpenChange(nextOpen);
   }
@@ -153,10 +139,9 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
   const removeTag = (t: string) => setTags(tags.filter(tag => tag !== t));
   const removeLink = (l: string) => setLinks(links.filter(link => link !== l));
-  const removeUser = (id: string) => setSelectedUsers(selectedUsers.filter(u => u !== id));
-  const removeFile = (idx: number) => setFiles(files.filter((_, i) => i !== idx));
+  const removeNewFile = (idx: number) => setNewFiles(newFiles.filter((_, i) => i !== idx));
 
-  const onSubmit = async (data: CreateProjectFormValues) => {
+  const onSubmit = async (data: EditProjectFormValues) => {
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('projectKey', data.projectKey.toUpperCase());
@@ -164,50 +149,38 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
     if (data.description) formData.append('description', data.description);
     if (data.colorCode) formData.append('colorCode', data.colorCode);
     if (date) formData.append('estimatedCompletionDate', date.toISOString());
+    else formData.append('estimatedCompletionDate', ''); // clear date
     
-    if (tags.length > 0) formData.append('tags', JSON.stringify(tags));
-    if (links.length > 0) {
-      const stringifiedLinks = links.map(l => JSON.stringify(l));
-      formData.append('externalLinks', JSON.stringify(stringifiedLinks));
-    }
-    if (selectedUsers.length > 0) formData.append('coreTeamMemberIds', JSON.stringify(selectedUsers));
+    formData.append('tags', JSON.stringify(tags));
+    formData.append('externalLinks', JSON.stringify(links));
 
-    files.forEach(file => formData.append('documents', file));
+    newFiles.forEach(file => formData.append('documents', file));
 
-    createProject.mutate(formData, {
-      onSuccess: (project) => {
-        toast.success(`Project "${project.name}" created!`);
+    updateProject.mutate(project.id, formData, {
+      onSuccess: () => {
+        toast.success(`Project "${data.name}" updated!`);
         handleClose(false);
-        navigate(`/projects/${project.id}`);
       },
       onError: (err: any) => {
-        const details = err?.response?.data?.details;
-        const msg = err?.response?.data?.message;
-        toast.error(details ? `${msg}: ${details}` : (msg || 'Failed to create project.'));
+        toast.error(err?.response?.data?.message || 'Failed to update project.');
       },
     });
   };
 
-  const onInvalid = (validationErrors: any) => {
-    Object.values(validationErrors).forEach((error: any) => {
-      toast.error(error.message || 'Please check your form inputs.');
-    });
-  };
-
-  const isPending = isSubmitting || createProject.isPending;
+  const isPending = isSubmitting || updateProject.isPending;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[1000px] w-full border-ip-outline-variant bg-ip-surface-container-lowest font-jakarta shadow-2xl rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
         <DialogHeader className="px-6 py-5 border-b border-ip-outline-variant bg-ip-surface shrink-0">
-          <DialogTitle className="text-2xl font-bold tracking-tight text-ip-on-surface">Create New Project</DialogTitle>
+          <DialogTitle className="text-2xl font-bold tracking-tight text-ip-on-surface">Edit Project Details</DialogTitle>
           <DialogDescription className="text-ip-on-surface-variant">
-            Set up a workspace, invite your core team, and attach initial resources.
+            Update your project's settings, links, and documents.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-6">
-          <form id="create-project-form" onSubmit={handleSubmit(onSubmit, onInvalid)} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <form id="edit-project-form" onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* LEFT COLUMN: Basic Details */}
             <div className="space-y-6">
@@ -250,16 +223,23 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
                 <div className="space-y-1.5">
                   <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><CalendarIcon size={14} /> Target Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal border-ip-outline-variant bg-ip-surface", !date && "text-ip-on-surface-variant")}>
-                        {date ? format(date, "PPP") : <span>Pick a date</span>}
+                  <div className="flex gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal border-ip-outline-variant bg-ip-surface", !date && "text-ip-on-surface-variant")}>
+                          {date ? format(date, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                      </PopoverContent>
+                    </Popover>
+                    {date && (
+                      <Button variant="outline" type="button" className="px-2" onClick={() => setDate(undefined)}>
+                        <X size={14} />
                       </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
-                    </PopoverContent>
-                  </Popover>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -280,7 +260,7 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
             </div>
 
-            {/* RIGHT COLUMN: Resources & Team */}
+            {/* RIGHT COLUMN: Resources & Links */}
             <div className="space-y-6">
               
               {/* Tags */}
@@ -294,54 +274,6 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
                   ))}
                 </div>
                 <Input placeholder="Type tag and press Enter" value={tagInput} onChange={e => setTagInput(e.target.value)} onKeyDown={handleAddTag} />
-              </div>
-
-              {/* Core Team */}
-              <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><Users size={14} /> Core Team</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {selectedUsers.map(id => {
-                    const u = users?.find(user => user.id === id);
-                    return u ? (
-                      <span key={id} className="flex items-center gap-1.5 bg-ip-surface px-2 py-1 border border-ip-outline-variant rounded-full text-xs font-semibold text-ip-on-surface">
-                        <div className="w-4 h-4 rounded-full bg-ip-primary text-white flex items-center justify-center text-[8px]">{u.name[0]}</div>
-                        {u.name}
-                        <button type="button" onClick={() => removeUser(id)} className="hover:text-ip-error"><X size={12}/></button>
-                      </span>
-                    ) : null;
-                  })}
-                </div>
-                <Popover open={userSearchOpen} onOpenChange={setUserSearchOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" role="combobox" aria-expanded={userSearchOpen} className="w-full justify-between bg-ip-surface border-ip-outline-variant">
-                      Invite team members...
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[380px] p-0">
-                    <Command>
-                      <CommandInput placeholder="Search users..." />
-                      <CommandList>
-                        <CommandEmpty>No users found.</CommandEmpty>
-                        <CommandGroup>
-                          {users?.filter(u => !selectedUsers.includes(u.id)).map((u) => (
-                            <CommandItem
-                              key={u.id}
-                              value={u.name}
-                              onSelect={() => {
-                                setSelectedUsers([...selectedUsers, u.id]);
-                                setUserSearchOpen(false);
-                              }}
-                            >
-                              <Check className={cn("mr-2 h-4 w-4", selectedUsers.includes(u.id) ? "opacity-100" : "opacity-0")} />
-                              {u.name} ({u.email})
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
               </div>
 
               {/* External Links */}
@@ -363,22 +295,25 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
               {/* Documents */}
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><FileText size={14} /> Documents</Label>
+                <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><FileText size={14} /> Add New Documents</Label>
+                <div className="text-xs text-ip-on-surface-variant mb-2">
+                  Currently attached documents cannot be removed from here yet.
+                </div>
                 <div className="space-y-2 mb-2">
-                  {files.map((f, i) => (
-                    <div key={i} className="flex items-center justify-between bg-ip-surface border border-ip-outline-variant px-3 py-2 rounded-lg text-sm">
-                      <span className="truncate flex-1 font-medium">{f.name}</span>
-                      <span className="text-xs text-ip-on-surface-variant font-mono mx-3">{(f.size/1024/1024).toFixed(1)}MB</span>
-                      <button type="button" onClick={() => removeFile(i)} className="text-ip-on-surface-variant hover:text-ip-error"><X size={14}/></button>
+                  {newFiles.map((f, i) => (
+                    <div key={i} className="flex items-center justify-between bg-ip-primary/5 border border-ip-primary/20 px-3 py-2 rounded-lg text-sm">
+                      <span className="truncate flex-1 font-medium text-ip-primary">{f.name}</span>
+                      <span className="text-xs text-ip-primary/60 font-mono mx-3">{(f.size/1024/1024).toFixed(1)}MB</span>
+                      <button type="button" onClick={() => removeNewFile(i)} className="text-ip-primary/60 hover:text-ip-error"><X size={14}/></button>
                     </div>
                   ))}
                 </div>
                 <input type="file" multiple className="hidden" ref={fileInputRef} onChange={e => {
-                  if (e.target.files) setFiles([...files, ...Array.from(e.target.files)]);
+                  if (e.target.files) setNewFiles([...newFiles, ...Array.from(e.target.files)]);
                   e.target.value = '';
                 }} />
                 <Button type="button" variant="outline" className="w-full border-dashed" onClick={() => fileInputRef.current?.click()}>
-                  <Upload size={16} className="mr-2" /> Upload Files
+                  <Upload size={16} className="mr-2" /> Select Files to Add
                 </Button>
               </div>
 
@@ -388,8 +323,8 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
         <DialogFooter className="px-6 py-4 border-t border-ip-outline-variant bg-ip-surface shrink-0">
           <Button variant="outline" onClick={() => handleClose(false)} disabled={isPending}>Cancel</Button>
-          <Button type="submit" form="create-project-form" disabled={isPending} className="bg-ip-primary hover:bg-ip-primary-fixed">
-            {isPending ? 'Creating...' : 'Create Project'}
+          <Button type="submit" form="edit-project-form" disabled={isPending} className="bg-ip-primary hover:bg-ip-primary-fixed">
+            {isPending ? 'Saving...' : 'Save Changes'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -103,19 +103,26 @@ model User {
 }
 
 model Project {
-  id          String        @id @default(uuid())
-  name        String
-  description String?
-  status      ProjectStatus @default(Planning)
-  createdById String        @map("created_by")
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
+  id                      String        @id @default(uuid())
+  projectKey              String        @unique @map("project_key")
+  name                    String
+  description             String?
+  visibility              String        @default("PUBLIC")
+  status                  ProjectStatus @default(Planning)
+  colorCode               String?       @map("color_code")
+  tags                    String[]      @default([])
+  estimatedCompletionDate DateTime?     @map("estimated_completion_date")
+  externalLinks           String[]      @default([]) @map("external_links")
+  createdById             String        @map("created_by")
+  createdAt               DateTime      @default(now()) @map("created_at")
+  updatedAt               DateTime      @updatedAt @map("updated_at")
 
   // Relations
-  createdBy User            @relation("ProjectCreator", fields: [createdById], references: [id])
-  members   ProjectMember[]
-  tasks     Task[]
-  channels  Channel[]
+  createdBy   User            @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  members     ProjectMember[]
+  tasks       Task[]
+  channels    Channel[]
+  attachments Attachment[]
 
   @@map("projects")
 }
@@ -149,7 +156,7 @@ model Task {
   updatedAt   DateTime   @updatedAt @map("updated_at")
 
   // Relations
-  createdBy     User             @relation("TaskCreator", fields: [createdById], references: [id])
+  createdBy     User             @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Cascade)
   // Cascade: deleting a Project wipes all its Tasks (and their children below)
   project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   assignments   TaskAssignment[]
@@ -187,7 +194,7 @@ model Comment {
 
   // Cascade: deleting a Task wipes all its Comments
   task      Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  createdBy User @relation(fields: [createdById], references: [id])
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   @@map("comments")
 }
@@ -200,13 +207,15 @@ model Attachment {
   // Size in bytes — Int supports up to ~2.1GB which is sufficient for attachments
   fileSize     Int      @map("file_size")
   fileType     String   @map("file_type")
-  taskId       String   @map("task_id")
+  taskId       String?  @map("task_id")
+  projectId    String?  @map("project_id")
   uploadedById String   @map("uploaded_by")
   uploadedAt   DateTime @default(now()) @map("uploaded_at")
 
-  // Cascade: deleting a Task wipes all its Attachments
-  task       Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  uploadedBy User @relation(fields: [uploadedById], references: [id])
+  // Relations
+  task       Task?    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  project    Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  uploadedBy User     @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
 
   @@map("attachments")
 }
@@ -267,7 +276,7 @@ model Channel {
 
   // Relations
   project   Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  createdBy User      @relation("ChannelCreator", fields: [createdById], references: [id])
+  createdBy User      @relation("ChannelCreator", fields: [createdById], references: [id], onDelete: Cascade)
   messages  Message[]
 
   @@map("channels")

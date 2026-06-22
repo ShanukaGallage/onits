@@ -36,12 +36,38 @@ export function useCreateProject() {
   const [isPending, setIsPending] = useState(false);
 
   const mutate = async (
-    data: { name: string; description?: string },
+    data: FormData,
     options?: { onSuccess?: (data: Project) => void; onError?: (err: unknown) => void }
   ) => {
     setIsPending(true);
     try {
-      const res = await api.post<Project>('/projects', data);
+      const res = await api.post<Project>('/projects', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      options?.onSuccess?.(res.data);
+    } catch (err) {
+      options?.onError?.(err);
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  return { mutate, isPending };
+}
+
+export function useUpdateProject() {
+  const [isPending, setIsPending] = useState(false);
+
+  const mutate = async (
+    projectId: string,
+    data: FormData,
+    options?: { onSuccess?: (data: Project) => void; onError?: (err: unknown) => void }
+  ) => {
+    setIsPending(true);
+    try {
+      const res = await api.put<Project>(`/projects/${projectId}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       options?.onSuccess?.(res.data);
     } catch (err) {
       options?.onError?.(err);

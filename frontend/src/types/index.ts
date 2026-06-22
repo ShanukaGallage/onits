@@ -26,13 +26,20 @@ export interface ProjectMember {
 
 export interface Project {
   id: string;
+  projectKey: string;
   name: string;
   description?: string;
   status: ProjectStatus;
+  visibility: string;
+  colorCode?: string;
+  tags?: string[];
+  estimatedCompletionDate?: string;
+  externalLinks?: string[];
   createdById: string;
   createdBy?: User;
   members?: ProjectMember[];
   tasks?: Task[];
+  attachments?: Attachment[];
   createdAt: string;
   updatedAt: string;
 }
@@ -62,11 +69,14 @@ export interface Comment {
 
 export interface Attachment {
   id: string;
-  filename: string;
-  url: string;
-  taskId: string;
+  fileName: string;
+  fileUrl: string;
+  fileSize: number;
+  fileType: string;
+  taskId?: string;
+  projectId?: string;
   uploadedById: string;
-  createdAt: string;
+  uploadedAt: string;
 }
 
 export interface Notification {

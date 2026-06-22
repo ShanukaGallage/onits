@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -63,8 +63,7 @@ export default function ForcePasswordResetPage() {
   } = useForm<PasswordFormValues>({ resolver: zodResolver(passwordSchema) });
 
   if (user && !user.isFirstLogin) {
-    navigate('/', { replace: true });
-    return null;
+    return <Navigate to="/" replace />;
   }
 
   const onSubmit = async (data: PasswordFormValues) => {

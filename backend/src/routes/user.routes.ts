@@ -8,6 +8,7 @@ import {
   reactivateUser,
   uploadAvatar,
   removeAvatar,
+  deleteUser,
 } from '../controllers/user.controller';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
@@ -76,6 +77,14 @@ router.patch(
   authenticate,
   authorize(['Admin']),
   reactivateUser
+);
+
+// DELETE /api/users/:id
+router.delete(
+  '/:id',
+  authenticate,
+  authorize(['Admin']),
+  deleteUser
 );
 
 export default router;

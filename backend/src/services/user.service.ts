@@ -246,3 +246,21 @@ export async function addProjectMemberByUsername(projectId: string, username: st
   });
   return user;
 }
+
+/**
+ * Hard deletes a user from the database.
+ * Throws an error if the user is not found.
+ */
+export async function deleteUser(id: string): Promise<void> {
+  const existingUser = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!existingUser) {
+    throw new Error('User not found');
+  }
+
+  await prisma.user.delete({
+    where: { id },
+  });
+}

@@ -8,7 +8,7 @@ import { FolderKanban, TableProperties, LayoutDashboard, Loader2, Plus } from 'l
 import CreateTaskModal from '@/features/tasks/components/CreateTaskModal';
 
 export default function TasksPage() {
-  const { data: projects, isLoading } = useProjects();
+  const { projects, isLoading } = useProjects();
   const [projectId, setProjectId] = useState<string>('');
   const [view, setView] = useState<'kanban' | 'table'>('kanban');
   const [createTaskOpen, setCreateTaskOpen] = useState(false);

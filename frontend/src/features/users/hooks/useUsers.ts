@@ -99,3 +99,19 @@ export function useReactivateUser() {
     },
   });
 }
+
+/**
+ * Delete a user by ID.
+ * Invalidates the users list on success.
+ */
+export function useDeleteUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      api.delete(`/users/${id}`).then((r) => r.data),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: USERS_KEY });
+    },
+  });
+}

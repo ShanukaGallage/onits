@@ -159,3 +159,15 @@ export const removeAvatar = async (req: Request, res: Response) => {
     return handleError(res, error);
   }
 };
+
+/**
+ * 9. deleteUser: Permanently removes a user.
+ */
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    await userService.deleteUser(req.params.id as string);
+    return res.status(204).send();
+  } catch (error) {
+    return handleError(res, error);
+  }
+};

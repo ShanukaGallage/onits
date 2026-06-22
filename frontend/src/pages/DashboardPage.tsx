@@ -10,7 +10,7 @@ import {
   ArrowRight, Zap, CheckSquare, Inbox, User, TrendingUp, TrendingDown,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import type { ProjectWithDetails } from '../features/projects/hooks/useProjects';
+import type { Project } from '@/types';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -37,7 +37,7 @@ function ProjectTaskCollector({
   project,
   onTasks,
 }: {
-  project: ProjectWithDetails;
+  project: Project;
   onTasks: (tasks: TaskBag[]) => void;
 }) {
   const { data } = useTasks(project.id);
@@ -238,7 +238,7 @@ function RecentActivity() {
 
 // ─── Sprint progress ──────────────────────────────────────────────────────────
 
-function SprintProgress({ tasks, projects }: { tasks: TaskBag[]; projects: ProjectWithDetails[] }) {
+function SprintProgress({ tasks, projects }: { tasks: TaskBag[]; projects: Project[] }) {
   const navigate = useNavigate();
 
   const projectProgress = projects.slice(0, 4).map((p) => {

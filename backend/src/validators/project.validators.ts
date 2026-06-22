@@ -8,16 +8,14 @@ export const createProjectSchema = z.object({
     .string()
     .min(1, { message: 'Project name is required' })
     .max(100, { message: 'Project name must be 100 characters or fewer' }),
-
-  description: z
-    .string()
-    .max(1000, { message: 'Description must be 1000 characters or fewer' })
-    .optional(),
-
-  deadline: z
-    .string()
-    .datetime({ message: 'Deadline must be a valid ISO 8601 date-time string' })
-    .optional(),
+  description: z.string().max(1000).optional(),
+  projectKey: z.string().min(2, { message: 'Project key must be at least 2 characters' }),
+  visibility: z.string().optional(),
+  colorCode: z.string().optional(),
+  tags: z.any().optional(),
+  estimatedCompletionDate: z.string().optional(),
+  externalLinks: z.any().optional(),
+  coreTeamMemberIds: z.any().optional(),
 });
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
@@ -31,20 +29,16 @@ export const updateProjectSchema = z.object({
     .min(1, { message: 'Project name cannot be empty' })
     .max(100, { message: 'Project name must be 100 characters or fewer' })
     .optional(),
-
-  description: z
-    .string()
-    .max(1000, { message: 'Description must be 1000 characters or fewer' })
-    .optional(),
-
-  deadline: z
-    .string()
-    .datetime({ message: 'Deadline must be a valid ISO 8601 date-time string' })
-    .optional(),
-
+  description: z.string().max(1000).optional(),
+  projectKey: z.string().min(2).optional(),
+  visibility: z.string().optional(),
+  colorCode: z.string().optional(),
+  tags: z.any().optional(),
+  estimatedCompletionDate: z.string().optional(),
+  externalLinks: z.any().optional(),
   status: z
-    .enum(['Active', 'Completed', 'Archived'] as const, {
-      message: 'Status must be Active, Completed, or Archived',
+    .enum(['Planning', 'InProgress', 'Completed', 'Archived'] as const, {
+      message: 'Status must be Planning, InProgress, Completed, or Archived',
     })
     .optional(),
 });
