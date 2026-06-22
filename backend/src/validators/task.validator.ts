@@ -22,6 +22,8 @@ export const createTaskSchema = z.object({
   priority: z.enum(['Low', 'Medium', 'High'] as const).optional(),
   projectId: z.string().uuid('projectId must be a valid UUID'),
   assigneeIds: z.array(z.string().uuid('Each assigneeId must be a valid UUID')).optional(),
+  tags: z.array(z.string()).optional(),
+  initialComment: z.string().optional(),
 }).superRefine((data, ctx) => dateRefinement(data.dueDate, ctx));
 
 export const updateTaskSchema = z.object({
@@ -30,6 +32,7 @@ export const updateTaskSchema = z.object({
   dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}(T.*)?$/, { message: 'dueDate must be a valid date (YYYY-MM-DD or ISO 8601)' }).optional(),
   priority: z.enum(['Low', 'Medium', 'High'] as const).optional(),
   status: z.enum(['ToDo', 'InProgress', 'Completed'] as const).optional(),
+  tags: z.array(z.string()).optional(),
 }).superRefine((data, ctx) => dateRefinement(data.dueDate, ctx));
 
 export const updateTaskStatusSchema = z.object({

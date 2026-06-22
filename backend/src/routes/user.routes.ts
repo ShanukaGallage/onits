@@ -6,9 +6,13 @@ import {
   updateUser,
   deactivateUser,
   reactivateUser,
+  uploadAvatar,
+  removeAvatar,
+  deleteUser,
 } from '../controllers/user.controller';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
+import { uploadAvatar as uploadMiddleware } from '../middleware/upload';
 
 const router = Router();
 
@@ -18,6 +22,21 @@ router.get(
   authenticate,
   authorize(['Admin']),
   getAllUsers
+);
+
+// POST /api/users/me/avatar
+router.post(
+  '/me/avatar',
+  authenticate,
+  uploadMiddleware.single('avatar'),
+  uploadAvatar
+);
+
+// DELETE /api/users/me/avatar
+router.delete(
+  '/me/avatar',
+  authenticate,
+  removeAvatar
 );
 
 // POST /api/users
@@ -58,6 +77,14 @@ router.patch(
   authenticate,
   authorize(['Admin']),
   reactivateUser
+);
+
+// DELETE /api/users/:id
+router.delete(
+  '/:id',
+  authenticate,
+  authorize(['Admin']),
+  deleteUser
 );
 
 export default router;

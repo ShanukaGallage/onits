@@ -23,6 +23,8 @@ export interface CreateTaskPayload {
   priority?: Priority;
   projectId: string;
   assigneeIds?: string[];
+  tags?: string[];
+  initialComment?: string;
 }
 
 export interface UpdateTaskPayload {

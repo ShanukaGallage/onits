@@ -6,8 +6,9 @@ import type { User } from '../types/index';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  mutateUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -23,8 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const res = await api.post<User>('/auth/login', { email, password });
+  const login = async (identifier: string, password: string) => {
+    const res = await api.post<User>('/auth/login', { identifier, password });
     setUser(res.data);
   };
 
@@ -33,8 +34,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  // Allows any component to update the cached user (e.g. after password change)
+  const mutateUser = (updatedUser: User) => {
+    setUser(updatedUser);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, mutateUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -45,3 +51,4 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
   return ctx;
 }
+

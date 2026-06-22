@@ -1,197 +1,160 @@
-import { useState } from 'react';
-import { useTasks, useDeleteTask } from '../hooks/useTasks';
-import { useAuth } from '@/context/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ArrowUpDown, ArrowUp, ArrowDown, Trash2, Calendar, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useNavigate } from 'react-router-dom';
+import { useTasks } from '../hooks/useTasks';
+import { ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
+import type { TaskWithDetails } from '../hooks/useTasks';
 
 interface TaskTableProps {
   projectId: string;
 }
 
 export default function TaskTable({ projectId }: TaskTableProps) {
-  const { user } = useAuth();
-  const [status, setStatus] = useState<string>('_all');
-  const [priority, setPriority] = useState<string>('_all');
-  const [sortBy, setSortBy] = useState<string>('createdAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
-  const { data: tasks = [], isLoading } = useTasks(projectId, {
-    status: status === '_all' ? undefined : (status as any),
-    priority: priority === '_all' ? undefined : (priority as any),
-    sortBy,
-    sortOrder,
-  });
-
-  const deleteTask = useDeleteTask();
-
-  const handleSort = (field: string) => {
-    if (sortBy === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(field);
-      setSortOrder('asc');
-    }
-  };
-
-  const getSortIcon = (field: string) => {
-    if (sortBy !== field) return <ArrowUpDown className="w-3 h-3 ml-1 text-neutral-600" />;
-    return sortOrder === 'asc' ? (
-      <ArrowUp className="w-3 h-3 ml-1 text-indigo-400" />
-    ) : (
-      <ArrowDown className="w-3 h-3 ml-1 text-indigo-400" />
-    );
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Completed': return <CheckCircle2 className="w-4 h-4 text-emerald-400 mr-1.5" />;
-      case 'InProgress': return <Clock className="w-4 h-4 text-amber-400 mr-1.5" />;
-      default: return <AlertCircle className="w-4 h-4 text-neutral-400 mr-1.5" />;
-    }
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'High': return 'bg-red-500/10 text-red-400 border-red-500/20';
-      case 'Medium': return 'bg-amber-500/10 text-amber-400 border-amber-500/20';
-      case 'Low': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      default: return 'bg-neutral-500/10 text-neutral-400 border-neutral-500/20';
-    }
-  };
+  const { data: tasks, isLoading } = useTasks(projectId);
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="h-10 bg-neutral-900 animate-pulse rounded-md w-[300px]" />
-        <div className="h-64 bg-neutral-900 animate-pulse rounded-lg" />
+      <div className="flex justify-center py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-ip-primary" />
       </div>
     );
   }
 
-  return (
-    <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="w-[180px] bg-neutral-900 border-neutral-800">
-            <SelectValue placeholder="All Statuses" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="_all">All Statuses</SelectItem>
-            <SelectItem value="ToDo">To Do</SelectItem>
-            <SelectItem value="InProgress">In Progress</SelectItem>
-            <SelectItem value="Completed">Completed</SelectItem>
-          </SelectContent>
-        </Select>
+  // Group tasks
+  const todo = tasks?.filter((t) => t.status === 'ToDo') || [];
+  const inProgress = tasks?.filter((t) => t.status === 'InProgress') || [];
+  const review = tasks?.filter((t) => t.status === 'Completed') || [];
 
-        <Select value={priority} onValueChange={setPriority}>
-          <SelectTrigger className="w-[180px] bg-neutral-900 border-neutral-800">
-            <SelectValue placeholder="All Priorities" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="_all">All Priorities</SelectItem>
-            <SelectItem value="Low">Low</SelectItem>
-            <SelectItem value="Medium">Medium</SelectItem>
-            <SelectItem value="High">High</SelectItem>
-          </SelectContent>
-        </Select>
+  const groups = [
+    { title: 'To Do', items: todo },
+    { title: 'In Progress', items: inProgress },
+    { title: 'Review', items: review },
+  ];
+
+  return (
+    <div className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-ip-xl overflow-hidden shadow-[0_2px_8px_rgba(70,72,212,0.05)]">
+      
+      {/* Table Header */}
+      <div className="grid grid-cols-[32px_1fr_80px_100px_120px_80px] md:grid-cols-[32px_1fr_100px_150px_120px_100px_100px] gap-4 p-4 bg-ip-surface-container-low border-b border-ip-outline-variant text-[11px] font-bold text-ip-on-surface-variant uppercase tracking-wider">
+        <div className="text-center">Pri</div>
+        <div>Task Title</div>
+        <div className="hidden md:block">Priority</div>
+        <div className="hidden md:block">Tags</div>
+        <div>Status</div>
+        <div>Due Date</div>
+        <div className="text-right hidden md:block">ID</div>
       </div>
 
-      {/* Table */}
-      <div className="border border-neutral-800 rounded-lg overflow-hidden bg-neutral-950/50">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-neutral-900/50 border-b border-neutral-800 text-neutral-400 text-xs uppercase tracking-wider">
-              <tr>
-                <th 
-                  className="px-4 py-3 font-medium cursor-pointer hover:bg-neutral-800/50 transition-colors"
-                  onClick={() => handleSort('title')}
-                >
-                  <div className="flex items-center">Title {getSortIcon('title')}</div>
-                </th>
-                <th 
-                  className="px-4 py-3 font-medium cursor-pointer hover:bg-neutral-800/50 transition-colors"
-                  onClick={() => handleSort('status')}
-                >
-                  <div className="flex items-center">Status {getSortIcon('status')}</div>
-                </th>
-                <th 
-                  className="px-4 py-3 font-medium cursor-pointer hover:bg-neutral-800/50 transition-colors"
-                  onClick={() => handleSort('priority')}
-                >
-                  <div className="flex items-center">Priority {getSortIcon('priority')}</div>
-                </th>
-                <th 
-                  className="px-4 py-3 font-medium cursor-pointer hover:bg-neutral-800/50 transition-colors"
-                  onClick={() => handleSort('dueDate')}
-                >
-                  <div className="flex items-center">Due Date {getSortIcon('dueDate')}</div>
-                </th>
-                <th className="px-4 py-3 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-800">
-              {tasks.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-neutral-500">
-                    No tasks found matching your criteria.
-                  </td>
-                </tr>
-              ) : (
-                tasks.map((task) => (
-                  <tr key={task.id} className="hover:bg-neutral-900/30 transition-colors group">
-                    <td className="px-4 py-3 font-medium text-neutral-200">
-                      {task.title}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center text-neutral-300 font-medium">
-                        {getStatusIcon(task.status)}
-                        {task.status.replace(/([A-Z])/g, ' $1').trim()}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge variant="outline" className={getPriorityBadge(task.priority)}>
-                        {task.priority}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3">
-                      {task.dueDate ? (
-                        <div className="flex items-center text-neutral-400">
-                          <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                          {new Date(task.dueDate).toLocaleDateString(undefined, { 
-                            month: 'short', 
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
-                        </div>
-                      ) : (
-                        <span className="text-neutral-600">-</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {(user?.role === 'Admin' || user?.role === 'ProjectManager') && (
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          className="opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                          onClick={() => {
-                            if (confirm('Are you sure you want to delete this task?')) {
-                              deleteTask.mutate(task.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      {groups.map((group) => {
+        if (group.items.length === 0) return null;
+        
+        return (
+          <div key={group.title}>
+            {/* Group Header */}
+            <div className="bg-ip-surface-container py-2 px-4 border-b border-ip-outline-variant text-sm font-semibold text-ip-on-surface flex items-center gap-1.5">
+              <ChevronDown size={16} className="text-ip-tertiary" />
+              {group.title} ({group.items.length})
+            </div>
+
+            {/* Rows */}
+            {group.items.map((task) => (
+              <TaskRow key={task.id} task={task} onClick={() => navigate(`/projects/${task.projectId}`)} />
+            ))}
+          </div>
+        );
+      })}
+
+      {!tasks?.length && (
+        <div className="p-10 text-center text-ip-on-surface-variant text-sm">
+          No tasks found.
         </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Row Component ─────────────────────────────────────────────────────────────
+
+function TaskRow({ task, onClick }: { task: TaskWithDetails; onClick: () => void }) {
+  const isDone = task.status === 'Completed';
+
+  const tags = task.tags || [];
+
+  // Status Chip config
+  let statusBadge = { label: 'To Do', cls: 'bg-ip-surface-container-high text-ip-on-surface-variant' };
+  if (task.status === 'InProgress') statusBadge = { label: 'In Progress', cls: 'bg-ip-secondary-container text-ip-on-secondary-container' };
+  if (task.status === 'Completed') statusBadge = { label: 'In Review', cls: 'bg-ip-tertiary-fixed text-ip-ip-on-tertiary-fixed' };
+
+  // Priority config
+  let prioDot = 'bg-ip-outline';
+  let prioBadge = 'bg-ip-surface-container text-ip-on-surface-variant';
+  if (task.priority === 'High') {
+    prioDot = 'bg-ip-primary';
+    prioBadge = 'bg-ip-primary-container text-ip-on-primary-container';
+  } else if (task.priority === 'Medium') {
+    prioDot = 'bg-ip-tertiary';
+    prioBadge = 'bg-ip-tertiary-container text-ip-on-tertiary-container';
+  } else if (task.priority === 'Low') {
+    prioDot = 'bg-ip-tertiary-fixed-dim';
+  }
+
+  // Date
+  const dateStr = task.dueDate 
+    ? new Date(task.dueDate).toLocaleString('default', { month: 'short', day: 'numeric' })
+    : '-';
+
+  return (
+    <div 
+      onClick={onClick}
+      className={`grid grid-cols-[32px_1fr_80px_100px_120px_80px] md:grid-cols-[32px_1fr_100px_150px_120px_100px_100px] gap-4 p-4 border-b border-ip-outline-variant items-center hover:bg-ip-surface-container-low transition-colors cursor-pointer bg-ip-surface-container-lowest last:border-b-0`}
+    >
+      {/* Priority Dot */}
+      <div className="flex justify-center">
+        <span className={`w-2 h-2 rounded-full ${prioDot}`} title={`${task.priority} Priority`} />
+      </div>
+
+      {/* Title & Desc */}
+      <div className="min-w-0">
+        <div className={`text-sm font-medium text-ip-on-surface truncate ${isDone ? 'line-through opacity-70' : ''}`}>
+          {task.title}
+        </div>
+        {task.description && (
+          <div className={`text-xs text-ip-on-surface-variant truncate mt-0.5 ${isDone ? 'opacity-70' : ''}`}>
+            {task.description}
+          </div>
+        )}
+      </div>
+
+      {/* Priority Badge */}
+      <div className="hidden md:block">
+        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${prioBadge}`}>
+          {task.priority}
+        </span>
+      </div>
+
+      {/* Tags */}
+      <div className="hidden md:flex gap-1.5 flex-wrap">
+        {tags.map((t, i) => (
+          <span key={i} className={`px-2 py-0.5 rounded bg-ip-surface-variant text-ip-on-surface-variant text-[10px] font-mono ${isDone ? 'opacity-70' : ''}`}>
+            {t}
+          </span>
+        ))}
+      </div>
+
+      {/* Status */}
+      <div>
+        <span className={`px-2 py-1 rounded text-[11px] font-mono font-medium ${statusBadge.cls}`}>
+          {statusBadge.label}
+        </span>
+      </div>
+
+      {/* Due Date */}
+      <div className={`text-xs text-ip-on-surface-variant ${isDone ? 'opacity-70' : ''}`}>
+        {dateStr}
+      </div>
+
+      {/* ID */}
+      <div className={`text-[11px] font-mono text-ip-on-surface-variant text-right hidden md:block ${isDone ? 'opacity-70' : ''}`}>
+        ON-{task.id.slice(0, 4)}
       </div>
     </div>
   );

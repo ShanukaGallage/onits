@@ -41,21 +41,21 @@ function clearTokenCookies(res: Response) {
 // ─────────────────────────────────────────────────────────────────────────────
 /**
  * Handles user login.
- * Reads email and password, calls authService, sets HttpOnly token cookies, returns user.
+ * Reads identifier (email or username) and password, calls authService, sets HttpOnly token cookies, returns user.
  */
 export const loginController = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    if (!email || !password) {
+    if (!identifier || !password) {
       res.status(400).json({
         error:   "Bad Request",
-        message: "Email and password are required",
+        message: "Identifier and password are required",
       });
       return;
     }
 
-    const { user, token, refreshToken } = await loginUser(email, password);
+    const { user, token, refreshToken } = await loginUser(identifier, password);
 
     setTokenCookies(res, token, refreshToken);
 

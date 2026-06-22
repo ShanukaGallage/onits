@@ -4,12 +4,14 @@ import TaskTable from '@/features/tasks/components/TaskTable';
 import { useProjects } from '@/features/projects/hooks/useProjects';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { FolderKanban, TableProperties, LayoutDashboard, Loader2 } from 'lucide-react';
+import { FolderKanban, TableProperties, LayoutDashboard, Loader2, Plus } from 'lucide-react';
+import CreateTaskModal from '@/features/tasks/components/CreateTaskModal';
 
 export default function TasksPage() {
-  const { data: projects, isLoading } = useProjects();
+  const { projects, isLoading } = useProjects();
   const [projectId, setProjectId] = useState<string>('');
   const [view, setView] = useState<'kanban' | 'table'>('kanban');
+  const [createTaskOpen, setCreateTaskOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -74,6 +76,14 @@ export default function TasksPage() {
               Table
             </Button>
           </div>
+
+          <Button 
+            className="bg-indigo-600 hover:bg-indigo-500 text-white ml-2"
+            onClick={() => setCreateTaskOpen(true)}
+          >
+            <Plus className="w-4 h-4 mr-1.5" />
+            New Task
+          </Button>
         </div>
       </div>
 
@@ -94,6 +104,12 @@ export default function TasksPage() {
           )}
         </div>
       )}
+
+      <CreateTaskModal 
+        open={createTaskOpen} 
+        onOpenChange={setCreateTaskOpen}
+        defaultProjectId={projectId || undefined}
+      />
     </div>
   );
 }

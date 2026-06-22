@@ -5,7 +5,7 @@ import {
   createProjectSchema,
   updateProjectSchema,
   addMemberSchema,
-} from '../validators/project.validator';
+} from '../validators/project.validators';
 
 import { SafeUser } from '../config/db';
 
@@ -46,7 +46,15 @@ const handleError = (res: Response, error: unknown) => {
     return res.status(400).json({ errorCode: 400, message });
   }
 
-  return res.status(500).json({ errorCode: 500, message: 'Internal server error' });
+  const fs = require('fs');
+  fs.writeFileSync('error.log', JSON.stringify({ message: error.message, stack: error.stack, error: String(error) }));
+  
+  console.error('Project Controller 500 Error:', error);
+  return res.status(500).json({ 
+    errorCode: 500, 
+    message: 'Internal server error',
+    details: message || String(error)
+  });
 };
 
 /**
@@ -80,7 +88,8 @@ export const createProject = async (req: Request, res: Response) => {
   try {
     const validated = createProjectSchema.parse(req.body);
     const createdById = req.user?.id as string;
-    const project = await projectService.createProject(validated, createdById);
+    const files = req.files as Express.Multer.File[] | undefined;
+    const project = await projectService.createProject(validated, createdById, files);
     return res.status(201).json(project);
   } catch (error) {
     return handleError(res, error);
@@ -93,7 +102,8 @@ export const createProject = async (req: Request, res: Response) => {
 export const updateProject = async (req: Request, res: Response) => {
   try {
     const validated = updateProjectSchema.parse(req.body);
-    const project = await projectService.updateProject(req.params.id as string, validated);
+    const files = req.files as Express.Multer.File[] | undefined;
+    const project = await projectService.updateProject(req.params.id as string, validated, files);
     return res.status(200).json(project);
   } catch (error) {
     return handleError(res, error);
@@ -134,6 +144,22 @@ export const removeMember = async (req: Request, res: Response) => {
       req.params.id as string,
       req.params.userId as string
     );
+    return res.status(200).json(project);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+/**
+ * 8. updateProjectStatus: Validates input and updates status of a project.
+ */
+export const updateProjectStatus = async (req: Request, res: Response) => {
+  try {
+    const { status } = req.body;
+    if (!['Planning', 'InProgress', 'Completed', 'Archived'].includes(status)) {
+      return res.status(400).json({ errorCode: 400, message: 'Invalid status' });
+    }
+    const project = await projectService.updateProjectStatus(req.params.id as string, status);
     return res.status(200).json(project);
   } catch (error) {
     return handleError(res, error);

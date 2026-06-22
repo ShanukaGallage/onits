@@ -7,6 +7,7 @@ import {
   deleteProject,
   addMember,
   removeMember,
+  updateProjectStatus,
 } from '../controllers/project.controller';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
@@ -88,10 +89,13 @@ router.get(
  *       500:
  *         description: Internal server error
  */
+import { uploadProjectAttachments } from '../middleware/upload';
+
 router.post(
   '/',
   authenticate,
   authorize(['ProjectManager', 'Admin']),
+  uploadProjectAttachments.array('documents', 10),
   validate(createProjectSchema),
   createProject
 );
@@ -168,6 +172,7 @@ router.put(
   '/:id',
   authenticate,
   authorize(['ProjectManager', 'Admin']),
+  uploadProjectAttachments.array('documents', 10),
   validate(updateProjectSchema),
   updateProject
 );

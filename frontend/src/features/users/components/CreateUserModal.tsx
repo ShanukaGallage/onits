@@ -28,6 +28,11 @@ import {
 const ROLES: Role[] = ['Admin', 'ProjectManager', 'Collaborator'];
 
 const createUserSchema = z.object({
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters.')
+    .max(30, 'Username must be at most 30 characters.')
+    .regex(/^[a-z0-9_]+$/, 'Only lowercase letters, numbers, and underscores'),
   name: z.string().min(1, 'Name is required.'),
   email: z.string().email('Please enter a valid email address.'),
   role: z.enum(['Admin', 'ProjectManager', 'Collaborator'], {
@@ -109,6 +114,26 @@ export default function CreateUserModal({ open, onOpenChange }: CreateUserModalP
           noValidate
           className="space-y-4 py-2"
         >
+          {/* Username */}
+          <div className="space-y-1.5">
+            <Label htmlFor="cu-username">Username</Label>
+            <Input
+              id="cu-username"
+              placeholder="e.g. johndoe"
+              aria-describedby={errors.username ? 'cu-username-error' : 'cu-username-hint'}
+              {...register('username')}
+            />
+            {errors.username ? (
+              <p id="cu-username-error" className="text-xs text-red-600">
+                {errors.username.message}
+              </p>
+            ) : (
+              <p id="cu-username-hint" className="text-xs text-muted-foreground">
+                Lowercase letters, numbers, and underscores only. Cannot be changed later.
+              </p>
+            )}
+          </div>
+
           {/* Name */}
           <div className="space-y-1.5">
             <Label htmlFor="cu-name">Full name</Label>

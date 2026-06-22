@@ -4,34 +4,34 @@
 
 @layer base {
   :root {
-    /* Force dark theme globally to match the slate-950 app shell */
-    --background:        222 47% 5%;
-    --foreground:        210 40% 95%;
+    /* ── shadcn/ui CSS variables (light — Indigo Pulse mapped) ──────────── */
+    --background:        240 100% 99%;    /* ip-surface   #fbf8ff */
+    --foreground:        234 24% 12%;     /* ip-on-surface #191b27 */
 
-    --card:              222 47% 8%;
-    --card-foreground:   210 40% 95%;
+    --card:              0 0% 100%;
+    --card-foreground:   234 24% 12%;
 
-    --popover:           222 47% 8%;
-    --popover-foreground: 210 40% 95%;
+    --popover:           0 0% 100%;
+    --popover-foreground: 234 24% 12%;
 
-    --primary:           239 84% 67%;
-    --primary-foreground: 210 40% 98%;
+    --primary:           240 66% 55%;    /* ip-primary #4648d4 */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary:         217 33% 17%;
-    --secondary-foreground: 210 40% 95%;
+    --secondary:         235 9% 39%;     /* ip-secondary #5b5d6d */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted:             217 33% 17%;
-    --muted-foreground:  215 20% 55%;
+    --muted:             240 100% 97%;   /* ip-surface-container-low */
+    --muted-foreground:  239 8% 30%;
 
-    --accent:            217 33% 17%;
-    --accent-foreground: 210 40% 95%;
+    --accent:            240 100% 97%;
+    --accent-foreground: 234 24% 12%;
 
-    --destructive:       0 63% 55%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive:       0 71% 41%;      /* ip-error #ba1a1a */
+    --destructive-foreground: 0 0% 100%;
 
-    --border:            217 33% 17%;
-    --input:             217 33% 17%;
-    --ring:              239 84% 67%;
+    --border:            247 16% 79%;    /* ip-outline-variant #c7c4d7 */
+    --input:             247 16% 79%;
+    --ring:              240 66% 55%;    /* ip-primary */
 
     --radius: 0.5rem;
   }
@@ -40,8 +40,47 @@
     border-color: hsl(var(--border));
   }
 
+  html {
+    font-size: 14px;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    font-size: 14px;
+    line-height: 20px;
   }
-}
+
+  /* Custom scrollbar for kanban board */
+  .kanban-board::-webkit-scrollbar {
+      height: 8px;
+  }
+  .kanban-board::-webkit-scrollbar-track {
+      background: transparent; 
+      border-radius: 4px;
+  }
+  .kanban-board::-webkit-scrollbar-thumb {
+      background: #c7c4d7; /* ip-outline-variant */
+      border-radius: 4px;
+  }
+  .kanban-board::-webkit-scrollbar-thumb:hover {
+      background: #767586; /* ip-outline */
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #e6e7f8; /* ip-surface-container-high */
+      border-radius: 4px;
+  }
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+      background: #c7c4d7; /* ip-outline-variant */
+  }
+}

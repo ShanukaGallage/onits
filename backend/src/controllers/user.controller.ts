@@ -126,3 +126,48 @@ export const changePassword = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * 7. uploadAvatar: Handles profile picture upload and updates DB record.
+ */
+export const uploadAvatar = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ errorCode: 400, message: 'No file uploaded' });
+    }
+
+    // The file is saved in uploads/avatars by Multer. 
+    // We construct the public URL path for the frontend to access.
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    
+    // Using req.user!.id (set by authenticate middleware)
+    const user = await userService.updateAvatar(req.user!.id, avatarUrl);
+    
+    return res.status(200).json(user);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+/**
+ * 8. removeAvatar: Sets the user's avatarUrl to null in the DB.
+ */
+export const removeAvatar = async (req: Request, res: Response) => {
+  try {
+    const user = await userService.updateAvatar(req.user!.id, null);
+    return res.status(200).json(user);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
+/**
+ * 9. deleteUser: Permanently removes a user.
+ */
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    await userService.deleteUser(req.params.id as string);
+    return res.status(204).send();
+  } catch (error) {
+    return handleError(res, error);
+  }
+};

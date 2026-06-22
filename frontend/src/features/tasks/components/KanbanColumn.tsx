@@ -1,4 +1,5 @@
 import { useDroppable } from '@dnd-kit/core';
+import { Plus, MoreHorizontal } from 'lucide-react';
 import type { TaskStatus } from '@/types';
 import type { TaskWithDetails } from '../hooks/useTasks';
 import KanbanCard from './KanbanCard';
@@ -7,45 +8,47 @@ interface KanbanColumnProps {
   title: string;
   status: TaskStatus;
   tasks: TaskWithDetails[];
+  dotColor: string;
 }
 
-export default function KanbanColumn({
-  title,
-  status,
-  tasks,
-}: KanbanColumnProps) {
-  const {
-    setNodeRef,
-    isOver,
-  } = useDroppable({
-    id: status,
-  });
+export default function KanbanColumn({ title, status, tasks, dotColor }: KanbanColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
     <div
       ref={setNodeRef}
-      className={`flex-1 border rounded-lg p-4 transition-colors ${
-        isOver
-          ? 'bg-blue-50 ring-2 ring-blue-300'
-          : ''
+      className={`w-[320px] flex flex-col h-full bg-ip-surface-container-low rounded-xl border border-ip-outline-variant/50 p-2 transition-colors duration-200 ${
+        isOver ? 'bg-ip-surface-container border-ip-primary ring-1 ring-ip-primary/30' : ''
       }`}
     >
-      <h2 className="mb-4 font-semibold">
-        {title} ({tasks.length})
-      </h2>
+      <div className="flex justify-between items-center mb-3 px-2 pt-2">
+        <div className="flex items-center gap-1.5">
+          <div className={`w-2.5 h-2.5 rounded-full ${dotColor}`} />
+          <h3 className="text-base font-bold text-ip-on-surface">{title}</h3>
+          <span className="bg-ip-surface-container-high text-ip-on-surface-variant text-[11px] font-bold px-2 py-0.5 rounded-full ml-1">
+            {tasks.length}
+          </span>
+        </div>
+        <div className="flex items-center gap-0.5">
+          {status === 'ToDo' && (
+            <button className="text-ip-on-surface-variant hover:text-ip-primary transition-colors p-1 rounded-md hover:bg-ip-surface">
+              <Plus size={16} />
+            </button>
+          )}
+          <button className="text-ip-on-surface-variant hover:text-ip-primary transition-colors p-1 rounded-md hover:bg-ip-surface">
+            <MoreHorizontal size={16} />
+          </button>
+        </div>
+      </div>
 
-      <div className="space-y-3">
-        {tasks.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No tasks
-          </p>
-        ) : (
-          tasks.map((task) => (
-            <KanbanCard
-              key={task.id}
-              task={task}
-            />
-          ))
+      <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 custom-scrollbar pb-4">
+        {tasks.map((task) => (
+          <KanbanCard key={task.id} task={task} />
+        ))}
+        {tasks.length === 0 && (
+          <div className="h-24 border border-dashed border-ip-outline-variant/50 rounded-[16px] flex items-center justify-center text-sm text-ip-on-surface-variant italic">
+            Drop tasks here
+          </div>
         )}
       </div>
     </div>

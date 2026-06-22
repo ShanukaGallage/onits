@@ -2,6 +2,7 @@ import { prisma, safeUserSelect } from '../config/db';
 import { Priority, TaskStatus, NotificationType } from '@prisma/client';
 // @ts-ignore
 import { io } from '../socket/socket';
+import { sendTaskAssignedEmail } from '../utils/mailer';
 
 /**
  * Helper function to create a notification record and emit a Socket.io event.
@@ -96,7 +97,7 @@ export async function getTaskById(id: string) {
  * Creates a task, optionally creates assignments, and notifies assignees.
  */
 export async function createTask(
-  data: { title: string; description?: string; dueDate?: Date; priority?: Priority; projectId: string },
+  data: { title: string; description?: string; dueDate?: Date; priority?: Priority; projectId: string; tags?: string[]; initialComment?: string },
   createdById: string,
   assigneeIds?: string[]
 ) {
@@ -110,8 +111,20 @@ export async function createTask(
         priority: data.priority,
         projectId: data.projectId,
         createdById,
+        tags: data.tags || [],
       },
     });
+
+    // Create initial comment if provided
+    if (data.initialComment) {
+      await tx.comment.create({
+        data: {
+          content: data.initialComment,
+          taskId: newTask.id,
+          createdById,
+        },
+      });
+    }
 
     // 2. If assignees provided, create assignments and notifications
     if (assigneeIds && assigneeIds.length > 0) {
@@ -134,6 +147,12 @@ export async function createTask(
           },
         });
         io.to(assigneeId).emit('notification:new', notification);
+
+        // Fetch user to send email
+        const user = await tx.user.findUnique({ where: { id: assigneeId } });
+        if (user) {
+          await sendTaskAssignedEmail(user.email, user.name, data.title);
+        }
       }
     }
 
@@ -170,7 +189,7 @@ export async function createTask(
  */
 export async function updateTask(
   id: string,
-  data: { title?: string; description?: string; dueDate?: Date; priority?: Priority; status?: TaskStatus },
+  data: { title?: string; description?: string; dueDate?: Date; priority?: Priority; status?: TaskStatus; tags?: string[] },
   updatedById: string
 ) {
   const existing = await prisma.task.findUnique({
@@ -194,6 +213,7 @@ export async function updateTask(
       dueDate: data.dueDate,
       priority: data.priority,
       status: data.status,
+      tags: data.tags,
     },
     include: {
       createdBy: {

@@ -1,18 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useUsers, useDeactivateUser, useReactivateUser } from '../hooks/useUsers';
+import { useUsers, useDeactivateUser, useReactivateUser, useDeleteUser } from '../hooks/useUsers';
 import type { User, Role, UserStatus } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -23,18 +14,53 @@ import {
 } from '@/components/ui/dialog';
 import { Search, UserX } from 'lucide-react';
 
-// ─── Badge helpers ────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const roleBadgeClass: Record<Role, string> = {
-  Admin: 'bg-blue-100 text-blue-700 border-blue-200',
-  ProjectManager: 'bg-green-100 text-green-700 border-green-200',
-  Collaborator: 'bg-gray-100 text-gray-600 border-gray-200',
-};
+function getRoleUI(role: Role) {
+  switch (role) {
+    case 'Admin':
+      return {
+        containerClass: 'bg-[#fef2f2] text-[#991b1b] border border-[#fca5a5]',
+        icon: 'shield_person',
+        label: 'ADMIN',
+      };
+    case 'ProjectManager':
+      return {
+        containerClass: 'bg-secondary-container text-on-secondary-container border border-outline-variant',
+        icon: 'architecture',
+        label: 'PROJECT MANAGER',
+      };
+    case 'Collaborator':
+    default:
+      return {
+        containerClass: 'bg-surface-variant text-on-surface-variant border border-outline-variant',
+        icon: 'code',
+        label: 'ENGINEER',
+      };
+  }
+}
 
-const statusBadgeClass: Record<UserStatus, string> = {
-  Active: 'bg-green-100 text-green-700 border-green-200',
-  Deactivated: 'bg-red-100 text-red-600 border-red-200',
-};
+function getStatusUI(status: UserStatus) {
+  switch (status) {
+    case 'Active':
+      return {
+        containerClass: 'bg-[#ecfdf5] text-[#065f46]',
+        dotClass: 'bg-[#10b981]',
+        label: 'ACTIVE',
+      };
+    case 'Deactivated':
+    default:
+      return {
+        containerClass: 'bg-surface-variant text-on-surface-variant',
+        dotClass: 'bg-outline',
+        label: 'OFFLINE',
+      };
+  }
+}
+
+function getInitials(name: string) {
+  return name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase();
+}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -42,7 +68,7 @@ export default function UserTable() {
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [confirmUser, setConfirmUser] = useState<User | null>(null);
-  const [confirmAction, setConfirmAction] = useState<'deactivate' | 'reactivate'>('deactivate');
+  const [confirmAction, setConfirmAction] = useState<'deactivate' | 'reactivate' | 'delete'>('deactivate');
 
   // 300 ms debounce
   useEffect(() => {
@@ -56,16 +82,22 @@ export default function UserTable() {
   const deactivate = useDeactivateUser();
   const reactivate = useReactivateUser();
 
-  const isPending = deactivate.isPending || reactivate.isPending;
+  const remove = useDeleteUser();
 
-  function openConfirm(user: User, action: 'deactivate' | 'reactivate') {
+  const isPending = deactivate.isPending || reactivate.isPending || remove.isPending;
+
+  function openConfirm(user: User, action: 'deactivate' | 'reactivate' | 'delete') {
     setConfirmUser(user);
     setConfirmAction(action);
   }
 
   function handleConfirm() {
     if (!confirmUser) return;
-    const mutation = confirmAction === 'deactivate' ? deactivate : reactivate;
+    const mutation = 
+      confirmAction === 'deactivate' ? deactivate : 
+      confirmAction === 'reactivate' ? reactivate : 
+      remove;
+
     mutation.mutate(confirmUser.id, {
       onSuccess: () => setConfirmUser(null),
     });
@@ -74,18 +106,20 @@ export default function UserTable() {
   // ─── Loading skeleton ───────────────────────────────────────────────────────
   if (isLoading) {
     return (
-      <div className="space-y-3 p-6">
-        <Skeleton className="h-9 w-64" />
-        <div className="rounded-lg border">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex gap-4 px-4 py-3 border-b last:border-b-0">
-              <Skeleton className="h-4 w-36" />
-              <Skeleton className="h-4 w-48" />
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-4 w-20 ml-auto" />
-            </div>
-          ))}
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full max-w-xs rounded-lg" />
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+          <div className="p-md space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex gap-4 items-center">
+                <Skeleton className="w-10 h-10 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -94,93 +128,128 @@ export default function UserTable() {
   // ─── Error state ────────────────────────────────────────────────────────────
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center gap-3">
-        <UserX className="w-10 h-10 text-red-400" />
-        <p className="text-sm font-medium text-red-600">Failed to load users</p>
-        <p className="text-xs text-gray-400">
+      <div className="flex flex-col items-center justify-center py-20 bg-surface-container-lowest border border-outline-variant rounded-xl text-center gap-3">
+        <UserX className="w-10 h-10 text-error" />
+        <p className="text-body-lg font-medium text-error">Failed to load users</p>
+        <p className="text-body-sm text-on-surface-variant">
           Something went wrong while fetching the user list. Please try again.
         </p>
       </div>
     );
   }
 
+  const totalUsers = users?.length || 0;
+
   // ─── Table ──────────────────────────────────────────────────────────────────
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="relative w-full max-w-xs">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-        <Input
-          id="user-search"
-          type="search"
-          placeholder="Search users…"
+      {/* Search Bar */}
+      <div className="relative w-full max-w-sm">
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+        <input 
+          className="w-full pl-10 pr-4 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-body-md text-body-md shadow-sm" 
+          placeholder="Search users..." 
+          type="text"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          className="pl-8"
         />
       </div>
 
-      {/* Table */}
-      <div className="rounded-lg border overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {!users || users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="py-12 text-center text-sm text-muted-foreground">
-                  No users found{debouncedSearch ? ` for "${debouncedSearch}"` : ''}.
-                </TableCell>
-              </TableRow>
-            ) : (
-              users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={roleBadgeClass[user.role]}>
-                      {user.role}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={statusBadgeClass[user.status]}>
-                      {user.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {user.status === 'Deactivated' ? (
-                      <Button
-                        id={`reactivate-${user.id}`}
-                        variant="outline"
-                        size="sm"
-                        className="border-emerald-600 text-emerald-500 hover:bg-emerald-950 hover:text-emerald-400"
-                        onClick={() => openConfirm(user, 'reactivate')}
-                      >
-                        Activate
-                      </Button>
+      {/* Users Data Table (Card Style) */}
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col">
+        {/* Table Header */}
+        <div className="hidden md:grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-md p-md border-b border-outline-variant bg-surface-container-low items-center">
+          <div className="w-10"></div> {/* Avatar spacer */}
+          <span className="font-label-caps text-label-caps text-on-surface-variant">USER DETAILS</span>
+          <span className="font-label-caps text-label-caps text-on-surface-variant">ROLE & DEPARTMENT</span>
+          <span className="font-label-caps text-label-caps text-on-surface-variant">STATUS</span>
+          <span className="font-label-caps text-label-caps text-on-surface-variant text-right">ACTIONS</span>
+        </div>
+
+        {/* List Items */}
+        <div className="flex flex-col">
+          {!users || users.length === 0 ? (
+            <div className="p-12 text-center text-body-md text-on-surface-variant">
+              No users found{debouncedSearch ? ` for "${debouncedSearch}"` : ''}.
+            </div>
+          ) : (
+            users.map((user) => {
+              const roleUI = getRoleUI(user.role);
+              const statusUI = getStatusUI(user.status);
+
+              return (
+                <div key={user.id} className="grid grid-cols-1 md:grid-cols-[auto_1fr_1fr_1fr_auto] gap-md p-md border-b border-outline-variant hover:bg-surface-container transition-colors items-center group last:border-b-0">
+                  <div className="w-10 h-10 rounded-full bg-primary-container overflow-hidden border-2 border-surface flex-shrink-0 flex items-center justify-center text-on-primary font-bold">
+                    {user.avatarUrl ? (
+                      <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
                     ) : (
-                      <Button
-                        id={`deactivate-${user.id}`}
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => openConfirm(user, 'deactivate')}
-                      >
-                        Deactivate
-                      </Button>
+                      getInitials(user.name)
                     )}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                  </div>
+                  <div>
+                    <h4 className="text-body-lg font-medium text-on-surface">{user.name}</h4>
+                    <span className="font-label-code text-label-code text-on-surface-variant">{user.email}</span>
+                  </div>
+                  <div>
+                    <div className={`inline-flex items-center gap-xs px-2 py-1 rounded ${roleUI.containerClass}`}>
+                      <span className="material-symbols-outlined text-[14px]">{roleUI.icon}</span>
+                      <span className="font-label-caps text-label-caps">{roleUI.label}</span>
+                    </div>
+                    <span className="block text-body-sm text-on-surface-variant mt-xs">Department</span>
+                  </div>
+                  <div>
+                    <div className={`inline-flex items-center gap-xs px-2 py-1 rounded ${statusUI.containerClass}`}>
+                      <span className={`w-2 h-2 rounded-full ${statusUI.dotClass}`}></span>
+                      <span className="font-label-caps text-label-caps">{statusUI.label}</span>
+                    </div>
+                    <span className="block text-body-sm text-on-surface-variant mt-xs">Last login: N/A</span>
+                  </div>
+                  <div className="flex justify-end gap-xs opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="p-2 rounded hover:bg-surface-variant text-on-surface-variant hover:text-primary transition-colors" title="Edit User">
+                      <span className="material-symbols-outlined text-lg">edit</span>
+                    </button>
+                    {user.status === 'Deactivated' ? (
+                      <button 
+                        onClick={() => openConfirm(user, 'reactivate')}
+                        className="p-2 rounded hover:bg-surface-variant text-on-surface-variant hover:text-[#10b981] transition-colors" 
+                        title="Reactivate"
+                      >
+                        <span className="material-symbols-outlined text-lg">check_circle</span>
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => openConfirm(user, 'deactivate')}
+                        className="p-2 rounded hover:bg-surface-variant text-on-surface-variant hover:text-error transition-colors" 
+                        title="Deactivate"
+                      >
+                        <span className="material-symbols-outlined text-lg">block</span>
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => openConfirm(user, 'delete')}
+                      className="p-2 rounded hover:bg-surface-variant text-on-surface-variant hover:text-error transition-colors" 
+                      title="Remove User"
+                    >
+                      <span className="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Pagination Footer */}
+        {users && users.length > 0 && (
+          <div className="p-md flex items-center justify-between bg-surface-container-lowest">
+            <span className="text-body-sm text-on-surface-variant">Showing 1 to {totalUsers} of {totalUsers} users</span>
+            <div className="flex gap-xs">
+              <button className="px-sm py-xs border border-outline-variant rounded hover:bg-surface-container-low text-on-surface-variant disabled:opacity-50" disabled>Prev</button>
+              <button className="px-sm py-xs border border-primary bg-primary text-on-primary rounded">1</button>
+              <button className="px-sm py-xs border border-outline-variant rounded hover:bg-surface-container-low text-on-surface-variant disabled:opacity-50" disabled>Next</button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Confirmation dialog */}
@@ -193,7 +262,9 @@ export default function UserTable() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {confirmAction === 'deactivate' ? 'Deactivate user?' : 'Reactivate user?'}
+              {confirmAction === 'deactivate' ? 'Deactivate user?' : 
+               confirmAction === 'reactivate' ? 'Reactivate user?' : 
+               'Permanently delete user?'}
             </DialogTitle>
             <DialogDescription>
               {confirmAction === 'deactivate' ? (
@@ -202,11 +273,17 @@ export default function UserTable() {
                   <span className="font-semibold text-foreground">{confirmUser?.name}</span>{' '}
                   ({confirmUser?.email}). They will no longer be able to sign in.
                 </>
-              ) : (
+              ) : confirmAction === 'reactivate' ? (
                 <>
                   This will reactivate{' '}
                   <span className="font-semibold text-foreground">{confirmUser?.name}</span>{' '}
                   ({confirmUser?.email}). They will be able to sign in again.
+                </>
+              ) : (
+                <>
+                  This will permanently delete{' '}
+                  <span className="font-semibold text-foreground">{confirmUser?.name}</span>{' '}
+                  ({confirmUser?.email}) and all data they created. This action cannot be undone.
                 </>
               )}
             </DialogDescription>
@@ -221,14 +298,18 @@ export default function UserTable() {
             </Button>
             <Button
               id="confirm-status-btn"
-              variant={confirmAction === 'deactivate' ? 'destructive' : 'default'}
+              variant={confirmAction === 'reactivate' ? 'default' : 'destructive'}
               className={confirmAction === 'reactivate' ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : ''}
               onClick={handleConfirm}
               disabled={isPending}
             >
               {isPending
-                ? confirmAction === 'deactivate' ? 'Deactivating…' : 'Activating…'
-                : confirmAction === 'deactivate' ? 'Yes, deactivate' : 'Yes, activate'}
+                ? confirmAction === 'deactivate' ? 'Deactivating…' : 
+                  confirmAction === 'reactivate' ? 'Activating…' : 
+                  'Deleting...'
+                : confirmAction === 'deactivate' ? 'Yes, deactivate' : 
+                  confirmAction === 'reactivate' ? 'Yes, activate' : 
+                  'Yes, delete'}
             </Button>
           </DialogFooter>
         </DialogContent>

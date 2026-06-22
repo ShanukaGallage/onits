@@ -1,26 +1,26 @@
- import { Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
 export default function AppLayout() {
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-950">
+    <div className="flex h-screen overflow-hidden bg-ip-surface font-jakarta">
 
-      {/* Fixed Left Sidebar — width 64 = 256px */}
-      <div className="w-64 flex-shrink-0 h-screen bg-slate-900 border-r border-slate-800 flex flex-col">
+      {/* Fixed Left Sidebar */}
+      <div className="w-64 flex-shrink-0 h-screen bg-ip-surface border-r border-ip-outline-variant flex flex-col">
         <Sidebar />
       </div>
 
       {/* Right Side */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* Top Header — height 16 = 64px */}
-        <div className="h-16 flex-shrink-0 border-b border-slate-800 bg-slate-900">
+        {/* Top Header */}
+        <div className="h-16 flex-shrink-0 border-b border-ip-outline-variant bg-ip-surface/80 backdrop-blur-md">
           <Header />
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto bg-slate-950 p-6">
+        <main className="flex-1 overflow-y-auto bg-ip-surface p-6">
           <Outlet />
         </main>
       </div>
