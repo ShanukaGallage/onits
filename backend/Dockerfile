@@ -19,7 +19,7 @@ WORKDIR /app
 COPY package*.json ./
 # `npm ci` is used instead of `npm install` — it installs exact versions from
 # package-lock.json (reproducible builds, no version drift in production)
-RUN npm ci
+RUN npm install
 
 # ── Stage 2: Development (hot-reload) ─────────────────────────────────────────
 FROM base AS development
