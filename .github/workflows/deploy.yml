@@ -101,3 +101,4 @@ jobs:
           app_location: frontend      # Where package.json is
           output_location: dist       # Where Vite puts the build output
           skip_app_build: true        # We already built above so the env var is set correctly
+ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true
