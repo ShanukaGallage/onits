@@ -52,7 +52,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./backend
-          dockerfile: ./backend/Dockerfile
           target: production          # Use the production stage (minimal Alpine image)
           push: true
           tags: |
