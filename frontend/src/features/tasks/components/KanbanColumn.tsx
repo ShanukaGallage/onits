@@ -1,5 +1,5 @@
 import { useDroppable } from '@dnd-kit/core';
-import { Plus, MoreHorizontal } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import type { TaskStatus } from '@/types';
 import type { TaskWithDetails } from '../hooks/useTasks';
 import KanbanCard from './KanbanCard';

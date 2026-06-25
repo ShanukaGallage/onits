@@ -8,7 +8,7 @@ import ManageTeamModal from './ManageTeamModal';
 import { 
   TrendingUp, Users, FileText, Link as LinkIcon, 
   Upload, Plus, Edit2, Play, ExternalLink, Loader2, ArrowLeft,
-  CheckCircle, Filter, MoreHorizontal, Calendar, AlertTriangle, ChevronsUpDown,
+  CheckCircle, Calendar,
   Globe, Lock, Tag
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -36,7 +36,7 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
   const totalTasks = tasks.length;
   const doneTasks = tasks.filter(t => t.status === 'Completed').length;
   const inProgressTasks = tasks.filter(t => t.status === 'InProgress').length;
-  const todoTasks = tasks.filter(t => t.status === 'ToDo').length;
+
 
   const donePercent = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
   const inProgressPercent = totalTasks > 0 ? Math.round((inProgressTasks / totalTasks) * 100) : 0;
