@@ -53,6 +53,7 @@ export interface Task {
   status: TaskStatus;
   createdById: string;
   projectId: string;
+  assignee?: User;
   tags?: string[];
   createdAt: string;
   updatedAt: string;

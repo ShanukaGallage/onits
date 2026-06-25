@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../hooks/useTasks';
-import { ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronDown, Loader2 } from 'lucide-react';
 import type { TaskWithDetails } from '../hooks/useTasks';
 
 interface TaskTableProps {

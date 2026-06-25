@@ -5,7 +5,7 @@ import { useProjects } from '../features/projects/hooks/useProjects';
 import { useTasks, type TaskWithDetails } from '../features/tasks/hooks/useTasks';
 import { useNotifications } from '../features/notifications/hooks/useNotifications';
 import {
-  Download, Plus, FolderKanban, ListChecks, CheckCircle2, Users,
+  Download, Plus, FolderKanban, ListChecks, CheckCircle2,
   CalendarDays, Bell, CheckCircle, AlertTriangle, Info,
   ArrowRight, Zap, CheckSquare, Inbox, User, TrendingUp, TrendingDown,
 } from 'lucide-react';
@@ -48,10 +48,10 @@ function ProjectTaskCollector({
 // ─── Metric card ─────────────────────────────────────────────────────────────
 
 function MetricCard({
-  label, value, icon: Icon, iconColor, iconBg, trend, trendLabel, trendUp,
+  label, value, icon: Icon, iconColor, trend, trendLabel, trendUp,
 }: {
   label: string; value: number | string | null; icon: React.ElementType;
-  iconColor: string; iconBg: string; trend?: string; trendLabel?: string; trendUp?: boolean;
+  iconColor: string; trend?: string; trendLabel?: string; trendUp?: boolean;
 }) {
   return (
     <div className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-ip-lg p-4 hover:border-ip-primary/40 transition-colors shadow-[0_1px_4px_rgba(70,72,212,0.05)]">
@@ -391,7 +391,6 @@ export default function DashboardPage() {
           value={projectsLoading ? null : (projects?.length ?? 0)}
           icon={FolderKanban}
           iconColor="#4648d4"
-          iconBg="rgba(70,72,212,0.10)"
           trend="+12%"
           trendUp
         />
@@ -400,7 +399,6 @@ export default function DashboardPage() {
           value={projectsLoading ? null : activeTasks}
           icon={ListChecks}
           iconColor="#712ae2"
-          iconBg="rgba(113,42,226,0.10)"
           trendLabel="Stable"
         />
         <MetricCard
@@ -408,7 +406,6 @@ export default function DashboardPage() {
           value={projectsLoading ? null : completedTasks}
           icon={CheckCircle2}
           iconColor="#059669"
-          iconBg="rgba(5,150,105,0.10)"
           trend={completedTasks > 0 ? `+${completedTasks}` : undefined}
           trendUp
         />

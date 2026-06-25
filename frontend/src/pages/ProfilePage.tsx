@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { Camera, Upload, Trash2, Mail, Shield, User, Loader2 } from 'lucide-react';
+import { Camera, Upload, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '@/lib/axios';
 

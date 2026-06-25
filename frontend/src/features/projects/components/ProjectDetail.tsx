@@ -180,7 +180,7 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                   {[
                     { id: 'todo', title: 'To Do', color: 'bg-ip-outline', tasks: tasks.filter(t => t.status === 'ToDo') },
                     { id: 'inprogress', title: 'In Progress', color: 'bg-ip-primary-container', tasks: tasks.filter(t => t.status === 'InProgress') },
-                    { id: 'done', title: 'Done', color: 'bg-ip-outline-variant', tasks: tasks.filter(t => t.status === 'InReview' || t.status === 'Completed'), opacity: 'opacity-70' }
+                    { id: 'done', title: 'Done', color: 'bg-ip-outline-variant', tasks: tasks.filter(t => t.status === 'Completed'), opacity: 'opacity-70' }
                   ].map(col => (
                     <div key={col.id} className={`flex flex-col w-[280px] shrink-0 bg-ip-surface rounded-xl border border-ip-outline-variant overflow-hidden h-full ${col.opacity || ''}`}>
                       <div className="p-2.5 border-b border-ip-outline-variant bg-ip-surface-container-low flex justify-between items-center shrink-0">

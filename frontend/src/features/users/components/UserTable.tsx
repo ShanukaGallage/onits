@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useUsers, useDeactivateUser, useReactivateUser, useDeleteUser } from '../hooks/useUsers';
 import type { User, Role, UserStatus } from '@/types';
-import { Input } from '@/components/ui/input';
+
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Search, UserX } from 'lucide-react';
+import { UserX } from 'lucide-react';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

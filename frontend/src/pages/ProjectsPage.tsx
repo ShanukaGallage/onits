@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Plus, Archive, ArchiveRestore, UserPlus, X, Loader2 } from 'lucide-react';
 import { useProjects } from '../features/projects/hooks/useProjects';
 import CreateProjectModal from '../features/projects/components/CreateProjectModal';
-import type { Project, ProjectStatus, User } from '@/types';
+import type { ProjectStatus } from '@/types';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 

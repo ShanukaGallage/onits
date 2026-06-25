@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Plus, List, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import KanbanBoard from '@/features/tasks/components/KanbanBoard';
 import TaskTable from '@/features/tasks/components/TaskTable';
-import { useAuth } from '@/context/AuthContext';
 import { useTasks } from '@/features/tasks/hooks/useTasks';
 import type { TaskWithDetails } from '@/features/tasks/hooks/useTasks';
-import { Loader2 } from 'lucide-react';
 
 // ─── Calendar View ─────────────────────────────────────────────────────────────
 function CalendarView({ projectId }: { projectId: string }) {
@@ -106,7 +104,6 @@ function CalendarView({ projectId }: { projectId: string }) {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function MyTasksPage() {
-  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   
   const tab = searchParams.get('tab') || 'list';
