@@ -10,7 +10,19 @@ let io: SocketIOServer;
 export function initSocket(httpServer: HttpServer): SocketIOServer {
   io = new SocketIOServer(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL,
+      origin: function (origin: string | undefined, callback: (err: Error | null, origin?: boolean) => void) {
+        const allowedOrigins = [
+          process.env.FRONTEND_URL,
+          'http://localhost:5173',
+          'http://localhost:4173',
+          'https://nice-water-02ebe0a00.7.azurestaticapps.net'
+        ];
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true,
     },
   });

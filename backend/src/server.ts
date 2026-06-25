@@ -29,10 +29,21 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" } // Required to allow images to load externally
 }));
 
-// CORS
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        'http://localhost:5173',
+        'http://localhost:4173',
+        'https://nice-water-02ebe0a00.7.azurestaticapps.net'
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
