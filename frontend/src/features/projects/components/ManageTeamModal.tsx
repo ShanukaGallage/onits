@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { useAddMember, useRemoveMember } from '../hooks/useProjects';
 import { useUsers } from '@/features/users/hooks/useUsers';
 import type { Project } from '@/types';
-import { X, Users, Check, ChevronsUpDown, Loader2 } from 'lucide-react';
+import { X, Users, ChevronsUpDown, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -15,7 +15,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
+
 import { useAuth } from '@/context/AuthContext';
 
 interface ManageTeamModalProps {

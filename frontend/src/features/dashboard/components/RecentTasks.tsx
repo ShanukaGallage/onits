@@ -41,7 +41,7 @@ function ProjectTasks({
 export default function RecentTasks() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: projects, isLoading } = useProjects();
+  const { projects, isLoading } = useProjects();
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
 
   const canCreateTask = user?.role === 'Admin' || user?.role === 'ProjectManager';

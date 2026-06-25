@@ -56,7 +56,7 @@ function StatCard({ label, value, icon: Icon, iconColor, iconBg, trend }: StatCo
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function DashboardStats() {
-  const { data: projects, isLoading } = useProjects();
+  const { projects, isLoading } = useProjects();
 
   let activeTasks = 0;
   let completedTasks = 0;

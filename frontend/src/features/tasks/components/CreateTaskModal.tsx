@@ -60,7 +60,7 @@ export default function CreateTaskModal({
   onOpenChange,
   defaultProjectId,
 }: CreateTaskModalProps) {
-  const { data: projects } = useProjects();
+  const { projects } = useProjects();
   const { data: users } = useUsers();
   const createTask = useCreateTask();
 

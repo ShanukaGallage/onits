@@ -36,7 +36,7 @@ import {
   DialogFooter,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { cn } from '@/lib/utils';
+
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
@@ -257,7 +257,7 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                      <Calendar mode="single" selected={date} onSelect={setDate} autoFocus />
                     </PopoverContent>
                   </Popover>
                 </div>

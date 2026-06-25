@@ -66,7 +66,7 @@ function ProjectCard({ project }: { project: { id: string; name: string; descrip
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function ProjectOverview() {
   const navigate = useNavigate();
-  const { data: projects, isLoading } = useProjects();
+  const { projects, isLoading } = useProjects();
 
   const visible = projects?.slice(0, 6) ?? [];
 

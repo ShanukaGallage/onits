@@ -7,7 +7,7 @@ import { Users, Folder, ArrowRight, FolderOpen } from 'lucide-react';
 
 export default function ProjectList() {
   const navigate = useNavigate();
-  const { data: projects, isLoading, isError } = useProjects();
+  const { projects, isLoading, isError } = useProjects();
 
   // ─── Loading Skeletons ───────────────────────────────────────────────────────
   if (isLoading) {
