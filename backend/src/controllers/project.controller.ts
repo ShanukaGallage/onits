@@ -46,10 +46,7 @@ const handleError = (res: Response, error: unknown) => {
     return res.status(400).json({ errorCode: 400, message });
   }
 
-  const fs = require('fs');
-  fs.writeFileSync('error.log', JSON.stringify({ message: error.message, stack: error.stack, error: String(error) }));
-  
-  console.error('Project Controller 500 Error:', error);
+  console.error('Project Controller 500 Error:', error instanceof Error ? error.stack : error);
   return res.status(500).json({ 
     errorCode: 500, 
     message: 'Internal server error',

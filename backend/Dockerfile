@@ -17,9 +17,10 @@
 FROM node:22-alpine AS base
 WORKDIR /app
 COPY package*.json ./
-# `npm ci` installs exact versions from package-lock.json
-# (reproducible builds, no version drift in production)
-RUN npm ci
+# Note: Using `npm install` instead of `npm ci` because this is an npm
+# workspaces monorepo — the package-lock.json lives at the repo root,
+# not inside backend/. Docker only has access to backend/package*.json.
+RUN npm install
 
 # ── Stage 2: Development (hot-reload) ─────────────────────────────────────────
 FROM base AS development
