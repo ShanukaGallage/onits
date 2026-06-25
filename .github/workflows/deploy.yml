@@ -81,7 +81,7 @@ jobs:
           node-version: '20'
 
       - name: 📦 Install frontend dependencies
-        run: npm ci --prefix frontend
+        run: npm install --prefix frontend
 
       - name: 🔨 Build React application
         run: npm run build --prefix frontend
