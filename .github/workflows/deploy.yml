@@ -87,7 +87,7 @@ jobs:
         env:
           # This is the production backend URL.
           # Update this to your Azure Web App URL or custom api.onits.app subdomain
-          VITE_API_URL: https://onits-backend.azurewebsites.net
+          VITE_API_URL: https://onits-backend.azurewebsites.net/api
 
       - name: 🚀 Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1

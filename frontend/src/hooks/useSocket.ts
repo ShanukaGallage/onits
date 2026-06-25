@@ -9,7 +9,11 @@ export function useSocket() {
   useEffect(() => {
     if (!user) return;
 
-    socketRef.current = io('http://localhost:5000', {
+    const socketUrl = import.meta.env.VITE_API_URL 
+      ? import.meta.env.VITE_API_URL.replace('/api', '') 
+      : 'http://localhost:5000';
+
+    socketRef.current = io(socketUrl, {
       withCredentials: true,
       // NFR-11: Reconnection strategies with retry and exponential backoff
       reconnection: true,
