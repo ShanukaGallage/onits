@@ -38,7 +38,17 @@ export async function getProjectById(id: string) {
           },
         },
       },
-      tasks: true,
+      tasks: {
+        include: {
+          assignments: {
+            include: {
+              user: {
+                select: safeUserSelect,
+              },
+            },
+          },
+        },
+      },
     },
   });
 

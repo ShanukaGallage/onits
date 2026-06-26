@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
+import { mutate as swrMutate } from 'swr';
 import type { Task, Priority, TaskStatus, User } from '@/types';
 
 // ─── Payload/Extended Types ──────────────────────────────────────────────────
@@ -89,8 +90,15 @@ export function useCreateTask() {
   return useMutation({
     mutationFn: (payload: CreateTaskPayload) =>
       api.post<TaskWithDetails>('/tasks', payload).then((r) => r.data),
-    onSuccess: () => {
+    onSuccess: (newTask, variables) => {
+      console.log('Task created! Manually updating cache for project:', variables.projectId);
+      queryClient.setQueriesData({ queryKey: ['tasks', variables.projectId] }, (old: any) => {
+        if (!Array.isArray(old)) return [newTask];
+        return [newTask, ...old];
+      });
       void queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      // Invalidate SWR cache for the project to sync ProjectDetail.tsx
+      void swrMutate(`/projects/${variables.projectId}`);
     },
   });
 }
