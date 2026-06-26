@@ -14,7 +14,9 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ── Stage 1: Base dependencies ────────────────────────────────────────────────
-FROM node:22-alpine AS base
+FROM node:22-slim AS base
+# Prisma requires OpenSSL which is sometimes missing in slim images
+RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /app
 COPY package*.json ./
 # Note: Using `npm install` instead of `npm ci` because this is an npm
@@ -33,13 +35,15 @@ EXPOSE 5000
 CMD ["npm", "run", "dev"]
 
 # ── Stage 3: TypeScript builder ───────────────────────────────────────────────
-FROM base AS builder
+FROM node:22-slim AS builder
 COPY . .
 RUN npx prisma generate
 RUN npm run build
 
 # ── Stage 4: Production (minimal footprint) ───────────────────────────────────
-FROM node:22-alpine AS production
+FROM node:22-slim AS production
+# Prisma requires OpenSSL which is sometimes missing in slim images
+RUN apt-get update -y && apt-get install -y openssl
 WORKDIR /app
 
 # Copy only what is needed to run the compiled application
@@ -48,7 +52,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 
-# Re-generate Prisma Client for the production Alpine environment
+# Re-generate Prisma Client for the production environment
 # (the generated client contains native binaries that are OS-specific)
 RUN npx prisma generate
 
