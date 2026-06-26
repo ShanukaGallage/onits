@@ -29,33 +29,41 @@ env:
 
 jobs:
 
-  # ── Job 1: Build + Deploy Backend (Code) ───────────────────────────────────
+  # ── Job 1: Build + Deploy Backend ──────────────────────────────────────────
   deploy-backend:
-    name: 🚀 Backend — Build & Deploy Native Code to Azure
+    name: 🚀 Backend — Build Docker Image & Deploy to Azure
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write           # Required to push to GitHub Container Registry
 
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
 
-      - name: ⚙️ Set up Node.js v22
-        uses: actions/setup-node@v4
+      - name: 🔑 Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          node-version: '22'
-          cache: 'npm'
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 📦 Install Dependencies & Build
-        run: |
-          npm ci
-          npx prisma generate --schema=backend/prisma/schema.prisma
-          npm run build --workspace=backend
+      - name: 🏗️ Build and push backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          target: production          # Use the production stage (minimal Alpine image)
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
 
-      - name: 🌐 Deploy to Azure Web App (Code)
+      - name: 🌐 Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: onits-backend      # Must match your Azure Web App name exactly
           publish-profile: ${{ secrets.AZURE_BACKEND_PUBLISH_PROFILE }}
-          package: ./backend
+          images: ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
 
   # ── Job 2: Build + Deploy Frontend ─────────────────────────────────────────
   deploy-frontend:
