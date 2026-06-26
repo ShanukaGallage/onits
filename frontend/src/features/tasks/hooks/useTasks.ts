@@ -1,16 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
 import { mutate as swrMutate } from 'swr';
-import type { Task, Priority, TaskStatus, User } from '@/types';
+import type { Task, Priority, TaskStatus, User, TaskAssignment } from '@/types';
 
 // ─── Payload/Extended Types ──────────────────────────────────────────────────
-
-export interface TaskAssignment {
-  taskId: string;
-  userId: string;
-  assignedAt: string;
-  user: User;
-}
 
 export interface TaskWithDetails extends Task {
   createdBy: User;

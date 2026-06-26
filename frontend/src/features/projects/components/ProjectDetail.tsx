@@ -211,14 +211,17 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                                   {task.dueDate ? new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '-'}
                                 </span>
                               </div>
-                              
-                              {task.assignee && (
-                                <div className={`w-5 h-5 rounded-full bg-ip-surface-container-high border border-ip-outline-variant flex items-center justify-center overflow-hidden ${col.id === 'done' ? 'grayscale opacity-60' : ''}`}>
-                                  {task.assignee.avatarUrl ? (
-                                    <img src={getAvatarUrl(task.assignee.avatarUrl) || ''} alt={task.assignee.name} className="w-full h-full object-cover" />
-                                  ) : (
-                                    <span className="text-[8px] font-bold text-ip-on-surface-variant">{getInitials(task.assignee.name)}</span>
-                                  )}
+                              {task.assignments && task.assignments.length > 0 && (
+                                <div className="flex -space-x-1.5">
+                                  {task.assignments.map((assignment: any) => assignment.user ? (
+                                    <div key={assignment.user.id} className={`w-5 h-5 rounded-full bg-ip-surface-container-high border border-ip-outline-variant flex items-center justify-center overflow-hidden ${col.id === 'done' ? 'grayscale opacity-60' : ''}`}>
+                                      {assignment.user.avatarUrl ? (
+                                        <img src={getAvatarUrl(assignment.user.avatarUrl) || ''} alt={assignment.user.name} className="w-full h-full object-cover" />
+                                      ) : (
+                                        <span className="text-[8px] font-bold text-ip-on-surface-variant">{getInitials(assignment.user.name)}</span>
+                                      )}
+                                    </div>
+                                  ) : null)}
                                 </div>
                               )}
                             </div>
