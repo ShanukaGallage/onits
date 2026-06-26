@@ -11,7 +11,6 @@ import {
   CheckCircle, Calendar,
   Globe, Lock, Tag
 } from 'lucide-react';
-import { toast } from 'sonner';
 import type { ProjectStatus } from '@/types';
 
 export default function ProjectDetail({ projectId }: { projectId?: string }) {
