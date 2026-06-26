@@ -35,7 +35,7 @@ EXPOSE 5000
 CMD ["npm", "run", "dev"]
 
 # ── Stage 3: TypeScript builder ───────────────────────────────────────────────
-FROM node:22-slim AS builder
+FROM base AS builder
 COPY . .
 RUN npx prisma generate
 RUN npm run build
