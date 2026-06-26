@@ -106,7 +106,7 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`OnIts backend running on port ${PORT}`);
-  // verifyMailer();   // Temporarily disabled to prevent potential unhandled socket errors on startup
+  verifyMailer();   // Confirm SMTP connection on startup
   startCronJobs();  // Start the deadline warning scheduler
 });
 
