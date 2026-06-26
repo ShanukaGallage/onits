@@ -92,8 +92,7 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
-// Hardcode to 5000 to prevent Azure from overriding with process.env.PORT (which causes a mismatch with Dockerfile EXPOSE)
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`OnIts backend running on port ${PORT}`);
