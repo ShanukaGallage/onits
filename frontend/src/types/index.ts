@@ -44,6 +44,13 @@ export interface Project {
   updatedAt: string;
 }
 
+export interface TaskAssignment {
+  taskId: string;
+  userId: string;
+  assignedAt: string;
+  user?: User;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -53,7 +60,7 @@ export interface Task {
   status: TaskStatus;
   createdById: string;
   projectId: string;
-  assignee?: User;
+  assignments?: TaskAssignment[];
   tags?: string[];
   createdAt: string;
   updatedAt: string;
