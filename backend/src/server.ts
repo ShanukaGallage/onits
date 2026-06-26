@@ -17,6 +17,14 @@ import { startCronJobs } from './utils/cron';
 import { verifyMailer } from './utils/mailer';
 import path from 'path';
 
+process.on('uncaughtException', (err) => {
+  console.error('FATAL UNCAUGHT EXCEPTION:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('FATAL UNHANDLED REJECTION:', reason);
+});
+
 dotenv.config();
 
 const app = express();
@@ -98,7 +106,7 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`OnIts backend running on port ${PORT}`);
-  verifyMailer();   // Confirm SMTP connection on startup
+  // verifyMailer();   // Temporarily disabled to prevent potential unhandled socket errors on startup
   startCronJobs();  // Start the deadline warning scheduler
 });
 
