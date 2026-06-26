@@ -36,7 +36,9 @@ app.use(
         process.env.FRONTEND_URL,
         'http://localhost:5173',
         'http://localhost:4173',
-        'https://nice-water-02ebe0a00.7.azurestaticapps.net'
+        'https://nice-water-02ebe0a00.7.azurestaticapps.net',
+        'https://onits.app',
+        'https://www.onits.app'
       ];
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
