@@ -9,12 +9,13 @@ const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
 
 function setTokenCookies(res: Response, token: string, refreshToken: string) {
   const isProduction = process.env.NODE_ENV === "production";
+  const sameSiteMode = isProduction ? "none" : "lax";
 
   // Short-lived access token
   res.cookie("token", token, {
     httpOnly: true,
     secure:   isProduction,
-    sameSite: "strict",
+    sameSite: sameSiteMode,
     maxAge:   ACCESS_TOKEN_MAX_AGE,
   });
 
@@ -22,7 +23,7 @@ function setTokenCookies(res: Response, token: string, refreshToken: string) {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure:   isProduction,
-    sameSite: "strict",
+    sameSite: sameSiteMode,
     maxAge:   REFRESH_TOKEN_MAX_AGE,
     path:     "/api/auth/refresh", // Only sent to the refresh endpoint
   });
@@ -30,7 +31,8 @@ function setTokenCookies(res: Response, token: string, refreshToken: string) {
 
 function clearTokenCookies(res: Response) {
   const isProduction = process.env.NODE_ENV === "production";
-  const base = { httpOnly: true, secure: isProduction, sameSite: "strict" as const };
+  const sameSiteMode = isProduction ? "none" : "lax";
+  const base = { httpOnly: true, secure: isProduction, sameSite: sameSiteMode as any };
 
   res.clearCookie("token",        base);
   res.clearCookie("refreshToken", { ...base, path: "/api/auth/refresh" });
