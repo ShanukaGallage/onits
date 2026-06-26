@@ -5,7 +5,7 @@ import { useProjects } from '../features/projects/hooks/useProjects';
 import { useTasks, type TaskWithDetails } from '../features/tasks/hooks/useTasks';
 import { useNotifications } from '../features/notifications/hooks/useNotifications';
 import {
-  Download, Plus, FolderKanban, ListChecks, CheckCircle2,
+  Plus, FolderKanban, ListChecks, CheckCircle2,
   CalendarDays, Bell, CheckCircle, AlertTriangle, Info,
   ArrowRight, Zap, CheckSquare, Inbox, User, TrendingUp, TrendingDown,
 } from 'lucide-react';
@@ -341,7 +341,6 @@ function SystemStatus() {
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const { projects, isLoading: projectsLoading } = useProjects();
   const firstName = user?.name?.split(' ')[0] ?? 'there';
 
@@ -369,19 +368,7 @@ export default function DashboardPage() {
             Here is what's happening with your projects today.
           </p>
         </div>
-        <div className="flex gap-2 mt-3 md:mt-0">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-ip-base text-xs bg-ip-surface-container-high text-ip-on-surface hover:bg-ip-surface-container-highest border border-ip-outline-variant transition-colors">
-            <Download size={13} />
-            Export Report
-          </button>
-          <button
-            onClick={() => navigate('/my-tasks')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-ip-base text-xs bg-ip-primary-container text-ip-on-primary font-bold hover:opacity-90 transition-all"
-          >
-            <Plus size={13} />
-            New Issue
-          </button>
-        </div>
+
       </div>
 
       {/* ── Metrics Row ──────────────────────────────────────────────────── */}
