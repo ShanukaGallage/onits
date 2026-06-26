@@ -1,32 +1,43 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@/context/AuthContext';
 
+let globalSocket: Socket | null = null;
+
 export function useSocket() {
   const { user } = useAuth();
-  const socketRef = useRef<Socket | null>(null);
+  const [socket, setSocket] = useState<Socket | null>(globalSocket);
 
   useEffect(() => {
-    if (!user) return;
+    // If no user, disconnect and clear global socket
+    if (!user) {
+      if (globalSocket) {
+        globalSocket.disconnect();
+        globalSocket = null;
+        setSocket(null);
+      }
+      return;
+    }
 
-    const socketUrl = import.meta.env.VITE_API_URL 
-      ? import.meta.env.VITE_API_URL.replace('/api', '') 
-      : 'http://localhost:5000';
+    // If user exists and socket doesn't, create it
+    if (!globalSocket) {
+      const socketUrl = import.meta.env.VITE_API_URL 
+        ? import.meta.env.VITE_API_URL.replace('/api', '') 
+        : 'http://localhost:5000';
 
-    socketRef.current = io(socketUrl, {
-      withCredentials: true,
-      // NFR-11: Reconnection strategies with retry and exponential backoff
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      randomizationFactor: 0.5,
-    });
+      globalSocket = io(socketUrl, {
+        withCredentials: true,
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        randomizationFactor: 0.5,
+      });
+    }
 
-    return () => {
-      socketRef.current?.disconnect();
-    };
+    // Always ensure this component's state matches the global socket
+    setSocket(globalSocket);
   }, [user]);
 
-  return socketRef.current;
+  return socket;
 }

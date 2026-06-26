@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useTasks } from '../hooks/useTasks';
+import { useRealtimeTasks } from '../hooks/useRealtimeTasks';
 import { ChevronDown, Loader2 } from 'lucide-react';
 import type { TaskWithDetails } from '../hooks/useTasks';
 
@@ -8,6 +9,7 @@ interface TaskTableProps {
 }
 
 export default function TaskTable({ projectId }: TaskTableProps) {
+  useRealtimeTasks(projectId);
   const { data: tasks, isLoading } = useTasks(projectId);
   const navigate = useNavigate();
 

@@ -15,6 +15,7 @@ import channelRouter from './routes/channel.routes';
 import messageRouter from './routes/message.routes';
 import { startCronJobs } from './utils/cron';
 import { verifyMailer } from './utils/mailer';
+import { initSocket } from './socket/socket';
 import path from 'path';
 
 process.on('uncaughtException', (err) => {
@@ -104,10 +105,12 @@ app.get('/health', (_req: Request, res: Response) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`OnIts backend running on port ${PORT}`);
   verifyMailer();   // Confirm SMTP connection on startup
   startCronJobs();  // Start the deadline warning scheduler
 });
+
+initSocket(server);
 
 export default app;

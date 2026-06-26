@@ -160,12 +160,12 @@ export default function CreateTaskModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-3xl border-neutral-800 bg-neutral-950/95 backdrop-blur-xl text-foreground max-h-[90vh] overflow-hidden flex flex-col p-0 shadow-2xl rounded-xl">
-        <DialogHeader className="px-6 py-5 border-b border-white/5 bg-white/[0.02]">
-          <DialogTitle className="text-xl font-semibold tracking-tight text-white flex items-center gap-2">
+      <DialogContent className="sm:max-w-3xl border-ip-outline-variant bg-ip-surface-container-lowest font-jakarta text-ip-on-surface max-h-[90vh] overflow-hidden flex flex-col p-0 shadow-2xl rounded-xl">
+        <DialogHeader className="px-6 py-5 border-b border-ip-outline-variant bg-ip-surface">
+          <DialogTitle className="text-xl font-bold tracking-tight text-ip-on-surface flex items-center gap-2">
             Create New Task
           </DialogTitle>
-          <DialogDescription className="text-neutral-400 text-sm mt-1">
+          <DialogDescription className="text-ip-on-surface-variant text-sm mt-1">
             Fill in the details below to add a new task to your project.
           </DialogDescription>
         </DialogHeader>
@@ -177,11 +177,11 @@ export default function CreateTaskModal({
           className="flex-1 overflow-y-auto px-6 py-5 custom-scrollbar"
         >
           {Object.keys(errors).length > 0 && (
-            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg mb-6 text-red-400 text-sm flex flex-col gap-1">
+            <div className="p-3 bg-ip-error-container border border-ip-error/20 rounded-lg mb-6 text-ip-on-error-container text-sm flex flex-col gap-1">
               <p className="font-semibold">Please fix the following errors:</p>
               <ul className="list-disc pl-5 space-y-0.5">
                 {Object.entries(errors).map(([key, error]) => (
-                  <li key={key} className="capitalize text-red-300">{key}: {error?.message as string}</li>
+                  <li key={key} className="capitalize">{key}: {error?.message as string}</li>
                 ))}
               </ul>
             </div>
@@ -190,18 +190,18 @@ export default function CreateTaskModal({
           <div className="space-y-6">
             {/* Title (Full Width) */}
             <div className="space-y-2">
-              <Label htmlFor="ct-title" className="text-sm font-medium text-neutral-300">
-                Task Title <span className="text-indigo-400">*</span>
+              <Label htmlFor="ct-title" className="text-sm font-bold text-ip-on-surface">
+                Task Title <span className="text-ip-error">*</span>
               </Label>
               <Input
                 id="ct-title"
                 placeholder="e.g. Design landing page hero section"
-                className="border-neutral-800 bg-neutral-900/50 text-white placeholder:text-neutral-600 focus-visible:border-indigo-500/50 focus-visible:ring-indigo-500/20 text-lg py-6 shadow-inner"
+                className="border-ip-outline-variant bg-ip-surface text-ip-on-surface placeholder:text-ip-outline focus-visible:border-ip-primary focus-visible:ring-ip-primary/20 text-lg py-6 shadow-sm"
                 aria-describedby={errors.title ? 'ct-title-error' : undefined}
                 {...register('title')}
               />
               {errors.title && (
-                <p id="ct-title-error" className="text-xs text-red-400">
+                <p id="ct-title-error" className="text-xs text-ip-error">
                   {errors.title.message}
                 </p>
               )}
@@ -209,69 +209,69 @@ export default function CreateTaskModal({
 
             {/* Description (Full Width) */}
             <div className="space-y-2">
-              <Label htmlFor="ct-desc" className="text-sm font-medium text-neutral-300">
+              <Label htmlFor="ct-desc" className="text-sm font-bold text-ip-on-surface">
                 Description
               </Label>
               <textarea
                 id="ct-desc"
                 rows={3}
                 placeholder="Add more details about this task..."
-                className="w-full min-w-0 rounded-lg border border-neutral-800 bg-neutral-900/50 px-3 py-2 text-sm text-white placeholder:text-neutral-600 outline-none transition-all focus-visible:border-indigo-500/50 focus-visible:ring-4 focus-visible:ring-indigo-500/10 resize-none shadow-inner custom-scrollbar"
+                className="w-full min-w-0 rounded-lg border border-ip-outline-variant bg-ip-surface px-3 py-2 text-sm text-ip-on-surface placeholder:text-ip-outline outline-none transition-all focus-visible:border-ip-primary focus-visible:ring-1 focus-visible:ring-ip-primary resize-none shadow-sm custom-scrollbar"
                 {...register('description')}
               />
             </div>
 
             {/* Grid 3 Columns: Project, Priority, Due Date */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-4 rounded-xl border border-white/5 bg-white/[0.01]">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-4 rounded-xl border border-ip-outline-variant bg-ip-surface-container-low">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-neutral-300">
-                  Project <span className="text-indigo-400">*</span>
+                <Label className="text-sm font-bold text-ip-on-surface">
+                  Project <span className="text-ip-error">*</span>
                 </Label>
                 <Select
                   value={selectedProjectId}
                   onValueChange={(val) => setValue('projectId', val, { shouldValidate: true })}
                 >
-                  <SelectTrigger className="w-full border-neutral-800 bg-neutral-900/50 text-white focus:border-indigo-500/50 focus:ring-indigo-500/20">
+                  <SelectTrigger className="w-full border-ip-outline-variant bg-ip-surface text-ip-on-surface focus:border-ip-primary focus:ring-1 focus:ring-ip-primary">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
-                  <SelectContent className="border-neutral-800 bg-neutral-900">
+                  <SelectContent className="border-ip-outline-variant bg-ip-surface-container-lowest text-ip-on-surface">
                     {(projects ?? []).map((p) => (
-                      <SelectItem key={p.id} value={p.id} className="text-white focus:bg-neutral-800">
+                      <SelectItem key={p.id} value={p.id} className="focus:bg-ip-surface-container-high cursor-pointer">
                         {p.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 {errors.projectId && (
-                  <p className="text-xs text-red-400">{errors.projectId.message}</p>
+                  <p className="text-xs text-ip-error">{errors.projectId.message}</p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-neutral-300">Priority</Label>
+                <Label className="text-sm font-bold text-ip-on-surface">Priority</Label>
                 <Select
                   value={selectedPriority}
                   onValueChange={(val) =>
                     setValue('priority', val as 'Low' | 'Medium' | 'High', { shouldValidate: true })
                   }
                 >
-                  <SelectTrigger className="w-full border-neutral-800 bg-neutral-900/50 text-white focus:border-indigo-500/50 focus:ring-indigo-500/20">
+                  <SelectTrigger className="w-full border-ip-outline-variant bg-ip-surface text-ip-on-surface focus:border-ip-primary focus:ring-1 focus:ring-ip-primary">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="border-neutral-800 bg-neutral-900">
-                    <SelectItem value="Low"    className="text-white focus:bg-neutral-800">
+                  <SelectContent className="border-ip-outline-variant bg-ip-surface-container-lowest text-ip-on-surface">
+                    <SelectItem value="Low"    className="focus:bg-ip-surface-container-high cursor-pointer">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-neutral-500"></div> Low
+                        <div className="w-2 h-2 rounded-full bg-ip-outline-variant"></div> Low
                       </div>
                     </SelectItem>
-                    <SelectItem value="Medium" className="text-white focus:bg-neutral-800">
+                    <SelectItem value="Medium" className="focus:bg-ip-surface-container-high cursor-pointer">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-blue-500"></div> Medium
+                        <div className="w-2 h-2 rounded-full bg-ip-secondary-container"></div> Medium
                       </div>
                     </SelectItem>
-                    <SelectItem value="High"   className="text-white focus:bg-neutral-800">
+                    <SelectItem value="High"   className="focus:bg-ip-surface-container-high cursor-pointer">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]"></div> High
+                        <div className="w-2 h-2 rounded-full bg-ip-error"></div> High
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -279,13 +279,13 @@ export default function CreateTaskModal({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ct-due" className="text-sm font-medium text-neutral-300">
+                <Label htmlFor="ct-due" className="text-sm font-bold text-ip-on-surface">
                   Due Date
                 </Label>
                 <Input
                   id="ct-due"
                   type="date"
-                  className="w-full border-neutral-800 bg-neutral-900/50 text-white focus-visible:border-indigo-500/50 focus-visible:ring-indigo-500/20 [color-scheme:dark]"
+                  className="w-full border-ip-outline-variant bg-ip-surface text-ip-on-surface focus-visible:border-ip-primary focus-visible:ring-1 focus-visible:ring-ip-primary"
                   {...register('dueDate')}
                 />
               </div>
@@ -295,41 +295,41 @@ export default function CreateTaskModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Assignees */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-neutral-300 flex items-center justify-between">
+                <Label className="text-sm font-bold text-ip-on-surface flex items-center justify-between">
                   Assign To
-                  <span className="text-xs text-neutral-500 font-normal">{selectedAssignees.length} selected</span>
+                  <span className="text-xs text-ip-on-surface-variant font-normal">{selectedAssignees.length} selected</span>
                 </Label>
-                <div className="max-h-[140px] overflow-y-auto rounded-lg border border-neutral-800 bg-neutral-900/30 p-1.5 space-y-0.5 custom-scrollbar shadow-inner">
+                <div className="max-h-[140px] overflow-y-auto rounded-lg border border-ip-outline-variant bg-ip-surface p-1.5 space-y-0.5 custom-scrollbar shadow-sm">
                   {users?.map(u => (
-                    <label key={u.id} className={`flex items-center gap-3 cursor-pointer text-sm transition-all py-2 px-2.5 rounded-md ${selectedAssignees.includes(u.id) ? 'bg-indigo-500/10 text-white' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`}>
+                    <label key={u.id} className={`flex items-center gap-3 cursor-pointer text-sm transition-all py-2 px-2.5 rounded-md ${selectedAssignees.includes(u.id) ? 'bg-ip-primary-container text-ip-on-primary-container' : 'text-ip-on-surface hover:text-ip-on-surface-variant hover:bg-ip-surface-container-high'}`}>
                       <input 
                         type="checkbox" 
                         checked={selectedAssignees.includes(u.id)}
                         onChange={() => toggleAssignee(u.id)}
-                        className="rounded bg-neutral-800 border-neutral-600 text-indigo-500 focus:ring-indigo-500/20 focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4 cursor-pointer" 
+                        className="rounded bg-ip-surface border-ip-outline-variant text-ip-primary focus:ring-ip-primary/20 focus:ring-offset-0 focus:ring-offset-transparent w-4 h-4 cursor-pointer" 
                       />
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shadow-md">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-ip-primary to-ip-tertiary flex items-center justify-center text-[10px] font-bold text-white shadow-sm">
                           {u.name.substring(0, 2).toUpperCase()}
                         </div>
                         {u.name}
                       </div>
                     </label>
                   ))}
-                  {!users?.length && <p className="text-xs text-neutral-500 italic p-2 text-center">No team members found</p>}
+                  {!users?.length && <p className="text-xs text-ip-outline italic p-2 text-center">No team members found</p>}
                 </div>
               </div>
 
               {/* Tags & Initial Comment */}
               <div className="space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-neutral-300">Tags</Label>
-                  <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-2 shadow-inner focus-within:border-indigo-500/50 focus-within:ring-4 focus-within:ring-indigo-500/10 transition-all">
+                  <Label className="text-sm font-bold text-ip-on-surface">Tags</Label>
+                  <div className="rounded-lg border border-ip-outline-variant bg-ip-surface p-2 shadow-sm focus-within:border-ip-primary focus-within:ring-1 focus-within:ring-ip-primary transition-all">
                     <div className="flex flex-wrap gap-1.5 mb-2 empty:mb-0">
                       {selectedTags.map(t => (
-                        <span key={t} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/20">
+                        <span key={t} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-ip-surface-container-high text-ip-on-surface border border-ip-outline-variant">
                           {t}
-                          <button type="button" onClick={() => removeTag(t)} className="text-indigo-400 hover:text-red-400 transition-colors">
+                          <button type="button" onClick={() => removeTag(t)} className="text-ip-on-surface-variant hover:text-ip-error transition-colors">
                             <X size={12} />
                           </button>
                         </span>
@@ -340,20 +340,20 @@ export default function CreateTaskModal({
                       value={tagInput}
                       onChange={(e) => setTagInput(e.target.value)}
                       onKeyDown={handleTagInputKeyDown}
-                      className="w-full bg-transparent text-sm text-white placeholder:text-neutral-600 outline-none"
+                      className="w-full bg-transparent text-sm text-ip-on-surface placeholder:text-ip-outline outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="ct-comment" className="text-sm font-medium text-neutral-300">
+                  <Label htmlFor="ct-comment" className="text-sm font-bold text-ip-on-surface">
                     Initial Comment
                   </Label>
                   <textarea
                     id="ct-comment"
                     rows={2}
                     placeholder="Leave a comment when creating this task..."
-                    className="w-full min-w-0 rounded-lg border border-neutral-800 bg-neutral-900/50 px-3 py-2 text-sm text-white placeholder:text-neutral-600 outline-none transition-all focus-visible:border-indigo-500/50 focus-visible:ring-4 focus-visible:ring-indigo-500/10 resize-none shadow-inner custom-scrollbar"
+                    className="w-full min-w-0 rounded-lg border border-ip-outline-variant bg-ip-surface px-3 py-2 text-sm text-ip-on-surface placeholder:text-ip-outline outline-none transition-all focus-visible:border-ip-primary focus-visible:ring-1 focus-visible:ring-ip-primary resize-none shadow-sm custom-scrollbar"
                     {...register('initialComment')}
                   />
                 </div>
@@ -362,13 +362,13 @@ export default function CreateTaskModal({
           </div>
         </form>
 
-        <DialogFooter className="px-6 py-4 border-t border-white/5 bg-white/[0.01] flex items-center justify-end gap-3">
+        <DialogFooter className="px-6 py-4 border-t border-ip-outline-variant bg-ip-surface-container shrink-0 flex items-center justify-end gap-3">
           <Button
             variant="ghost"
             type="button"
             onClick={() => handleClose(false)}
             disabled={isPending}
-            className="text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+            className="text-ip-on-surface-variant hover:text-ip-on-surface hover:bg-ip-surface-container-high transition-colors"
           >
             Cancel
           </Button>
@@ -377,7 +377,7 @@ export default function CreateTaskModal({
             type="submit"
             form="create-task-form"
             disabled={isPending}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_15px_rgba(79,70,229,0.3)] transition-all min-w-[120px]"
+            className="bg-ip-primary hover:bg-ip-primary-container text-white hover:text-ip-on-primary-container shadow-sm transition-all min-w-[120px]"
           >
             {isPending ? (
               <>

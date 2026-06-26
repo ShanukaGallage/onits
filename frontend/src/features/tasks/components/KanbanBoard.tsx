@@ -12,6 +12,7 @@ import {
   useUpdateTaskStatus,
   type TaskWithDetails,
 } from '../hooks/useTasks';
+import { useRealtimeTasks } from '../hooks/useRealtimeTasks';
 
 import KanbanColumn from './KanbanColumn';
 import KanbanCard from './KanbanCard';
@@ -21,6 +22,7 @@ interface KanbanBoardProps {
 }
 
 export default function KanbanBoard({ projectId }: KanbanBoardProps) {
+  useRealtimeTasks(projectId);
   const { data: tasks = [], isLoading } = useTasks(projectId);
   const updateTaskStatus = useUpdateTaskStatus();
 

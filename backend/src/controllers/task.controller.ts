@@ -29,6 +29,7 @@ const handleError = (res: Response, error: unknown) => {
       message: error.issues[0]?.message || 'Validation error',
     });
   }
+  console.error('[TaskController] handleError:', error);
 
   const message = error instanceof Error ? error.message : '';
 
@@ -57,7 +58,8 @@ const handleError = (res: Response, error: unknown) => {
  */
 export const getTasks = async (req: Request, res: Response) => {
   try {
-    const { projectId, status, priority, sortBy, sortOrder } = req.query;
+    const projectId = req.params.projectId || req.query.projectId;
+    const { status, priority, sortBy, sortOrder } = req.query;
     const tasks = await taskService.getAllTasks(
       projectId as string, 
       {

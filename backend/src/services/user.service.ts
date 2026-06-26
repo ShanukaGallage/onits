@@ -81,14 +81,8 @@ export async function createUser(data: { name: string; username: string; email: 
     select: safeUserSelect,
   });
 
-  // Send welcome email — wrapped in its own try/catch so a mail failure
-  // never rolls back the already-persisted user record.
-  try {
-    await sendWelcomeEmail(data.email, data.name, data.username, tempPassword);
-  } catch (emailError) {
-    console.error('Welcome email failed to send:', emailError);
-    // User is already created — do not throw, just log
-  }
+  // Send welcome email with temporary password asynchronously
+  sendWelcomeEmail(data.email, data.name, data.username, tempPassword).catch(console.error);
 
   return user;
 }
@@ -214,13 +208,8 @@ export async function changePassword(id: string, currentPassword: string, newPas
     select: safeUserSelect,
   });
 
-  // Notify user their password was changed — isolated so a mail failure never
-  // prevents the password update from being returned to the caller.
-  try {
-    await sendPasswordChangedEmail(user.email, user.name);
-  } catch (emailError) {
-    console.error('Password changed email failed to send:', emailError);
-  }
+  // Send notification email asynchronously
+  sendPasswordChangedEmail(user.email, user.name).catch(console.error);
 
   return updatedUser;
 }

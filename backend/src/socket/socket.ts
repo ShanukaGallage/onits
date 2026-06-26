@@ -82,6 +82,21 @@ export function initSocket(httpServer: HttpServer): SocketIOServer {
     socket.on('disconnect', () => {
       console.log(`Socket disconnected for user: ${userId}`);
     });
+
+    // Real-Time Task Board: Join/Leave project rooms
+    socket.on('project:join', (projectId: string) => {
+      if (projectId) {
+        socket.join(`project:${projectId}`);
+        console.log(`User ${userId} joined project room: ${projectId}`);
+      }
+    });
+
+    socket.on('project:leave', (projectId: string) => {
+      if (projectId) {
+        socket.leave(`project:${projectId}`);
+        console.log(`User ${userId} left project room: ${projectId}`);
+      }
+    });
   });
 
   return io;
@@ -91,4 +106,9 @@ export function initSocket(httpServer: HttpServer): SocketIOServer {
  * Returns the active Socket.IO instance.
  * Throws if initSocket() has not been called yet.
  */
-export { io };
+export function getIO(): SocketIOServer {
+  if (!io) {
+    throw new Error('Socket.io not initialized!');
+  }
+  return io;
+}

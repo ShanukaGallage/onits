@@ -1,7 +1,6 @@
 import { prisma, safeUserSelect } from '../config/db';
 import { NotificationType } from '@prisma/client';
-// @ts-ignore
-import { io } from '../socket/socket';
+import { getIO } from '../socket/socket';
 
 /**
  * Helper function to create a notification record and emit a Socket.io event.
@@ -10,7 +9,7 @@ async function createNotification(userId: string, type: NotificationType, messag
   const notification = await prisma.notification.create({
     data: { userId, type, message, taskId }
   });
-  io.to(userId).emit('notification:new', notification);
+  getIO().to(userId).emit('notification:new', notification);
 }
 
 /**

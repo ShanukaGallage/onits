@@ -1,7 +1,6 @@
 import { prisma, safeUserSelect } from '../config/db';
 import { Priority, TaskStatus, NotificationType } from '@prisma/client';
-// @ts-ignore
-import { io } from '../socket/socket';
+import { getIO } from '../socket/socket';
 import { sendTaskAssignedEmail } from '../utils/mailer';
 
 /**
@@ -11,7 +10,7 @@ async function createNotification(userId: string, type: NotificationType, messag
   const notification = await prisma.notification.create({
     data: { userId, type, message, taskId }
   });
-  io.to(userId).emit('notification:new', notification);
+  getIO().to(userId).emit('notification:new', notification);
 }
 
 /**
@@ -101,63 +100,54 @@ export async function createTask(
   createdById: string,
   assigneeIds?: string[]
 ) {
-  const task = await prisma.$transaction(async (tx) => {
-    // 1. Create the task
-    const newTask = await tx.task.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        dueDate: data.dueDate,
-        priority: data.priority,
-        projectId: data.projectId,
-        createdById,
-        tags: data.tags || [],
-      },
-    });
-
-    // Create initial comment if provided
-    if (data.initialComment) {
-      await tx.comment.create({
-        data: {
+  const newTask = await prisma.task.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      dueDate: data.dueDate,
+      priority: data.priority,
+      projectId: data.projectId,
+      createdById,
+      tags: data.tags || [],
+      comments: data.initialComment ? {
+        create: {
           content: data.initialComment,
-          taskId: newTask.id,
           createdById,
+        }
+      } : undefined,
+      assignments: assigneeIds && assigneeIds.length > 0 ? {
+        create: assigneeIds.map((userId) => ({
+          userId,
+        }))
+      } : undefined,
+    },
+  });
+
+  // If assignees provided, create notifications and send emails AFTER task is created
+  if (assigneeIds && assigneeIds.length > 0) {
+    for (const assigneeId of assigneeIds) {
+      const notification = await prisma.notification.create({
+        data: {
+          userId: assigneeId,
+          type: 'TaskAssigned',
+          message: `You have been assigned to task: ${data.title}`,
+          taskId: newTask.id,
         },
       });
-    }
+      getIO().to(assigneeId).emit('notification:new', notification);
 
-    // 2. If assignees provided, create assignments and notifications
-    if (assigneeIds && assigneeIds.length > 0) {
-      // Create TaskAssignment records
-      await tx.taskAssignment.createMany({
-        data: assigneeIds.map((userId) => ({
-          taskId: newTask.id,
-          userId,
-        })),
-      });
-
-      // Send a notification to each assignee
-      for (const assigneeId of assigneeIds) {
-        const notification = await tx.notification.create({
-          data: {
-            userId: assigneeId,
-            type: 'TaskAssigned',
-            message: `You have been assigned to task: ${data.title}`,
-            taskId: newTask.id,
-          },
-        });
-        io.to(assigneeId).emit('notification:new', notification);
-
-        // Fetch user to send email
-        const user = await tx.user.findUnique({ where: { id: assigneeId } });
-        if (user) {
-          await sendTaskAssignedEmail(user.email, user.name, data.title);
-        }
+      // Fetch user to send email
+      const user = await prisma.user.findUnique({ where: { id: assigneeId } });
+      if (user) {
+        sendTaskAssignedEmail(user.email, user.name, data.title).catch(console.error);
       }
     }
+  }
 
-    return newTask;
-  });
+  const task = newTask;
+
+  // Broadcast real-time update to project room
+  getIO().to(`project:${task.projectId}`).emit('task:created', task);
 
   // Return the full task with createdBy and assignments (using safeUserSelect)
   const result = await prisma.task.findUnique({
@@ -241,6 +231,9 @@ export async function updateTask(
     }
   }
 
+  // Broadcast real-time update to project room
+  getIO().to(`project:${updatedTask.projectId}`).emit('task:updated', updatedTask);
+
   return updatedTask;
 }
 
@@ -260,6 +253,9 @@ export async function deleteTask(id: string) {
   await prisma.task.delete({
     where: { id },
   });
+
+  // Broadcast real-time update to project room
+  getIO().to(`project:${existing.projectId}`).emit('task:deleted', { id });
 
   return { message: 'Task deleted successfully' };
 }
@@ -324,6 +320,9 @@ export async function assignTask(taskId: string, userId: string) {
     throw new Error('Task not found after assignment');
   }
 
+  // Broadcast real-time update to project room
+  getIO().to(`project:${updated.projectId}`).emit('task:updated', updated);
+
   return updated;
 }
 
@@ -381,6 +380,9 @@ export async function unassignTask(taskId: string, userId: string) {
   if (!updated) {
     throw new Error('Task not found after unassignment');
   }
+
+  // Broadcast real-time update to project room
+  getIO().to(`project:${updated.projectId}`).emit('task:updated', updated);
 
   return updated;
 }

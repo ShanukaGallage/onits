@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import CreateTaskModal from '@/features/tasks/components/CreateTaskModal';
 import EditProjectModal from './EditProjectModal';
 import ManageTeamModal from './ManageTeamModal';
+import { useRealtimeTasks } from '@/features/tasks/hooks/useRealtimeTasks';
 import { 
   TrendingUp, Users, FileText, Link as LinkIcon, 
   Upload, Plus, Edit2, ExternalLink, Loader2, ArrowLeft,
@@ -18,6 +19,7 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
   const id = projectId || paramProjectId;
   const navigate = useNavigate();
   const { project, isLoading, isError, mutate } = useProject(id);
+  useRealtimeTasks(id || '');
   const { user } = useAuth();
   
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
@@ -265,20 +267,22 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                             {task.dueDate ? new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '-'}
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              {task.assignee ? (
-                                <>
-                                  <div className="w-5 h-5 rounded-full bg-ip-surface-container-high border border-ip-outline-variant flex items-center justify-center overflow-hidden">
-                                    {task.assignee.avatarUrl ? (
-                                      <img src={getAvatarUrl(task.assignee.avatarUrl) || ''} alt={task.assignee.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                      <span className="text-[8px] font-bold text-ip-on-surface-variant">{getInitials(task.assignee.name)}</span>
-                                    )}
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              {task.assignments && task.assignments.length > 0 ? (
+                                task.assignments.map((assignment: any) => (
+                                  <div key={assignment.user.id} className="flex items-center gap-1 bg-ip-surface-container px-1.5 py-0.5 rounded-full border border-ip-outline-variant/30">
+                                    <div className="w-4 h-4 rounded-full bg-ip-surface-container-high border border-ip-outline-variant flex items-center justify-center overflow-hidden">
+                                      {assignment.user.avatarUrl ? (
+                                        <img src={getAvatarUrl(assignment.user.avatarUrl) || ''} alt={assignment.user.name} className="w-full h-full object-cover" />
+                                      ) : (
+                                        <span className="text-[7px] font-bold text-ip-on-surface-variant">{getInitials(assignment.user.name)}</span>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] font-medium text-ip-on-surface">{assignment.user.name}</span>
                                   </div>
-                                  <span className="font-medium text-ip-on-surface">{task.assignee.name}</span>
-                                </>
+                                ))
                               ) : (
-                                <span className="text-ip-on-surface-variant italic">Unassigned</span>
+                                <span className="text-ip-on-surface-variant italic text-[11px]">Unassigned</span>
                               )}
                             </div>
                           </td>
