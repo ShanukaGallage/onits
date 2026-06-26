@@ -7,7 +7,7 @@ import EditProjectModal from './EditProjectModal';
 import ManageTeamModal from './ManageTeamModal';
 import { 
   TrendingUp, Users, FileText, Link as LinkIcon, 
-  Upload, Plus, Edit2, Play, ExternalLink, Loader2, ArrowLeft,
+  Upload, Plus, Edit2, ExternalLink, Loader2, ArrowLeft,
   CheckCircle, Calendar,
   Globe, Lock, Tag
 } from 'lucide-react';
@@ -113,12 +113,7 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                   <Edit2 size={16} />
                 </button>
               )}
-              <button 
-                onClick={() => toast.info('Sprint management coming soon!')}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-ip-outline-variant bg-ip-surface hover:bg-ip-surface-container-low text-ip-on-surface font-bold text-[13px] transition-colors"
-              >
-                <Play size={14} fill="currentColor" /> Sprint
-              </button>
+
               <button 
                 onClick={() => setCreateTaskOpen(true)}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-ip-primary hover:bg-ip-on-primary-fixed-variant text-ip-on-primary font-bold text-[13px] shadow-sm transition-all"
