@@ -298,4 +298,52 @@ router.delete(
   removeMember
 );
 
+/**
+ * @swagger
+ * /api/projects/{id}/status:
+ *   patch:
+ *     summary: Update project status
+ *     description: Updates the status of a project (Planning, InProgress, Completed, Archived).
+ *     security:
+ *       - cookieAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The project's UUID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [status]
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [Planning, InProgress, Completed, Archived]
+ *     responses:
+ *       200:
+ *         description: Updated project object
+ *       400:
+ *         description: Invalid status value
+ *       401:
+ *         description: Unauthenticated
+ *       403:
+ *         description: Forbidden — insufficient role
+ *       404:
+ *         description: Project not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch(
+  '/:id/status',
+  authenticate,
+  authorize(['ProjectManager', 'Admin']),
+  updateProjectStatus
+);
+
 export default router;

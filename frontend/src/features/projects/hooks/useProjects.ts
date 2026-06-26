@@ -9,16 +9,29 @@ export function useProjects() {
   const { data, error, isLoading, mutate } = useSWR<Project[]>('/projects', fetcher);
 
   const updateStatus = async (projectId: string, status: ProjectStatus) => {
-    // Optimistic UI update
+    // 1. Snapshot current data for rollback
+    const snapshot = data;
+
+    // 2. Apply optimistic update immediately (no re-fetch)
     if (data) {
-      mutate(data.map(p => p.id === projectId ? { ...p, status } : p), false);
+      mutate(
+        data.map(p => p.id === projectId ? { ...p, status } : p),
+        false // revalidate = false → keep optimistic, skip background fetch
+      );
     }
-    
+
     try {
-      await api.patch(`/projects/${projectId}/status`, { status });
-      mutate(); // Re-fetch to ensure sync
+      // 3. Persist to server
+      const res = await api.patch(`/projects/${projectId}/status`, { status });
+      // 4. Update cache with confirmed server response (no re-fetch needed)
+      mutate(
+        (current) => current?.map(p => p.id === projectId ? res.data : p),
+        false
+      );
     } catch (err) {
-      mutate(); // Revert on failure
+      // 5. Roll back to snapshot on failure, then re-fetch to ensure consistency
+      if (snapshot) mutate(snapshot, false);
+      mutate(); // trigger fresh fetch to stay in sync with server
       throw err;
     }
   };

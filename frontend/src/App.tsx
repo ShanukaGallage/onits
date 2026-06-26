@@ -1,4 +1,5 @@
- import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { SWRConfig } from 'swr';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import RoleRoute from '@/components/layout/RoleRoute';
 import AppLayout from '@/components/layout/AppLayout';
@@ -15,6 +16,7 @@ import ForcePasswordResetPage from '@/pages/ForcePasswordResetPage';
 
 export default function App() {
   return (
+    <SWRConfig value={{ revalidateOnFocus: false, revalidateOnReconnect: false }}>
     <BrowserRouter>
       <Routes>
         {/* Public */}
@@ -48,5 +50,6 @@ export default function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
+    </SWRConfig>
   );
 }

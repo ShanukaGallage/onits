@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Archive, ArchiveRestore, UserPlus, X, Loader2 } from 'lucide-react';
+import { Plus, Archive, ArchiveRestore, UserPlus, CheckCheck, Loader2, RotateCcw } from 'lucide-react';
 import { useProjects } from '../features/projects/hooks/useProjects';
 import CreateProjectModal from '../features/projects/components/CreateProjectModal';
 import type { ProjectStatus } from '@/types';
@@ -14,10 +14,17 @@ export default function ProjectsPage() {
 
   // Status visual mapping
   const statusColors: Record<ProjectStatus, { bg: string, text: string }> = {
-    Planning: { bg: 'bg-ip-surface-variant', text: 'text-ip-on-surface-variant' },
-    InProgress: { bg: 'bg-ip-primary-fixed', text: 'text-ip-on-primary-fixed' },
-    Completed: { bg: 'bg-ip-surface-container-highest', text: 'text-ip-tertiary' },
-    Archived: { bg: 'bg-ip-surface-container-highest', text: 'text-ip-outline' }
+    Planning:   { bg: 'bg-yellow-100',  text: 'text-black' },
+    InProgress: { bg: 'bg-blue-100',    text: 'text-black' },
+    Completed:  { bg: 'bg-green-100',   text: 'text-black' },
+    Archived:   { bg: 'bg-gray-100',    text: 'text-black' }
+  };
+
+  const cardBg: Record<ProjectStatus, { bg: string, border: string, hover: string }> = {
+    Planning:   { bg: 'bg-yellow-50',  border: 'border-yellow-200', hover: 'hover:shadow-[0_4px_16px_rgba(234,179,8,0.15)]'  },
+    InProgress: { bg: 'bg-blue-50',    border: 'border-blue-200',   hover: 'hover:shadow-[0_4px_16px_rgba(59,130,246,0.15)]' },
+    Completed:  { bg: 'bg-green-50',   border: 'border-green-200',  hover: 'hover:shadow-[0_4px_16px_rgba(34,197,94,0.15)]'  },
+    Archived:   { bg: 'bg-gray-50',    border: 'border-gray-200',   hover: 'hover:shadow-[0_4px_16px_rgba(156,163,175,0.15)]'}
   };
 
   const handleUpdateStatus = async (id: string, newStatus: ProjectStatus) => {
@@ -86,7 +93,7 @@ export default function ProjectsPage() {
               <div 
                 key={project.id} 
                 onClick={() => navigate(`/projects/${project.id}`)}
-                className={`cursor-pointer bg-ip-surface-container-lowest border border-ip-outline-variant rounded-2xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(70,72,212,0.02)] transition-all duration-200 ${project.status === 'Completed' || project.status === 'Archived' ? 'opacity-70 hover:opacity-100' : 'hover:shadow-[0_4px_16px_rgba(70,72,212,0.06)] hover:-translate-y-0.5'}`}
+                className={`cursor-pointer ${cardBg[project.status].bg} border ${cardBg[project.status].border} rounded-2xl p-5 flex flex-col gap-3 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-200 ${project.status === 'Completed' || project.status === 'Archived' ? 'opacity-75 hover:opacity-100' : `${cardBg[project.status].hover} hover:-translate-y-0.5`}`}
               >
                 <div className="flex justify-between items-start gap-2">
                   <div className="min-w-0">
@@ -149,29 +156,61 @@ export default function ProjectsPage() {
                   </div>
                   
                   <div className="flex gap-1">
-                    {project.status !== 'Archived' && (
+                    {/* Active project (Planning / InProgress) — show Complete + Archive */}
+                    {(project.status === 'Planning' || project.status === 'InProgress') && (
                       <>
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); toast.info('Member assignment coming soon!'); }}
-                          className="text-ip-outline hover:text-ip-primary transition-colors p-1.5 rounded-lg hover:bg-ip-surface-container-lowest" 
+                          className="text-ip-outline hover:text-ip-primary transition-colors p-1.5 rounded-lg hover:bg-white/60"
                           title="Assign Members"
                         >
                           <UserPlus size={18} />
                         </button>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); handleUpdateStatus(project.id, project.status === 'Completed' ? 'Archived' : 'Completed'); }}
-                          className={`p-1.5 rounded-lg hover:bg-ip-surface-container-lowest transition-colors ${project.status === 'Completed' ? 'text-ip-primary hover:text-ip-primary-container' : 'text-ip-outline hover:text-ip-error'}`} 
-                          title={project.status === 'Completed' ? 'Archive Project' : 'Complete Project'}
+                        {/* Mark as Completed — one click, stays completed */}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleUpdateStatus(project.id, 'Completed'); }}
+                          className="text-green-500 hover:text-green-700 transition-colors p-1.5 rounded-lg hover:bg-green-100"
+                          title="Mark as Completed"
                         >
-                          {project.status === 'Completed' ? <Archive size={18} /> : <X size={18} />}
+                          <CheckCheck size={18} />
+                        </button>
+                        {/* Archive — one click, moves to Archive list */}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleUpdateStatus(project.id, 'Archived'); }}
+                          className="text-gray-400 hover:text-gray-700 transition-colors p-1.5 rounded-lg hover:bg-gray-200"
+                          title="Archive Project"
+                        >
+                          <Archive size={18} />
                         </button>
                       </>
                     )}
+
+                    {/* Completed — show Restore to Active + Archive */}
+                    {project.status === 'Completed' && (
+                      <>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleUpdateStatus(project.id, 'InProgress'); }}
+                          className="text-blue-400 hover:text-blue-700 transition-colors p-1.5 rounded-lg hover:bg-blue-100"
+                          title="Restore to Active"
+                        >
+                          <RotateCcw size={18} />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleUpdateStatus(project.id, 'Archived'); }}
+                          className="text-gray-400 hover:text-gray-700 transition-colors p-1.5 rounded-lg hover:bg-gray-200"
+                          title="Archive Project"
+                        >
+                          <Archive size={18} />
+                        </button>
+                      </>
+                    )}
+
+                    {/* Archived — show Unarchive only */}
                     {project.status === 'Archived' && (
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); handleUpdateStatus(project.id, 'InProgress'); }}
-                        className="text-ip-outline hover:text-ip-on-surface transition-colors p-1.5 rounded-lg hover:bg-ip-surface-container-lowest" 
-                        title="Unarchive"
+                        className="text-ip-outline hover:text-ip-on-surface transition-colors p-1.5 rounded-lg hover:bg-ip-surface-container-lowest"
+                        title="Unarchive — restore to Active"
                       >
                         <ArchiveRestore size={18} />
                       </button>
