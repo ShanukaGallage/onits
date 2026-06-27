@@ -1,12 +1,12 @@
 import nodemailer from 'nodemailer';
 
 export const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
+  host: process.env.SMTP_HOST || 'smtp.resend.com',
   port: Number(process.env.SMTP_PORT) || 587,
   secure: false,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.SMTP_USER || 'resend',
+    pass: process.env.SMTP_PASS || process.env.RESEND_API_KEY,
   },
 });
 
@@ -34,7 +34,7 @@ export async function sendWelcomeEmail(
 ): Promise<void> {
   const recipient = resolveRecipient(to);
   const mailOptions = {
-    from: `"OnIts" <noreply@onits.app>`,
+    from: process.env.SMTP_FROM || `"OnIts" <noreply@onits.app>`,
     to: recipient,
     subject: recipient !== to
       ? `[DEV → ${to}] Welcome to OnIts — Your Account is Ready`
@@ -84,7 +84,7 @@ export async function sendDeadlineWarningEmail(
 
   const recipient = resolveRecipient(to);
   const mailOptions = {
-    from: `"OnIts" <noreply@onits.app>`,
+    from: process.env.SMTP_FROM || `"OnIts" <noreply@onits.app>`,
     to: recipient,
     subject: recipient !== to
       ? `[DEV → ${to}] ⚠️ Task Due Tomorrow — ${taskTitle}`
@@ -124,7 +124,7 @@ export async function sendDeadlineWarningEmail(
 export async function sendPasswordChangedEmail(to: string, name: string): Promise<void> {
   const recipient = resolveRecipient(to);
   const mailOptions = {
-    from: `"OnIts" <noreply@onits.app>`,
+    from: process.env.SMTP_FROM || `"OnIts" <noreply@onits.app>`,
     to: recipient,
     subject: recipient !== to
       ? `[DEV → ${to}] OnIts — Your Password Has Been Changed`
@@ -166,7 +166,7 @@ export async function sendPasswordChangedEmail(to: string, name: string): Promis
 export async function sendTaskAssignedEmail(to: string, name: string, taskTitle: string): Promise<void> {
   const recipient = resolveRecipient(to);
   const mailOptions = {
-    from: `"OnIts" <noreply@onits.app>`,
+    from: process.env.SMTP_FROM || `"OnIts" <noreply@onits.app>`,
     to: recipient,
     subject: recipient !== to
       ? `[DEV → ${to}] OnIts — You've been assigned to a new task`
