@@ -106,6 +106,11 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+// Fallback 404 handler for unmatched routes
+app.use((req, res) => {
+  res.status(404).json({ errorCode: 404, message: `Cannot ${req.method} ${req.path}` });
+});
+
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {

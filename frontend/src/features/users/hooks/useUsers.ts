@@ -61,7 +61,7 @@ export function useUpdateUser() {
 
   return useMutation({
     mutationFn: ({ id, ...payload }: UpdateUserPayload) =>
-      api.patch<User>(`/users/${id}`, payload).then((r) => r.data),
+      api.put<User>(`/users/${id}`, payload).then((r) => r.data),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: USERS_KEY });
     },
