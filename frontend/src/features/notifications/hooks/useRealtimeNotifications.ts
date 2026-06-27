@@ -17,7 +17,14 @@ export function useRealtimeNotifications() {
         description: notification.type,
       });
 
-      // Update cache
+      // Update cache directly for instant UI update
+      queryClient.setQueryData<Notification[]>(['notifications'], (old) => {
+        if (!old) return [notification];
+        if (old.some(n => n.id === notification.id)) return old;
+        return [notification, ...old];
+      });
+      
+      // Also invalidate to ensure it stays in sync
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     };
 
