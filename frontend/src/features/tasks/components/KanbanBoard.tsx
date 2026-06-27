@@ -4,6 +4,7 @@ import {
 } from '@dnd-kit/core';
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Archive } from 'lucide-react';
 
@@ -23,8 +24,16 @@ interface KanbanBoardProps {
 
 export default function KanbanBoard({ projectId }: KanbanBoardProps) {
   useRealtimeTasks(projectId);
-  const { data: tasks = [], isLoading } = useTasks(projectId);
+  const { data: rawTasks = [], isLoading } = useTasks(projectId);
   const updateTaskStatus = useUpdateTaskStatus();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('q')?.toLowerCase() || '';
+
+  const tasks = rawTasks.filter(t => 
+    !searchQuery || 
+    t.title.toLowerCase().includes(searchQuery) ||
+    t.description?.toLowerCase().includes(searchQuery)
+  );
 
   const [activeTask, setActiveTask] = useState<TaskWithDetails | null>(null);
 

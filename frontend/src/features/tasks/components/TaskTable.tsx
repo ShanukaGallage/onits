@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTasks } from '../hooks/useTasks';
 import { useRealtimeTasks } from '../hooks/useRealtimeTasks';
 import { ChevronDown, Loader2 } from 'lucide-react';
@@ -18,8 +18,16 @@ interface TaskTableProps {
 
 export default function TaskTable({ projectId }: TaskTableProps) {
   useRealtimeTasks(projectId);
-  const { data: tasks, isLoading } = useTasks(projectId);
+  const { data: rawTasks, isLoading } = useTasks(projectId);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('q')?.toLowerCase() || '';
+
+  const tasks = rawTasks?.filter(t => 
+    !searchQuery || 
+    t.title.toLowerCase().includes(searchQuery) ||
+    t.description?.toLowerCase().includes(searchQuery)
+  );
 
   if (isLoading) {
     return (

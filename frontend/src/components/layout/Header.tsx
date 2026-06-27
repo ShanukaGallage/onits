@@ -34,6 +34,24 @@ export default function Header() {
     try { await logout(); } finally { navigate('/login'); }
   };
 
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const q = e.currentTarget.value.trim();
+      const isTaskPage = location.pathname === '/my-tasks' || location.pathname.startsWith('/projects/');
+      
+      if (!isTaskPage) {
+        navigate(q ? `/my-tasks?q=${encodeURIComponent(q)}` : '/my-tasks');
+      } else {
+        if (q) {
+          searchParams.set('q', q);
+        } else {
+          searchParams.delete('q');
+        }
+        navigate(`${location.pathname}?${searchParams.toString()}`);
+      }
+    }
+  };
+
   return (
     <div className="h-full flex items-center justify-between px-6 font-jakarta">
 
@@ -84,7 +102,9 @@ export default function Header() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ip-outline" />
           <input
             type="text"
-            placeholder="Search..."
+            defaultValue={searchParams.get('q') || ''}
+            onKeyDown={handleSearch}
+            placeholder="Search tasks..."
             className="pl-9 pr-4 py-1.5 w-52 bg-ip-surface-container-low border border-ip-outline-variant rounded-ip-base text-sm text-ip-on-surface placeholder:text-ip-on-surface-variant/50 focus:outline-none focus:border-ip-primary focus:ring-1 focus:ring-ip-primary/30 transition-all duration-150"
           />
         </div>
