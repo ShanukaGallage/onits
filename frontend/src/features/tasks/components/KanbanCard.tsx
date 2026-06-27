@@ -96,17 +96,6 @@ export default function KanbanCard({ task, isOverlay = false }: KanbanCardProps)
         </div>
       )}
 
-      {task.status === 'InProgress' && task.dueDate && (
-        <div className="mb-3 mt-1">
-          <div className="flex justify-between text-xs text-ip-on-surface-variant mb-1">
-            <span>Progress</span>
-            <span>65%</span>
-          </div>
-          <div className="w-full bg-ip-surface-container-high rounded-full h-1">
-            <div className="bg-ip-primary-container h-1 rounded-full w-[65%]" />
-          </div>
-        </div>
-      )}
 
       <div className="flex justify-between items-end mt-auto pt-3 border-t border-ip-outline-variant/30">
         <div className="flex flex-wrap gap-1.5">
