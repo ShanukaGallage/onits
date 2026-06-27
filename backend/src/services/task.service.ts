@@ -383,3 +383,27 @@ export async function unassignTask(taskId: string, userId: string) {
 
   return updated;
 }
+
+/**
+ * Returns all tasks assigned to a specific user across all projects.
+ */
+export async function getMyTasks(userId: string) {
+  return prisma.task.findMany({
+    where: {
+      assignments: {
+        some: {
+          userId,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      createdBy: { select: safeUserSelect },
+      assignments: {
+        include: {
+          user: { select: safeUserSelect },
+        },
+      },
+    },
+  });
+}

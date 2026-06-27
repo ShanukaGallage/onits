@@ -80,6 +80,15 @@ export const getTasks = async (req: Request, res: Response) => {
 /** @deprecated use getTasks */
 export const getAllTasks = getTasks;
 
+export const getMyTasks = async (req: Request, res: Response) => {
+  try {
+    const tasks = await taskService.getMyTasks(req.user!.id);
+    return res.status(200).json(tasks);
+  } catch (error) {
+    return handleError(res, error);
+  }
+};
+
 /**
  * 2. getTaskById: Returns a single task by its unique ID.
  */

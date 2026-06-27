@@ -45,18 +45,17 @@ export function useTasks(
 ) {
   return useQuery({
     queryKey: ['tasks', projectId, filters],
-    queryFn: () =>
-      api
-        .get<TaskWithDetails[]>(
-          `/tasks/project/${projectId}`,
-          {
-            params: {
-              status: filters?.status,
-              priority: filters?.priority,
-            },
-          }
-        )
-        .then((r) => r.data),
+    queryFn: () => {
+      const url = projectId === 'me' ? '/tasks/me' : `/tasks/project/${projectId}`;
+      return api
+        .get<TaskWithDetails[]>(url, {
+          params: {
+            status: filters?.status,
+            priority: filters?.priority,
+          },
+        })
+        .then((r) => r.data);
+    },
     enabled: !!projectId,
   });
 }

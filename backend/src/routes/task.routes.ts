@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getAllTasks,
+  getMyTasks,
   createTask,
   getTaskById,
   updateTask,
@@ -58,6 +59,25 @@ const router = Router();
  *         description: Internal server error
  */
 router.get('/project/:projectId', authenticate, getAllTasks);
+
+/**
+ * @swagger
+ * /api/tasks/me:
+ *   get:
+ *     summary: Get tasks assigned to the current user
+ *     description: Retrieves all tasks assigned to the current user across all projects.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Array of task objects
+ *       401:
+ *         description: Unauthenticated
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/me', authenticate, getMyTasks);
+
 
 /**
  * @swagger

@@ -107,7 +107,7 @@ export default function MyTasksPage() {
   const [searchParams] = useSearchParams();
   
   const tab = searchParams.get('tab') || 'list';
-  const projectId = ''; // We fetch ALL tasks when projectId is empty, handled by the hook/backend
+  const projectId = 'me'; // 'me' triggers /api/tasks/me to fetch all user's tasks
 
   return (
     <div className="font-jakarta max-w-[1600px] w-full mx-auto">
