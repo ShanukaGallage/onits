@@ -3,18 +3,19 @@ import { useState } from 'react';
 import { useProject } from '../hooks/useProjects';
 import { useAuth } from '@/context/AuthContext';
 import CreateTaskModal from '@/features/tasks/components/CreateTaskModal';
+import KanbanBoard from '@/features/tasks/components/KanbanBoard';
+import TaskTable from '@/features/tasks/components/TaskTable';
 import EditProjectModal from './EditProjectModal';
 import ManageTeamModal from './ManageTeamModal';
 import { useRealtimeTasks } from '@/features/tasks/hooks/useRealtimeTasks';
 import { 
   TrendingUp, Users, FileText, Link as LinkIcon, 
   Upload, Plus, Edit2, ExternalLink, Loader2, ArrowLeft,
-  CheckCircle, Calendar,
-  Globe, Lock, Tag, Trash2
+  Calendar,
+  Globe, Lock, Tag
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getAvatarUrl, getInitials } from '@/lib/utils';
-import { useDeleteTask } from '@/features/tasks/hooks/useTasks';
 import type { ProjectStatus } from '@/types';
 
 export default function ProjectDetail({ projectId }: { projectId?: string }) {
@@ -24,14 +25,6 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
   const { project, isLoading, isError, mutate } = useProject(id);
   useRealtimeTasks(id || '');
   const { user } = useAuth();
-  const deleteTaskMutation = useDeleteTask();
-  
-  const handleDeleteTask = (taskId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      deleteTaskMutation.mutate({ taskId, projectId: project?.id });
-    }
-  };
   
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
   const [editProjectOpen, setEditProjectOpen] = useState(false);
@@ -60,13 +53,6 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
     InProgress: 'bg-ip-primary-fixed text-ip-on-primary-fixed',
     Completed: 'bg-ip-surface-container-highest text-ip-tertiary',
     Archived: 'bg-ip-surface-container-highest text-ip-outline'
-  };
-
-  const taskStatusColors: Record<string, string> = {
-    ToDo: 'bg-ip-surface-variant text-ip-on-surface-variant',
-    InProgress: 'bg-ip-primary/10 text-ip-primary',
-    InReview: 'bg-ip-tertiary/10 text-ip-tertiary',
-    Completed: 'bg-ip-surface-container-highest text-ip-outline'
   };
 
   return (
@@ -173,146 +159,12 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
             <div className="p-4 flex-1 overflow-x-auto bg-ip-surface-container-lowest">
               {/* Board View */}
               {activeTab === 'Board' && (
-                <div className="flex gap-4 h-full pb-2">
-                  {[
-                    { id: 'todo', title: 'To Do', color: 'bg-ip-outline', tasks: tasks.filter(t => t.status === 'ToDo') },
-                    { id: 'inprogress', title: 'In Progress', color: 'bg-ip-primary-container', tasks: tasks.filter(t => t.status === 'InProgress') },
-                    { id: 'done', title: 'Done', color: 'bg-ip-outline-variant', tasks: tasks.filter(t => t.status === 'Completed'), opacity: 'opacity-70' }
-                  ].map(col => (
-                    <div key={col.id} className={`flex flex-col w-[280px] shrink-0 bg-ip-surface rounded-xl border border-ip-outline-variant overflow-hidden h-full ${col.opacity || ''}`}>
-                      <div className="p-2.5 border-b border-ip-outline-variant bg-ip-surface-container-low flex justify-between items-center shrink-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`w-1.5 h-1.5 rounded-full ${col.color}`}></span>
-                          <h3 className="font-bold text-[13px] text-ip-on-surface">{col.title}</h3>
-                          <span className="bg-ip-surface-container-highest text-ip-on-surface-variant font-mono text-[10px] px-1.5 rounded">
-                            {col.tasks.length}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="p-2.5 flex-1 overflow-y-auto space-y-2.5">
-                        {col.tasks.map(task => (
-                          <div key={task.id} className={`bg-ip-surface-container-lowest border border-ip-outline-variant rounded-lg p-2.5 hover:shadow-sm transition-shadow cursor-grab ${col.id === 'inprogress' ? 'border-l-2 shadow-sm' : ''}`} style={col.id === 'inprogress' ? { borderLeftColor: project.colorCode || '#4648d4' } : {}}>
-                            <div className="flex justify-between items-start mb-1.5">
-                              <span className={`font-bold text-[9px] px-1.5 py-0.5 rounded uppercase ${task.priority === 'High' ? 'bg-ip-error-container text-ip-on-error-container' : 'bg-ip-surface-container-highest text-ip-on-surface-variant'}`}>
-                                {task.priority || 'Medium'}
-                              </span>
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono text-[10px] text-ip-outline">
-                                  #{task.id.split('-')[0]}-{task.id.split('-')[1]?.substring(0,3)}
-                                </span>
-                                {isManagerOrAdmin && (
-                                  <button onClick={(e) => handleDeleteTask(task.id, e)} className="text-ip-outline hover:text-ip-error transition-colors" title="Delete Task">
-                                    <Trash2 size={12} />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                            <h4 className={`font-bold text-[13px] leading-tight mb-2 ${col.id === 'done' ? 'line-through text-ip-outline' : 'text-ip-on-surface'}`}>
-                              {task.title}
-                            </h4>
-                            
-                            <div className="flex justify-between items-center mt-auto">
-                              <div className={`flex items-center gap-1 text-[11px] ${col.id === 'done' ? 'text-ip-outline' : 'text-ip-on-surface-variant'}`}>
-                                {col.id === 'done' ? <CheckCircle size={12} /> : <Calendar size={12} />}
-                                <span className="font-mono font-medium">
-                                  {task.dueDate ? new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '-'}
-                                </span>
-                              </div>
-                              {task.assignments && task.assignments.length > 0 && (
-                                <div className="flex -space-x-1.5">
-                                  {task.assignments.map((assignment: any) => assignment.user ? (
-                                    <Avatar key={assignment.user.id} className={`w-5 h-5 border border-ip-outline-variant shrink-0 ${col.id === 'done' ? 'grayscale opacity-60' : ''}`}>
-                                      <AvatarImage src={getAvatarUrl(assignment.user.avatarUrl) || ''} alt={assignment.user.name} className="object-cover" />
-                                      <AvatarFallback className="bg-ip-surface-container-high text-[8px] font-bold text-ip-on-surface-variant">
-                                        {getInitials(assignment.user.name)}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                  ) : null)}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                  <div className="flex flex-col w-10 shrink-0 bg-ip-surface-container-low rounded-xl border border-ip-outline-variant overflow-hidden h-full opacity-60 cursor-pointer">
-                    <div className="p-2 border-b border-ip-outline-variant bg-ip-surface-container-low flex flex-col items-center gap-2 shrink-0">
-                      <span className="w-1.5 h-1.5 rounded-full bg-ip-outline-variant mt-1"></span>
-                      <h3 className="font-bold text-[11px] uppercase tracking-widest text-ip-on-surface-variant mt-2" style={{ writingMode: 'vertical-lr', transform: 'rotate(180deg)' }}>Closed</h3>
-                    </div>
-                  </div>
-                </div>
+                <KanbanBoard projectId={project.id} />
               )}
 
               {/* List View */}
               {activeTab === 'List' && (
-                <div className="overflow-x-auto rounded-lg border border-ip-outline-variant">
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="bg-ip-surface-container-low border-b border-ip-outline-variant">
-                        <th className="px-4 py-2.5 text-[10px] font-bold tracking-wider uppercase text-ip-on-surface-variant">Task</th>
-                        <th className="px-4 py-2.5 text-[10px] font-bold tracking-wider uppercase text-ip-on-surface-variant">Status</th>
-                        <th className="px-4 py-2.5 text-[10px] font-bold tracking-wider uppercase text-ip-on-surface-variant">Priority</th>
-                        <th className="px-4 py-2.5 text-[10px] font-bold tracking-wider uppercase text-ip-on-surface-variant">Due</th>
-                        <th className="px-4 py-2.5 text-[10px] font-bold tracking-wider uppercase text-ip-on-surface-variant">Assignee</th>
-                        {isManagerOrAdmin && <th className="px-4 py-2.5 text-[10px] font-bold tracking-wider uppercase text-ip-on-surface-variant text-right">Actions</th>}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-ip-outline-variant/50">
-                      {tasks.map(task => (
-                        <tr key={task.id} className="hover:bg-ip-surface-container-lowest transition-colors text-[13px]">
-                          <td className="px-4 py-3 font-semibold text-ip-on-surface">{task.title}</td>
-                          <td className="px-4 py-3">
-                            <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-sm ${taskStatusColors[task.status] || 'bg-ip-surface-variant text-ip-on-surface-variant'}`}>
-                              {task.status}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-0.5 text-[10px] font-bold uppercase rounded-sm bg-ip-secondary-container text-ip-on-secondary-container">
-                              {task.priority || 'Med'}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 font-mono text-ip-on-surface-variant text-[12px]">
-                            {task.dueDate ? new Date(task.dueDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '-'}
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              {task.assignments && task.assignments.length > 0 ? (
-                                task.assignments.map((assignment: any) => (
-                                  <div key={assignment.user.id} className="flex items-center gap-1 bg-ip-surface-container px-1.5 py-0.5 rounded-full border border-ip-outline-variant/30">
-                                    <Avatar className="w-4 h-4 border border-ip-outline-variant shrink-0">
-                                      <AvatarImage src={getAvatarUrl(assignment.user.avatarUrl) || ''} alt={assignment.user.name} className="object-cover" />
-                                      <AvatarFallback className="bg-ip-surface-container-high text-[7px] font-bold text-ip-on-surface-variant">
-                                        {getInitials(assignment.user.name)}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="text-[10px] font-medium text-ip-on-surface">{assignment.user.name}</span>
-                                  </div>
-                                ))
-                              ) : (
-                                <span className="text-ip-on-surface-variant italic text-[11px]">Unassigned</span>
-                              )}
-                            </div>
-                          </td>
-                          {isManagerOrAdmin && (
-                            <td className="px-4 py-3 text-right">
-                              <button onClick={(e) => handleDeleteTask(task.id, e)} className="text-ip-outline hover:text-ip-error transition-colors p-1" title="Delete Task">
-                                <Trash2 size={14} />
-                              </button>
-                            </td>
-                          )}
-                        </tr>
-                      ))}
-                      {tasks.length === 0 && (
-                        <tr>
-                          <td colSpan={isManagerOrAdmin ? 6 : 5} className="px-4 py-8 text-center text-ip-on-surface-variant italic">No tasks found.</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                <TaskTable projectId={project.id} />
               )}
             </div>
           </div>
