@@ -37,8 +37,8 @@ function getRoleUI(role: Role) {
     default:
       return {
         containerClass: 'bg-surface-variant text-on-surface-variant border border-outline-variant',
-        icon: 'code',
-        label: 'ENGINEER',
+        icon: 'person',
+        label: 'COLLABORATOR',
       };
   }
 }

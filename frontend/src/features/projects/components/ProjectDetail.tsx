@@ -391,7 +391,7 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                     <div className="min-w-0">
                       <div className="font-bold text-ip-on-surface text-[13px] truncate">{u?.name}</div>
                       <div className="text-[11px] text-ip-on-surface-variant font-medium truncate">
-                        {u?.role === 'Admin' ? 'Project Lead' : u?.role === 'ProjectManager' ? 'Manager' : 'Engineer'}
+                        {u?.role === 'Admin' ? 'Project Lead' : u?.role === 'ProjectManager' ? 'Manager' : 'Collaborator'}
                       </div>
                     </div>
                   </div>

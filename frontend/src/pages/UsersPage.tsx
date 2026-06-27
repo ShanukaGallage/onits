@@ -69,7 +69,7 @@ export default function UsersPage() {
               onClick={() => setRoleFilter('Collaborator')}
               className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'Collaborator' ? 'border-primary bg-primary-container text-on-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
             >
-              Engineer
+              Collaborator
             </button>
           </div>
           <div className="flex items-center gap-sm text-on-surface-variant">

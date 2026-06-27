@@ -154,7 +154,7 @@ export default function ManageTeamModal({ open, onOpenChange, project, onMutate 
                           {project.createdById === u.id && <span className="px-1.5 py-0.5 rounded text-[9px] bg-ip-tertiary/10 text-ip-tertiary uppercase">Creator</span>}
                         </div>
                         <div className="text-xs text-ip-on-surface-variant font-medium truncate">
-                          {u.role === 'Admin' ? 'Project Lead' : u.role === 'ProjectManager' ? 'Manager' : 'Engineer'} • {u.email}
+                          {u.role === 'Admin' ? 'Project Lead' : u.role === 'ProjectManager' ? 'Manager' : 'Collaborator'} • {u.email}
                         </div>
                       </div>
                     </div>
