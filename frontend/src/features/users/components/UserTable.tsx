@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useUsers, useDeactivateUser, useReactivateUser, useDeleteUser } from '../hooks/useUsers';
+import EditUserModal from './EditUserModal';
 import type { User, Role, UserStatus } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getAvatarUrl, getInitials } from '@/lib/utils';
@@ -62,10 +63,15 @@ function getStatusUI(status: UserStatus) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export default function UserTable() {
+interface UserTableProps {
+  roleFilter?: Role | 'All';
+}
+
+export default function UserTable({ roleFilter = 'All' }: UserTableProps) {
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [confirmUser, setConfirmUser] = useState<User | null>(null);
+  const [editUser, setEditUser] = useState<User | null>(null);
   const [confirmAction, setConfirmAction] = useState<'deactivate' | 'reactivate' | 'delete'>('deactivate');
 
   // 300 ms debounce
@@ -76,7 +82,13 @@ export default function UserTable() {
     return () => clearTimeout(id);
   }, [searchInput]);
 
-  const { data: users, isLoading, isError } = useUsers(debouncedSearch || undefined);
+  const { data: allUsers, isLoading, isError } = useUsers(debouncedSearch || undefined);
+  
+  const users = allUsers?.filter((user) => {
+    if (roleFilter !== 'All' && user.role !== roleFilter) return false;
+    return true;
+  });
+
   const deactivate = useDeactivateUser();
   const reactivate = useReactivateUser();
 
@@ -202,7 +214,11 @@ export default function UserTable() {
                     <span className="block text-body-sm text-on-surface-variant mt-xs">Last login: N/A</span>
                   </div>
                   <div className="flex justify-end gap-xs opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-2 rounded hover:bg-surface-variant text-on-surface-variant hover:text-primary transition-colors" title="Edit User">
+                    <button 
+                      onClick={() => setEditUser(user)}
+                      className="p-2 rounded hover:bg-surface-variant text-on-surface-variant hover:text-primary transition-colors" 
+                      title="Edit User"
+                    >
                       <span className="material-symbols-outlined text-lg">edit</span>
                     </button>
                     {user.status === 'Deactivated' ? (
@@ -300,17 +316,12 @@ export default function UserTable() {
               onClick={handleConfirm}
               disabled={isPending}
             >
-              {isPending
-                ? confirmAction === 'deactivate' ? 'Deactivating…' : 
-                  confirmAction === 'reactivate' ? 'Activating…' : 
-                  'Deleting...'
-                : confirmAction === 'deactivate' ? 'Yes, deactivate' : 
-                  confirmAction === 'reactivate' ? 'Yes, activate' : 
-                  'Yes, delete'}
+              {isPending ? 'Confirming...' : 'Confirm'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <EditUserModal user={editUser} onClose={() => setEditUser(null)} />
     </div>
   );
 }

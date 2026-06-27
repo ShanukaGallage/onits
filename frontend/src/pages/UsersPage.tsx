@@ -2,9 +2,11 @@ import { useState } from 'react';
 import CreateUserModal from '@/features/users/components/CreateUserModal';
 import UserTable from '@/features/users/components/UserTable';
 import { useUsers } from '@/features/users/hooks/useUsers';
+import type { Role } from '@/types';
 
 export default function UsersPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [roleFilter, setRoleFilter] = useState<Role | 'All'>('All');
   const { data: users } = useUsers();
 
   const totalUsers = users?.length || 0;
@@ -45,10 +47,30 @@ export default function UsersPage() {
         </div>
         <div className="md:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex items-center justify-between gap-md">
           <div className="flex gap-sm">
-            <button className="px-md py-xs rounded-full border border-primary bg-primary-container text-on-primary font-label-caps text-label-caps transition-colors">All Roles</button>
-            <button className="px-md py-xs rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container-low font-label-caps text-label-caps transition-colors">Admin</button>
-            <button className="px-md py-xs rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container-low font-label-caps text-label-caps transition-colors">PM</button>
-            <button className="px-md py-xs rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container-low font-label-caps text-label-caps transition-colors">Engineer</button>
+            <button 
+              onClick={() => setRoleFilter('All')}
+              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'All' ? 'border-primary bg-primary-container text-on-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
+            >
+              All Roles
+            </button>
+            <button 
+              onClick={() => setRoleFilter('Admin')}
+              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'Admin' ? 'border-primary bg-primary-container text-on-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
+            >
+              Admin
+            </button>
+            <button 
+              onClick={() => setRoleFilter('ProjectManager')}
+              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'ProjectManager' ? 'border-primary bg-primary-container text-on-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
+            >
+              PM
+            </button>
+            <button 
+              onClick={() => setRoleFilter('Collaborator')}
+              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'Collaborator' ? 'border-primary bg-primary-container text-on-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
+            >
+              Engineer
+            </button>
           </div>
           <div className="flex items-center gap-sm text-on-surface-variant">
             <span className="material-symbols-outlined">filter_list</span>
@@ -57,7 +79,7 @@ export default function UsersPage() {
         </div>
       </div>
 
-      <UserTable />
+      <UserTable roleFilter={roleFilter} />
       <CreateUserModal open={isCreateOpen} onOpenChange={setIsCreateOpen} />
     </div>
   );
