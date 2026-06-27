@@ -1,5 +1,7 @@
 import { useDraggable } from '@dnd-kit/core';
-import { Calendar, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Calendar, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
+import { useDeleteTask } from '../hooks/useTasks';
+import { useAuth } from '@/context/AuthContext';
 import type { TaskWithDetails } from '../hooks/useTasks';
 
 interface KanbanCardProps {
@@ -8,6 +10,17 @@ interface KanbanCardProps {
 }
 
 export default function KanbanCard({ task, isOverlay = false }: KanbanCardProps) {
+  const { user } = useAuth();
+  const isManagerOrAdmin = user?.role === 'Admin' || user?.role === 'ProjectManager';
+  const deleteTaskMutation = useDeleteTask();
+
+  const handleDeleteTask = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      deleteTaskMutation.mutate(task.id);
+    }
+  };
+
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
     data: {
@@ -53,10 +66,17 @@ export default function KanbanCard({ task, isOverlay = false }: KanbanCardProps)
         <span className="text-[11px] font-mono font-medium text-ip-outline group-hover:text-ip-primary transition-colors">
           ON-{task.id.slice(0, 4)}
         </span>
-        <span className={`${prioBg} text-[9px] px-1.5 py-0.5 rounded flex items-center gap-1 font-bold uppercase tracking-widest`}>
-          {task.priority === 'High' && <AlertCircle size={10} />}
-          {task.priority === 'Medium' ? 'MED' : task.priority}
-        </span>
+        <div className="flex items-center gap-2">
+          {isManagerOrAdmin && (
+            <button onClick={handleDeleteTask} className="text-ip-outline hover:text-ip-error transition-colors" title="Delete Task">
+              <Trash2 size={12} />
+            </button>
+          )}
+          <span className={`${prioBg} text-[9px] px-1.5 py-0.5 rounded flex items-center gap-1 font-bold uppercase tracking-widest`}>
+            {task.priority === 'High' && <AlertCircle size={10} />}
+            {task.priority === 'Medium' ? 'MED' : task.priority}
+          </span>
+        </div>
       </div>
 
       <h4 className="text-sm font-semibold text-ip-on-surface mb-1.5 leading-tight">

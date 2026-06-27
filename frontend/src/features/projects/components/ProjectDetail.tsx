@@ -10,8 +10,9 @@ import {
   TrendingUp, Users, FileText, Link as LinkIcon, 
   Upload, Plus, Edit2, ExternalLink, Loader2, ArrowLeft,
   CheckCircle, Calendar,
-  Globe, Lock, Tag
+  Globe, Lock, Tag, Trash2
 } from 'lucide-react';
+import { useDeleteTask } from '@/features/tasks/hooks/useTasks';
 import type { ProjectStatus } from '@/types';
 
 export default function ProjectDetail({ projectId }: { projectId?: string }) {
@@ -21,6 +22,14 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
   const { project, isLoading, isError, mutate } = useProject(id);
   useRealtimeTasks(id || '');
   const { user } = useAuth();
+  const deleteTaskMutation = useDeleteTask();
+  
+  const handleDeleteTask = (taskId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      deleteTaskMutation.mutate(taskId);
+    }
+  };
   
   const [createTaskOpen, setCreateTaskOpen] = useState(false);
   const [editProjectOpen, setEditProjectOpen] = useState(false);
@@ -196,9 +205,16 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                               <span className={`font-bold text-[9px] px-1.5 py-0.5 rounded uppercase ${task.priority === 'High' ? 'bg-ip-error-container text-ip-on-error-container' : 'bg-ip-surface-container-highest text-ip-on-surface-variant'}`}>
                                 {task.priority || 'Medium'}
                               </span>
-                              <span className="font-mono text-[10px] text-ip-outline">
-                                #{task.id.split('-')[0]}-{task.id.split('-')[1]?.substring(0,3)}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-[10px] text-ip-outline">
+                                  #{task.id.split('-')[0]}-{task.id.split('-')[1]?.substring(0,3)}
+                                </span>
+                                {isManagerOrAdmin && (
+                                  <button onClick={(e) => handleDeleteTask(task.id, e)} className="text-ip-outline hover:text-ip-error transition-colors" title="Delete Task">
+                                    <Trash2 size={12} />
+                                  </button>
+                                )}
+                              </div>
                             </div>
                             <h4 className={`font-bold text-[13px] leading-tight mb-2 ${col.id === 'done' ? 'line-through text-ip-outline' : 'text-ip-on-surface'}`}>
                               {task.title}
@@ -250,6 +266,7 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                         <th className="px-4 py-2.5 text-[10px] font-bold tracking-wider uppercase text-ip-on-surface-variant">Priority</th>
                         <th className="px-4 py-2.5 text-[10px] font-bold tracking-wider uppercase text-ip-on-surface-variant">Due</th>
                         <th className="px-4 py-2.5 text-[10px] font-bold tracking-wider uppercase text-ip-on-surface-variant">Assignee</th>
+                        {isManagerOrAdmin && <th className="px-4 py-2.5 text-[10px] font-bold tracking-wider uppercase text-ip-on-surface-variant text-right">Actions</th>}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-ip-outline-variant/50">
@@ -289,11 +306,18 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                               )}
                             </div>
                           </td>
+                          {isManagerOrAdmin && (
+                            <td className="px-4 py-3 text-right">
+                              <button onClick={(e) => handleDeleteTask(task.id, e)} className="text-ip-outline hover:text-ip-error transition-colors p-1" title="Delete Task">
+                                <Trash2 size={14} />
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       ))}
                       {tasks.length === 0 && (
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-ip-on-surface-variant italic">No tasks found.</td>
+                          <td colSpan={isManagerOrAdmin ? 6 : 5} className="px-4 py-8 text-center text-ip-on-surface-variant italic">No tasks found.</td>
                         </tr>
                       )}
                     </tbody>

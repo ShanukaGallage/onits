@@ -147,6 +147,9 @@ export const updateTaskStatus = async (req: Request, res: Response) => {
  */
 export const deleteTask = async (req: Request, res: Response) => {
   try {
+    if (req.user?.role !== 'Admin' && req.user?.role !== 'ProjectManager') {
+      return res.status(403).json({ errorCode: 403, message: 'Forbidden: only Admin or ProjectManager can delete tasks' });
+    }
     const result = await taskService.deleteTask(req.params.id);
     return res.status(200).json(result);
   } catch (error) {
