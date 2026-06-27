@@ -92,5 +92,7 @@ export interface Notification {
   message: string;
   isRead: boolean;
   userId: string;
+  type?: string;
+  taskId?: string;
   createdAt: string;
 }

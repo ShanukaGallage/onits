@@ -16,7 +16,7 @@ export const transporter = nodemailer.createTransport({
  * your own email to receive all test emails regardless of the real recipient.
  * In production (NODE_ENV=production), emails go to the real recipient.
  */
-function resolveRecipient(realTo: string): string {
+export function resolveRecipient(realTo: string): string {
   if (process.env.NODE_ENV !== 'production' && process.env.DEV_EMAIL_OVERRIDE) {
     return process.env.DEV_EMAIL_OVERRIDE;
   }

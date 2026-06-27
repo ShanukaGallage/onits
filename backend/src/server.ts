@@ -13,6 +13,7 @@ import commentRouter from './routes/comment.routes';
 import attachmentRouter from './routes/attachment.routes';
 import channelRouter from './routes/channel.routes';
 import messageRouter from './routes/message.routes';
+import notificationRouter from './routes/notification.routes';
 import { startCronJobs } from './utils/cron';
 import { verifyMailer } from './utils/mailer';
 import { initSocket } from './socket/socket';
@@ -73,6 +74,7 @@ app.use('/api/tasks/:taskId/comments', commentRouter);
 app.use('/api/tasks/:taskId/attachments', attachmentRouter);
 app.use('/api/channels', channelRouter);
 app.use('/api/channels/:channelId/messages', messageRouter);
+app.use('/api/notifications', notificationRouter);
 
 // Swagger setup
 const swaggerSpec = swaggerJsdoc({

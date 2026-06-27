@@ -3,15 +3,7 @@ import { Priority, TaskStatus, NotificationType } from '@prisma/client';
 import { getIO } from '../socket/socket';
 import { sendTaskAssignedEmail } from '../utils/mailer';
 
-/**
- * Helper function to create a notification record and emit a Socket.io event.
- */
-async function createNotification(userId: string, type: NotificationType, message: string, taskId?: string) {
-  const notification = await prisma.notification.create({
-    data: { userId, type, message, taskId }
-  });
-  getIO().to(userId).emit('notification:new', notification);
-}
+import { createNotification } from './notification.service';
 
 /**
  * Returns all tasks for a project, optionally filtered by status and priority, and optionally sorted.
@@ -185,7 +177,9 @@ export async function updateTask(
   const existing = await prisma.task.findUnique({
     where: { id },
     include: {
-      assignments: true,
+      assignments: {
+        include: { user: true }
+      },
     },
   });
 
@@ -226,7 +220,8 @@ export async function updateTask(
         assignment.userId,
         'StatusChanged',
         `Task "${updatedTask.title}" status changed to ${data.status}`,
-        id
+        id,
+        assignment.user
       );
     }
   }
@@ -293,11 +288,13 @@ export async function assignTask(taskId: string, userId: string) {
     },
   });
 
+  const userToAssign = await prisma.user.findUnique({ where: { id: userId } });
   await createNotification(
     userId,
     'TaskAssigned',
     `You have been assigned to task: ${task.title}`,
-    taskId
+    taskId,
+    userToAssign || undefined
   );
 
   const updated = await prisma.task.findUnique({

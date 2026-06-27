@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '@/features/notifications/hooks/useNotifications';
+import { useRealtimeNotifications } from '@/features/notifications/hooks/useRealtimeNotifications';
 
 const routeTitles: Record<string, string> = {
   '/dashboard': 'Home',
@@ -19,6 +20,8 @@ export default function Header() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { data: notifications } = useNotifications();
+  
+  useRealtimeNotifications();
 
   const unreadCount = notifications?.filter((n) => !n.isRead).length ?? 0;
   const currentTab = searchParams.get('tab') || 'list';

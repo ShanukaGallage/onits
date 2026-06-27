@@ -2,16 +2,7 @@ import { prisma, safeUserSelect } from '../config/db';
 import { NotificationType } from '@prisma/client';
 import { getIO } from '../socket/socket';
 
-/**
- * Helper function to create a notification record and emit a Socket.io event.
- */
-async function createNotification(userId: string, type: NotificationType, message: string, taskId?: string) {
-  const notification = await prisma.notification.create({
-    data: { userId, type, message, taskId }
-  });
-  getIO().to(userId).emit('notification:new', notification);
-}
-
+import { createNotification } from './notification.service';
 /**
  * Return all comments for a task with createdBy (select safeUserSelect)
  * If task not found: throw new Error('Task not found')
@@ -46,8 +37,8 @@ export async function createComment(
     select: {
       title: true,
       assignments: {
-        select: {
-          userId: true,
+        include: {
+          user: true,
         },
       },
     },
@@ -71,14 +62,14 @@ export async function createComment(
   });
 
   // Get all task assignees and notify them (except comment creator)
-  const assigneeIds = task.assignments.map((assignment) => assignment.userId);
-  for (const assigneeId of assigneeIds) {
-    if (assigneeId !== createdById) {
+  for (const assignment of task.assignments) {
+    if (assignment.userId !== createdById) {
       await createNotification(
-        assigneeId,
+        assignment.userId,
         'CommentAdded',
         `New comment on task: "${task.title}"`,
-        data.taskId
+        data.taskId,
+        assignment.user
       );
     }
   }

@@ -2,6 +2,7 @@ import { prisma, safeUserSelect } from '../config/db';
 import type { SafeUser } from '../config/db';
 import bcrypt from 'bcryptjs';
 import { sendWelcomeEmail, sendPasswordChangedEmail } from '../utils/mailer';
+import { createNotification } from './notification.service';
 import { Role } from '@prisma/client';
 
 /**
@@ -101,7 +102,7 @@ export async function updateUser(id: string, data: { name?: string; role?: Role 
     throw new Error('User not found');
   }
 
-  return prisma.user.update({
+  const updated = await prisma.user.update({
     where: { id },
     data: {
       name: data.name,
@@ -109,6 +110,18 @@ export async function updateUser(id: string, data: { name?: string; role?: Role 
     },
     select: safeUserSelect,
   });
+
+  if (data.role && data.role !== existingUser.role) {
+    await createNotification(
+      id,
+      'AdminUpdate',
+      `Your role has been changed to ${data.role}`,
+      undefined,
+      existingUser
+    );
+  }
+
+  return updated;
 }
 
 /**
@@ -146,13 +159,23 @@ export async function deactivateUser(id: string): Promise<SafeUser> {
     throw new Error('User not found');
   }
 
-  return prisma.user.update({
+  const updated = await prisma.user.update({
     where: { id },
     data: {
       status: 'Deactivated',
     },
     select: safeUserSelect,
   });
+
+  await createNotification(
+    id,
+    'AdminUpdate',
+    'Your account has been deactivated.',
+    undefined,
+    existingUser
+  );
+
+  return updated;
 }
 
 /**
@@ -168,13 +191,23 @@ export async function reactivateUser(id: string): Promise<SafeUser> {
     throw new Error('User not found');
   }
 
-  return prisma.user.update({
+  const updated = await prisma.user.update({
     where: { id },
     data: {
       status: 'Active',
     },
     select: safeUserSelect,
   });
+
+  await createNotification(
+    id,
+    'AdminUpdate',
+    'Your account has been reactivated.',
+    undefined,
+    existingUser
+  );
+
+  return updated;
 }
 
 /**
