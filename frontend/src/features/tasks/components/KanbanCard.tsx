@@ -17,7 +17,7 @@ export default function KanbanCard({ task, isOverlay = false }: KanbanCardProps)
   const handleDeleteTask = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this task?')) {
-      deleteTaskMutation.mutate(task.id);
+      deleteTaskMutation.mutate({ taskId: task.id, projectId: task.projectId });
     }
   };
 

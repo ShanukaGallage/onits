@@ -171,10 +171,29 @@ export function useDeleteTask() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) =>
-      api.delete<{ message: string }>(`/tasks/${id}`).then((r) => r.data),
-    onSuccess: () => {
+    mutationFn: ({ taskId }: { taskId: string; projectId?: string }) =>
+      api.delete<{ message: string }>(`/tasks/${taskId}`).then((r) => r.data),
+    onMutate: ({ taskId, projectId }) => {
+      if (projectId) {
+        // Optimistically remove the task from the SWR project cache
+        void swrMutate(
+          `/projects/${projectId}`,
+          (currentData: any) => {
+            if (!currentData) return currentData;
+            return {
+              ...currentData,
+              tasks: currentData.tasks?.filter((t: any) => t.id !== taskId),
+            };
+          },
+          { revalidate: false }
+        );
+      }
+    },
+    onSuccess: (_data, variables) => {
       void queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      if (variables.projectId) {
+        void swrMutate(`/projects/${variables.projectId}`);
+      }
     },
   });
 }

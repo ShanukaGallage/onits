@@ -27,7 +27,7 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
   const handleDeleteTask = (taskId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this task?')) {
-      deleteTaskMutation.mutate(taskId);
+      deleteTaskMutation.mutate({ taskId, projectId: project?.id });
     }
   };
   
