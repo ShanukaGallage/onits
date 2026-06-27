@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Camera, Upload, Trash2, Loader2 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getAvatarUrl, getInitials } from '@/lib/utils';
 import { toast } from 'sonner';
 import api from '@/lib/axios';
 
@@ -63,18 +65,7 @@ export default function ProfilePage() {
   };
 
   // Get initials for the fallback avatar
-  const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
-  // Construct full URL if needed (axios usually handles relative to base URL, but for images we need the full host)
-  // Assuming the backend is running on the API base URL port
-  const getAvatarUrl = (path: string) => {
-    // If the path is already a full URL, return it
-    if (path.startsWith('http')) return path;
-    // Otherwise prepend the backend origin (e.g. http://localhost:5000)
-    // We can infer this from import.meta.env.VITE_API_URL, dropping the /api part
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-    const baseUrl = apiUrl.replace('/api', '');
-    return `${baseUrl}${path}`;
-  };
+  const initials = getInitials(user?.name);
 
   return (
     <div className="font-jakarta pb-24 md:pb-6">
@@ -99,17 +90,12 @@ export default function ProfilePage() {
                 onChange={handleFileChange}
               />
               <div className="relative mb-4 group cursor-pointer" onClick={handleUpdatePhotoClick}>
-                {user?.avatarUrl ? (
-                  <img 
-                    src={getAvatarUrl(user.avatarUrl)} 
-                    alt="Profile Avatar" 
-                    className="w-24 h-24 rounded-full border border-ip-outline-variant object-cover shadow-md"
-                  />
-                ) : (
-                  <div className="w-24 h-24 rounded-full border border-ip-outline-variant flex items-center justify-center text-ip-on-primary text-3xl font-bold bg-gradient-to-br from-ip-primary to-ip-primary-container shadow-md">
+                <Avatar className="w-24 h-24 rounded-full border border-ip-outline-variant shadow-md">
+                  <AvatarImage src={user?.avatarUrl ? getAvatarUrl(user.avatarUrl) : ''} alt="Profile Avatar" className="object-cover" />
+                  <AvatarFallback className="bg-gradient-to-br from-ip-primary to-ip-primary-container text-ip-on-primary text-3xl font-bold">
                     {initials}
-                  </div>
-                )}
+                  </AvatarFallback>
+                </Avatar>
                 <div className={`absolute inset-0 bg-ip-on-surface/40 rounded-full flex items-center justify-center transition-opacity ${isUploading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                   {isUploading ? <Loader2 className="text-ip-surface-container-lowest animate-spin" size={24} /> : <Camera className="text-ip-surface-container-lowest" size={24} />}
                 </div>

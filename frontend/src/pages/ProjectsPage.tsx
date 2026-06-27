@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Plus, Archive, ArchiveRestore, UserPlus, X, Loader2 } from 'lucide-react';
 import { useProjects } from '../features/projects/hooks/useProjects';
 import CreateProjectModal from '../features/projects/components/CreateProjectModal';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getAvatarUrl, getInitials } from '@/lib/utils';
 import type { ProjectStatus } from '@/types';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -32,17 +34,6 @@ export default function ProjectsPage() {
   const filteredProjects = projects?.filter(p => 
     showArchived ? p.status === 'Archived' : p.status !== 'Archived'
   ) || [];
-
-  const getAvatarUrl = (path?: string) => {
-    if (!path) return null;
-    if (path.startsWith('http')) return path;
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-    return `${apiUrl.replace('/api', '')}${path}`;
-  };
-
-  const getInitials = (name?: string) => {
-    return name ? name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
-  };
 
   if (isError) return <div className="p-6 text-ip-error">Failed to load projects.</div>;
 
@@ -114,17 +105,12 @@ export default function ProjectsPage() {
                       const avatarUrl = getAvatarUrl(user?.avatarUrl);
                       return (
                         <div key={member.userId} title={user?.name} className="relative">
-                          {avatarUrl ? (
-                            <img 
-                              src={avatarUrl} 
-                              alt={user?.name} 
-                              className={`w-8 h-8 rounded-full border-2 border-ip-surface-container-lowest object-cover ${project.status === 'Completed' ? 'grayscale' : ''}`}
-                            />
-                          ) : (
-                            <div className={`w-8 h-8 rounded-full border-2 border-ip-surface-container-lowest bg-gradient-to-br from-ip-primary to-ip-primary-container text-ip-on-primary flex items-center justify-center text-[11px] font-bold ${project.status === 'Completed' ? 'grayscale' : ''}`}>
+                          <Avatar className={`w-8 h-8 border-2 border-ip-surface-container-lowest ${project.status === 'Completed' ? 'grayscale' : ''}`}>
+                            <AvatarImage src={avatarUrl || ''} alt={user?.name || 'Member'} className="object-cover" />
+                            <AvatarFallback className="bg-gradient-to-br from-ip-primary to-ip-primary-container text-ip-on-primary text-[11px] font-bold">
                               {getInitials(user?.name)}
-                            </div>
-                          )}
+                            </AvatarFallback>
+                          </Avatar>
                         </div>
                       );
                     })}

@@ -12,6 +12,8 @@ import {
   CheckCircle, Calendar,
   Globe, Lock, Tag, Trash2
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getAvatarUrl, getInitials } from '@/lib/utils';
 import { useDeleteTask } from '@/features/tasks/hooks/useTasks';
 import type { ProjectStatus } from '@/types';
 
@@ -51,16 +53,6 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
   const donePercent = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
   const inProgressPercent = totalTasks > 0 ? Math.round((inProgressTasks / totalTasks) * 100) : 0;
 
-  const getAvatarUrl = (path?: string) => {
-    if (!path) return null;
-    if (path.startsWith('http')) return path;
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-    return `${apiUrl.replace('/api', '')}${path}`;
-  };
-
-  const getInitials = (name?: string) => {
-    return name ? name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
-  };
 
   // Status Badge mappings
   const statusColors: Record<ProjectStatus, string> = {
@@ -230,13 +222,12 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                               {task.assignments && task.assignments.length > 0 && (
                                 <div className="flex -space-x-1.5">
                                   {task.assignments.map((assignment: any) => assignment.user ? (
-                                    <div key={assignment.user.id} className={`w-5 h-5 rounded-full bg-ip-surface-container-high border border-ip-outline-variant flex items-center justify-center overflow-hidden ${col.id === 'done' ? 'grayscale opacity-60' : ''}`}>
-                                      {assignment.user.avatarUrl ? (
-                                        <img src={getAvatarUrl(assignment.user.avatarUrl) || ''} alt={assignment.user.name} className="w-full h-full object-cover" />
-                                      ) : (
-                                        <span className="text-[8px] font-bold text-ip-on-surface-variant">{getInitials(assignment.user.name)}</span>
-                                      )}
-                                    </div>
+                                    <Avatar key={assignment.user.id} className={`w-5 h-5 border border-ip-outline-variant shrink-0 ${col.id === 'done' ? 'grayscale opacity-60' : ''}`}>
+                                      <AvatarImage src={getAvatarUrl(assignment.user.avatarUrl) || ''} alt={assignment.user.name} className="object-cover" />
+                                      <AvatarFallback className="bg-ip-surface-container-high text-[8px] font-bold text-ip-on-surface-variant">
+                                        {getInitials(assignment.user.name)}
+                                      </AvatarFallback>
+                                    </Avatar>
                                   ) : null)}
                                 </div>
                               )}
@@ -291,13 +282,12 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                               {task.assignments && task.assignments.length > 0 ? (
                                 task.assignments.map((assignment: any) => (
                                   <div key={assignment.user.id} className="flex items-center gap-1 bg-ip-surface-container px-1.5 py-0.5 rounded-full border border-ip-outline-variant/30">
-                                    <div className="w-4 h-4 rounded-full bg-ip-surface-container-high border border-ip-outline-variant flex items-center justify-center overflow-hidden">
-                                      {assignment.user.avatarUrl ? (
-                                        <img src={getAvatarUrl(assignment.user.avatarUrl) || ''} alt={assignment.user.name} className="w-full h-full object-cover" />
-                                      ) : (
-                                        <span className="text-[7px] font-bold text-ip-on-surface-variant">{getInitials(assignment.user.name)}</span>
-                                      )}
-                                    </div>
+                                    <Avatar className="w-4 h-4 border border-ip-outline-variant shrink-0">
+                                      <AvatarImage src={getAvatarUrl(assignment.user.avatarUrl) || ''} alt={assignment.user.name} className="object-cover" />
+                                      <AvatarFallback className="bg-ip-surface-container-high text-[7px] font-bold text-ip-on-surface-variant">
+                                        {getInitials(assignment.user.name)}
+                                      </AvatarFallback>
+                                    </Avatar>
                                     <span className="text-[10px] font-medium text-ip-on-surface">{assignment.user.name}</span>
                                   </div>
                                 ))
@@ -392,13 +382,12 @@ export default function ProjectDetail({ projectId }: { projectId?: string }) {
                 const avatarUrl = getAvatarUrl(u?.avatarUrl);
                 return (
                   <div key={member.userId} className="flex items-center gap-3">
-                    {avatarUrl ? (
-                      <img src={avatarUrl} alt={u?.name} className="w-8 h-8 rounded-full object-cover border border-ip-outline-variant" />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ip-primary/80 to-ip-primary text-ip-on-primary flex items-center justify-center font-bold text-[10px]">
+                    <Avatar className="w-8 h-8 border border-ip-outline-variant shrink-0">
+                      <AvatarImage src={avatarUrl || ''} alt={u?.name} className="object-cover" />
+                      <AvatarFallback className="bg-gradient-to-br from-ip-primary/80 to-ip-primary text-ip-on-primary font-bold text-[10px]">
                         {getInitials(u?.name)}
-                      </div>
-                    )}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="min-w-0">
                       <div className="font-bold text-ip-on-surface text-[13px] truncate">{u?.name}</div>
                       <div className="text-[11px] text-ip-on-surface-variant font-medium truncate">

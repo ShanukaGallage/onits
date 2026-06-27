@@ -30,8 +30,6 @@ dotenv.config();
 
 const app = express();
 
-// Serve static uploads (e.g. avatars)
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Security middleware
 app.use(helmet({
@@ -62,6 +60,9 @@ app.use(
 // Body parsers
 app.use(express.json());
 app.use(cookieParser());
+
+// Serve static uploads (e.g. avatars) AFTER cors and helmet
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // API Routes
 app.use('/api/auth', authRouter);

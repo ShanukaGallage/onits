@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useUsers, useDeactivateUser, useReactivateUser, useDeleteUser } from '../hooks/useUsers';
 import type { User, Role, UserStatus } from '@/types';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getAvatarUrl, getInitials } from '@/lib/utils';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -56,10 +58,6 @@ function getStatusUI(status: UserStatus) {
         label: 'OFFLINE',
       };
   }
-}
-
-function getInitials(name: string) {
-  return name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase();
 }
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -179,13 +177,12 @@ export default function UserTable() {
 
               return (
                 <div key={user.id} className="grid grid-cols-1 md:grid-cols-[auto_1fr_1fr_1fr_auto] gap-md p-md border-b border-outline-variant hover:bg-surface-container transition-colors items-center group last:border-b-0">
-                  <div className="w-10 h-10 rounded-full bg-primary-container overflow-hidden border-2 border-surface flex-shrink-0 flex items-center justify-center text-on-primary font-bold">
-                    {user.avatarUrl ? (
-                      <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
-                    ) : (
-                      getInitials(user.name)
-                    )}
-                  </div>
+                  <Avatar className="w-10 h-10 border-2 border-surface flex-shrink-0">
+                    <AvatarImage src={getAvatarUrl(user.avatarUrl)} alt={user.name} className="object-cover" />
+                    <AvatarFallback className="bg-primary-container text-on-primary font-bold">
+                      {getInitials(user.name)}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
                     <h4 className="text-body-lg font-medium text-on-surface">{user.name}</h4>
                     <span className="font-label-code text-label-code text-on-surface-variant">{user.email}</span>

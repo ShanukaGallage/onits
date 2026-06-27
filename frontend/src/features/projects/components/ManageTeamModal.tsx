@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useAddMember, useRemoveMember } from '../hooks/useProjects';
 import { useUsers } from '@/features/users/hooks/useUsers';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { getAvatarUrl, getInitials } from '@/lib/utils';
 import type { Project } from '@/types';
 import { X, Users, ChevronsUpDown, Loader2 } from 'lucide-react';
 
@@ -66,17 +68,6 @@ export default function ManageTeamModal({ open, onOpenChange, project, onMutate 
     }
   };
 
-  const getInitials = (name?: string) => {
-    return name ? name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : '?';
-  };
-
-  const getAvatarUrl = (path?: string) => {
-    if (!path) return null;
-    if (path.startsWith('http')) return path;
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-    return `${apiUrl.replace('/api', '')}${path}`;
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] w-full border-ip-outline-variant bg-ip-surface-container-lowest font-jakarta shadow-2xl rounded-2xl p-0 overflow-hidden flex flex-col">
@@ -119,9 +110,12 @@ export default function ManageTeamModal({ open, onOpenChange, project, onMutate 
                           onSelect={() => handleAddUser(u.id)}
                           className="flex items-center gap-2 cursor-pointer"
                         >
-                          <div className="w-6 h-6 rounded-full bg-ip-surface-container-high flex items-center justify-center font-bold text-[10px] shrink-0 overflow-hidden">
-                            {u.avatarUrl ? <img src={getAvatarUrl(u.avatarUrl)!} alt={u.name} className="w-full h-full object-cover" /> : getInitials(u.name)}
-                          </div>
+                          <Avatar className="w-6 h-6 border border-ip-outline-variant shrink-0">
+                            <AvatarImage src={getAvatarUrl(u.avatarUrl) || ''} alt={u.name} className="object-cover" />
+                            <AvatarFallback className="bg-ip-surface-container-high font-bold text-[10px]">
+                              {getInitials(u.name)}
+                            </AvatarFallback>
+                          </Avatar>
                           <div className="flex flex-col min-w-0">
                             <span className="font-semibold text-sm truncate">{u.name}</span>
                             <span className="text-xs text-ip-on-surface-variant truncate">{u.email}</span>
@@ -147,9 +141,12 @@ export default function ManageTeamModal({ open, onOpenChange, project, onMutate 
                 return (
                   <div key={member.userId} className="flex items-center justify-between p-3 rounded-xl border border-ip-outline-variant bg-ip-surface shadow-sm">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-full border border-ip-outline-variant flex items-center justify-center overflow-hidden bg-gradient-to-br from-ip-primary/80 to-ip-primary text-ip-on-primary font-bold text-[11px] shrink-0">
-                        {u.avatarUrl ? <img src={getAvatarUrl(u.avatarUrl)!} alt={u.name} className="w-full h-full object-cover" /> : getInitials(u.name)}
-                      </div>
+                      <Avatar className="w-9 h-9 border border-ip-outline-variant shrink-0">
+                        <AvatarImage src={getAvatarUrl(u.avatarUrl) || ''} alt={u.name} className="object-cover" />
+                        <AvatarFallback className="bg-gradient-to-br from-ip-primary/80 to-ip-primary text-ip-on-primary font-bold text-[11px]">
+                          {getInitials(u.name)}
+                        </AvatarFallback>
+                      </Avatar>
                       <div className="min-w-0">
                         <div className="font-bold text-ip-on-surface text-sm flex items-center gap-2 truncate">
                           {u.name} 
