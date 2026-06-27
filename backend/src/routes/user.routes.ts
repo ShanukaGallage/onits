@@ -20,7 +20,6 @@ const router = Router();
 router.get(
   '/',
   authenticate,
-  authorize(['Admin']),
   getAllUsers
 );
 
