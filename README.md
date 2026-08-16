@@ -1,76 +1,100 @@
-# OnIts - Project Management System
+# OnIts
 
-## Project Overview
+OnIts is a full-stack task and project management platform for teams.
 
-OnIts is a comprehensive, full-stack Project Management and Task Tracking system designed to facilitate seamless collaboration across distributed teams. The system provides secure role-based access control (Admin, Project Manager, Collaborator), real-time task updates via WebSockets, and dynamic Kanban and Table layouts for efficient project execution.
+**Production:** https://www.onits.app
 
-## Technologies & Frameworks
+## Tech Stack
 
-**Frontend:**
+- **Frontend:** React + Vite + TypeScript + Tailwind
+- **Backend:** Node.js + Express + TypeScript
+- **Database:** PostgreSQL (Neon) with Prisma ORM
+- **Realtime:** Socket.IO
 
-- React 18
-- Vite
-- Tailwind CSS
-- Shadcn UI (Radix Primitives)
-- React Query (Data Fetching & Caching)
-- React Hook Form + Zod (Validation)
-- Socket.IO Client (Real-time updates)
+## Repository Structure
 
-**Backend:**
+- `/frontend` – React SPA (Vite)
+- `/backend` – Express API + Prisma
+- `/docker-compose.yml` – local Docker development setup
 
-- Node.js & Express
-- TypeScript
-- Prisma ORM
-- PostgreSQL (Neon Cloud)
-- Socket.IO (WebSockets)
-- JWT (Authentication)
-- Bcryptjs (Password Hashing)
-- Swagger / OpenAPI (Documentation)
+## Prerequisites
 
-**Infrastructure:**
+- Node.js 20+
+- npm 10+
+- Docker + Docker Compose (optional, recommended for local containerized dev)
 
-- Docker & Docker Compose
-- GitHub Actions (CI/CD)
-- Azure Web App for Containers (Backend Hosting)
-- Azure Static Web Apps (Frontend Hosting)
+## Environment Setup
 
-## Setup & Local Installation
+### Backend
 
-### Prerequisites
-
-- Docker and Docker Compose installed on your local machine.
-- Node.js v20+ (optional, if running outside Docker).
-
-### Running with Docker Compose (Recommended)
-
-1. Clone the repository:
-
+1. Copy:
    ```bash
-   git clone https://github.com/your-org/onits.git
-   cd onits
+   cp /home/runner/work/onits/onits/backend/.env.example /home/runner/work/onits/onits/backend/.env
    ```
+2. Fill required values in `/home/runner/work/onits/onits/backend/.env`:
+   - `DATABASE_URL` (Neon pooler URL)
+   - `DIRECT_URL` (Neon direct URL for migrations)
+   - `JWT_SECRET`
+   - `FRONTEND_URL`
+   - mail/test SMTP variables
 
-2. Configure environment variables:
-   - Copy `backend/.env.example` to `backend/.env` and fill in your database credentials and JWT secret.
-   - Copy `frontend/.env.example` to `frontend/.env`.
+### Frontend
 
-3. Start the containers:
+Create `/home/runner/work/onits/onits/frontend/.env` with:
 
-   ```bash
-   docker-compose up --build
-   ```
+```env
+VITE_API_URL=http://localhost:5000
+```
 
-4. Access the application:
-   - **Frontend:** http://localhost:5173
-   - **Backend API:** http://localhost:5000
+## Run Locally
 
-## API Documentation
+### Option 1: Docker Compose
 
-All REST API endpoints are fully documented using Swagger / OpenAPI.
-Once the backend is running locally, you can access the interactive API explorer at:
-👉 **[http://localhost:5000/api/docs](http://localhost:5000/api/docs)**
+```bash
+cd /home/runner/work/onits/onits
+docker-compose up --build
+```
 
-## Team Member Contributions
+- Frontend: http://localhost:5173
+- Backend: http://localhost:5000
+- API docs: http://localhost:5000/api/docs
 
-- **Shanuka (Project Coordinator, DevOps Lead & Backend Architect):**
-  -
+### Option 2: Native (without Docker)
+
+```bash
+cd /home/runner/work/onits/onits
+npm install
+```
+
+Start backend:
+
+```bash
+npm run dev --workspace=backend
+```
+
+Start frontend (new terminal):
+
+```bash
+npm run dev --workspace=frontend
+```
+
+## Useful Commands
+
+From repository root (`/home/runner/work/onits/onits`):
+
+```bash
+npm run dev:native
+npm run build --workspace=backend
+npm run build --workspace=frontend
+npm run lint --workspace=frontend
+```
+
+## Security & Architecture Notes
+
+- Authentication uses JWT in HttpOnly cookies.
+- Backend uses Prisma (no raw SQL).
+- Frontend API requests should go through the centralized Axios client.
+
+## License
+
+Private project.
