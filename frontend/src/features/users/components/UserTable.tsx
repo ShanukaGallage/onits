@@ -29,14 +29,14 @@ function getRoleUI(role: Role) {
       };
     case 'ProjectManager':
       return {
-        containerClass: 'bg-secondary-container text-on-secondary-container border border-outline-variant',
+        containerClass: 'bg-secondary-container text-on-secondary-container border border-border',
         icon: 'architecture',
         label: 'PROJECT MANAGER',
       };
     case 'Collaborator':
     default:
       return {
-        containerClass: 'bg-surface-variant text-on-surface-variant border border-outline-variant',
+        containerClass: 'bg-muted text-muted-foreground border border-border',
         icon: 'person',
         label: 'COLLABORATOR',
       };
@@ -54,7 +54,7 @@ function getStatusUI(status: UserStatus) {
     case 'Deactivated':
     default:
       return {
-        containerClass: 'bg-surface-variant text-on-surface-variant',
+        containerClass: 'bg-muted text-muted-foreground',
         dotClass: 'bg-outline',
         label: 'OFFLINE',
       };
@@ -118,7 +118,7 @@ export default function UserTable({ roleFilter = 'All' }: UserTableProps) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-10 w-full max-w-xs rounded-lg" />
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden">
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="p-md space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex gap-4 items-center">
@@ -138,10 +138,10 @@ export default function UserTable({ roleFilter = 'All' }: UserTableProps) {
   // ─── Error state ────────────────────────────────────────────────────────────
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 bg-surface-container-lowest border border-outline-variant rounded-xl text-center gap-3">
-        <UserX className="w-10 h-10 text-error" />
-        <p className="text-body-lg font-medium text-error">Failed to load users</p>
-        <p className="text-body-sm text-on-surface-variant">
+      <div className="flex flex-col items-center justify-center py-20 bg-card border border-border rounded-xl text-center gap-3">
+        <UserX className="w-10 h-10 text-destructive" />
+        <p className="text-body-lg font-medium text-destructive">Failed to load users</p>
+        <p className="text-body-sm text-muted-foreground">
           Something went wrong while fetching the user list. Please try again.
         </p>
       </div>
@@ -155,9 +155,9 @@ export default function UserTable({ roleFilter = 'All' }: UserTableProps) {
     <div className="space-y-4">
       {/* Search Bar */}
       <div className="relative w-full max-w-sm">
-        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">search</span>
         <input 
-          className="w-full pl-10 pr-4 py-2 rounded-lg border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-body-md text-body-md shadow-sm" 
+          className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-foreground focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-body-md text-body-md shadow-sm" 
           placeholder="Search users..." 
           type="text"
           value={searchInput}
@@ -166,20 +166,20 @@ export default function UserTable({ roleFilter = 'All' }: UserTableProps) {
       </div>
 
       {/* Users Data Table (Card Style) */}
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden flex flex-col">
+      <div className="bg-card border border-border rounded-xl overflow-hidden flex flex-col">
         {/* Table Header */}
-        <div className="hidden md:grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-md p-md border-b border-outline-variant bg-surface-container-low items-center">
+        <div className="hidden md:grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-md p-md border-b border-border bg-muted/50 items-center">
           <div className="w-10"></div> {/* Avatar spacer */}
-          <span className="font-label-caps text-label-caps text-on-surface-variant">USER DETAILS</span>
-          <span className="font-label-caps text-label-caps text-on-surface-variant">ROLE & DEPARTMENT</span>
-          <span className="font-label-caps text-label-caps text-on-surface-variant">STATUS</span>
-          <span className="font-label-caps text-label-caps text-on-surface-variant text-right">ACTIONS</span>
+          <span className="font-label-caps text-label-caps text-muted-foreground">USER DETAILS</span>
+          <span className="font-label-caps text-label-caps text-muted-foreground">ROLE & DEPARTMENT</span>
+          <span className="font-label-caps text-label-caps text-muted-foreground">STATUS</span>
+          <span className="font-label-caps text-label-caps text-muted-foreground text-right">ACTIONS</span>
         </div>
 
         {/* List Items */}
         <div className="flex flex-col">
           {!users || users.length === 0 ? (
-            <div className="p-12 text-center text-body-md text-on-surface-variant">
+            <div className="p-12 text-center text-body-md text-muted-foreground">
               No users found{debouncedSearch ? ` for "${debouncedSearch}"` : ''}.
             </div>
           ) : (
@@ -188,35 +188,35 @@ export default function UserTable({ roleFilter = 'All' }: UserTableProps) {
               const statusUI = getStatusUI(user.status);
 
               return (
-                <div key={user.id} className="grid grid-cols-1 md:grid-cols-[auto_1fr_1fr_1fr_auto] gap-md p-md border-b border-outline-variant hover:bg-surface-container transition-colors items-center group last:border-b-0">
+                <div key={user.id} className="grid grid-cols-1 md:grid-cols-[auto_1fr_1fr_1fr_auto] gap-md p-md border-b border-border hover:bg-muted transition-colors items-center group last:border-b-0">
                   <Avatar className="w-10 h-10 border-2 border-surface flex-shrink-0">
                     <AvatarImage src={getAvatarUrl(user.avatarUrl)} alt={user.name} className="object-cover" />
-                    <AvatarFallback className="bg-primary-container text-on-primary font-bold">
+                    <AvatarFallback className="bg-primary/20 text-primary-foreground font-bold">
                       {getInitials(user.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h4 className="text-body-lg font-medium text-on-surface">{user.name}</h4>
-                    <span className="font-label-code text-label-code text-on-surface-variant">{user.email}</span>
+                    <h4 className="text-body-lg font-medium text-foreground">{user.name}</h4>
+                    <span className="font-mono text-xs text-muted-foreground">{user.email}</span>
                   </div>
                   <div>
                     <div className={`inline-flex items-center gap-xs px-2 py-1 rounded ${roleUI.containerClass}`}>
                       <span className="material-symbols-outlined text-[14px]">{roleUI.icon}</span>
                       <span className="font-label-caps text-label-caps">{roleUI.label}</span>
                     </div>
-                    <span className="block text-body-sm text-on-surface-variant mt-xs">Department</span>
+                    <span className="block text-body-sm text-muted-foreground mt-xs">Department</span>
                   </div>
                   <div>
                     <div className={`inline-flex items-center gap-xs px-2 py-1 rounded ${statusUI.containerClass}`}>
                       <span className={`w-2 h-2 rounded-full ${statusUI.dotClass}`}></span>
                       <span className="font-label-caps text-label-caps">{statusUI.label}</span>
                     </div>
-                    <span className="block text-body-sm text-on-surface-variant mt-xs">Last login: N/A</span>
+                    <span className="block text-body-sm text-muted-foreground mt-xs">Last login: N/A</span>
                   </div>
                   <div className="flex justify-end gap-xs opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={() => setEditUser(user)}
-                      className="p-2 rounded hover:bg-surface-variant text-on-surface-variant hover:text-primary transition-colors" 
+                      className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-primary transition-colors" 
                       title="Edit User"
                     >
                       <span className="material-symbols-outlined text-lg">edit</span>
@@ -224,7 +224,7 @@ export default function UserTable({ roleFilter = 'All' }: UserTableProps) {
                     {user.status === 'Deactivated' ? (
                       <button 
                         onClick={() => openConfirm(user, 'reactivate')}
-                        className="p-2 rounded hover:bg-surface-variant text-on-surface-variant hover:text-[#10b981] transition-colors" 
+                        className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-[#10b981] transition-colors" 
                         title="Reactivate"
                       >
                         <span className="material-symbols-outlined text-lg">check_circle</span>
@@ -232,7 +232,7 @@ export default function UserTable({ roleFilter = 'All' }: UserTableProps) {
                     ) : (
                       <button 
                         onClick={() => openConfirm(user, 'deactivate')}
-                        className="p-2 rounded hover:bg-surface-variant text-on-surface-variant hover:text-error transition-colors" 
+                        className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors" 
                         title="Deactivate"
                       >
                         <span className="material-symbols-outlined text-lg">block</span>
@@ -240,7 +240,7 @@ export default function UserTable({ roleFilter = 'All' }: UserTableProps) {
                     )}
                     <button 
                       onClick={() => openConfirm(user, 'delete')}
-                      className="p-2 rounded hover:bg-surface-variant text-on-surface-variant hover:text-error transition-colors" 
+                      className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors" 
                       title="Remove User"
                     >
                       <span className="material-symbols-outlined text-lg">delete</span>
@@ -254,12 +254,12 @@ export default function UserTable({ roleFilter = 'All' }: UserTableProps) {
 
         {/* Pagination Footer */}
         {users && users.length > 0 && (
-          <div className="p-md flex items-center justify-between bg-surface-container-lowest">
-            <span className="text-body-sm text-on-surface-variant">Showing 1 to {totalUsers} of {totalUsers} users</span>
+          <div className="p-md flex items-center justify-between bg-card">
+            <span className="text-body-sm text-muted-foreground">Showing 1 to {totalUsers} of {totalUsers} users</span>
             <div className="flex gap-xs">
-              <button className="px-sm py-xs border border-outline-variant rounded hover:bg-surface-container-low text-on-surface-variant disabled:opacity-50" disabled>Prev</button>
-              <button className="px-sm py-xs border border-primary bg-primary text-on-primary rounded">1</button>
-              <button className="px-sm py-xs border border-outline-variant rounded hover:bg-surface-container-low text-on-surface-variant disabled:opacity-50" disabled>Next</button>
+              <button className="px-sm py-xs border border-border rounded hover:bg-muted/50 text-muted-foreground disabled:opacity-50" disabled>Prev</button>
+              <button className="px-sm py-xs border border-primary bg-primary text-primary-foreground rounded">1</button>
+              <button className="px-sm py-xs border border-border rounded hover:bg-muted/50 text-muted-foreground disabled:opacity-50" disabled>Next</button>
             </div>
           </div>
         )}

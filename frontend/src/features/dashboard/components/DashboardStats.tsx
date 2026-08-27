@@ -33,21 +33,21 @@ type StatConfig = {
 
 function StatCard({ label, value, icon: Icon, iconColor, iconBg, trend }: StatConfig) {
   return (
-    <div className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-ip-lg p-5 hover:border-ip-primary/40 transition-colors shadow-[0_2px_8px_rgba(70,72,212,0.04)]">
+    <div className="bg-card border border-border rounded-lg p-5 hover:border-primary/40 transition-colors shadow-[0_2px_8px_rgba(70,72,212,0.04)]">
       <div className="flex items-center justify-between mb-4">
-        <span className="text-sm font-medium text-ip-on-surface-variant">{label}</span>
-        <div className="w-8 h-8 rounded-ip-base flex items-center justify-center" style={{ background: iconBg }}>
+        <span className="text-sm font-medium text-muted-foreground">{label}</span>
+        <div className="w-8 h-8 rounded-md flex items-center justify-center" style={{ background: iconBg }}>
           <Icon size={16} style={{ color: iconColor }} />
         </div>
       </div>
       <div className="flex items-end gap-2">
         {value === null ? (
-          <Skeleton className="h-8 w-14 rounded bg-ip-surface-container" />
+          <Skeleton className="h-8 w-14 rounded bg-muted" />
         ) : (
-          <span className="text-[32px] font-bold leading-none text-ip-on-surface">{value}</span>
+          <span className="text-[32px] font-bold leading-none text-foreground">{value}</span>
         )}
         {trend && (
-          <span className="text-xs font-semibold text-ip-primary mb-1">{trend}</span>
+          <span className="text-xs font-semibold text-primary mb-1">{trend}</span>
         )}
       </div>
     </div>

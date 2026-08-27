@@ -17,25 +17,25 @@ export default function KanbanColumn({ title, status, tasks, dotColor }: KanbanC
   return (
     <div
       ref={setNodeRef}
-      className={`w-[320px] flex flex-col h-full bg-ip-surface-container-low rounded-xl border border-ip-outline-variant/50 p-2 transition-colors duration-200 ${
-        isOver ? 'bg-ip-surface-container border-ip-primary ring-1 ring-ip-primary/30' : ''
+      className={`w-[320px] flex flex-col h-full bg-muted/50 rounded-xl border border-border/50 p-2 transition-colors duration-200 ${
+        isOver ? 'bg-muted border-primary ring-1 ring-primary/30' : ''
       }`}
     >
       <div className="flex justify-between items-center mb-3 px-2 pt-2">
         <div className="flex items-center gap-1.5">
           <div className={`w-2.5 h-2.5 rounded-full ${dotColor}`} />
-          <h3 className="text-base font-bold text-ip-on-surface">{title}</h3>
-          <span className="bg-ip-surface-container-high text-ip-on-surface-variant text-[11px] font-bold px-2 py-0.5 rounded-full ml-1">
+          <h3 className="text-base font-bold text-foreground">{title}</h3>
+          <span className="bg-muted text-muted-foreground text-[11px] font-bold px-2 py-0.5 rounded-full ml-1">
             {tasks.length}
           </span>
         </div>
         <div className="flex items-center gap-0.5">
           {status === 'ToDo' && (
-            <button className="text-ip-on-surface-variant hover:text-ip-primary transition-colors p-1 rounded-md hover:bg-ip-surface">
+            <button className="text-muted-foreground hover:text-primary transition-colors p-1 rounded-md hover:bg-background">
               <Plus size={16} />
             </button>
           )}
-          <button className="text-ip-on-surface-variant hover:text-ip-primary transition-colors p-1 rounded-md hover:bg-ip-surface">
+          <button className="text-muted-foreground hover:text-primary transition-colors p-1 rounded-md hover:bg-background">
             <MoreHorizontal size={16} />
           </button>
         </div>
@@ -46,7 +46,7 @@ export default function KanbanColumn({ title, status, tasks, dotColor }: KanbanC
           <KanbanCard key={task.id} task={task} />
         ))}
         {tasks.length === 0 && (
-          <div className="h-24 border border-dashed border-ip-outline-variant/50 rounded-[16px] flex items-center justify-center text-sm text-ip-on-surface-variant italic">
+          <div className="h-24 border border-dashed border-border/50 rounded-[16px] flex items-center justify-center text-sm text-muted-foreground italic">
             Drop tasks here
           </div>
         )}

@@ -70,12 +70,12 @@ export default function ManageTeamModal({ open, onOpenChange, project, onMutate 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] w-full border-ip-outline-variant bg-ip-surface-container-lowest font-jakarta shadow-2xl rounded-2xl p-0 overflow-hidden flex flex-col">
-        <DialogHeader className="px-6 py-5 border-b border-ip-outline-variant bg-ip-surface shrink-0">
-          <DialogTitle className="text-xl font-bold tracking-tight text-ip-on-surface flex items-center gap-2">
-            <Users className="text-ip-primary" size={20} /> Manage Core Team
+      <DialogContent className="sm:max-w-[500px] w-full border-border bg-card font-jakarta shadow-2xl rounded-2xl p-0 overflow-hidden flex flex-col">
+        <DialogHeader className="px-6 py-5 border-b border-border bg-background shrink-0">
+          <DialogTitle className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            <Users className="text-primary" size={20} /> Manage Core Team
           </DialogTitle>
-          <DialogDescription className="text-ip-on-surface-variant text-sm mt-1">
+          <DialogDescription className="text-muted-foreground text-sm mt-1">
             Add or remove members from the project core team.
           </DialogDescription>
         </DialogHeader>
@@ -83,14 +83,14 @@ export default function ManageTeamModal({ open, onOpenChange, project, onMutate 
         <div className="p-6 space-y-6">
           {/* Add Member Combobox */}
           <div className="space-y-2">
-            <label className="text-sm font-bold text-ip-on-surface">Add New Member</label>
+            <label className="text-sm font-bold text-foreground">Add New Member</label>
             <Popover open={userSearchOpen} onOpenChange={setUserSearchOpen}>
               <PopoverTrigger asChild>
                 <Button 
                   variant="outline" 
                   role="combobox" 
                   aria-expanded={userSearchOpen} 
-                  className="w-full justify-between bg-ip-surface border-ip-outline-variant"
+                  className="w-full justify-between bg-background border-border"
                   disabled={addMember.isPending || removeMember.isPending}
                 >
                   {addMember.isPending ? <span className="flex items-center gap-2"><Loader2 size={14} className="animate-spin" /> Adding...</span> : "Search users to add..."}
@@ -110,15 +110,15 @@ export default function ManageTeamModal({ open, onOpenChange, project, onMutate 
                           onSelect={() => handleAddUser(u.id)}
                           className="flex items-center gap-2 cursor-pointer"
                         >
-                          <Avatar className="w-6 h-6 border border-ip-outline-variant shrink-0">
+                          <Avatar className="w-6 h-6 border border-border shrink-0">
                             <AvatarImage src={getAvatarUrl(u.avatarUrl) || ''} alt={u.name} className="object-cover" />
-                            <AvatarFallback className="bg-ip-surface-container-high font-bold text-[10px]">
+                            <AvatarFallback className="bg-muted font-bold text-[10px]">
                               {getInitials(u.name)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex flex-col min-w-0">
                             <span className="font-semibold text-sm truncate">{u.name}</span>
-                            <span className="text-xs text-ip-on-surface-variant truncate">{u.email}</span>
+                            <span className="text-xs text-muted-foreground truncate">{u.email}</span>
                           </div>
                         </CommandItem>
                       ))}
@@ -131,7 +131,7 @@ export default function ManageTeamModal({ open, onOpenChange, project, onMutate 
 
           {/* Current Members List */}
           <div className="space-y-3">
-            <label className="text-sm font-bold text-ip-on-surface">Current Members ({project.members?.length || 0})</label>
+            <label className="text-sm font-bold text-foreground">Current Members ({project.members?.length || 0})</label>
             <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-2">
               {project.members?.map(member => {
                 const u = member.user;
@@ -139,21 +139,21 @@ export default function ManageTeamModal({ open, onOpenChange, project, onMutate 
                 const isCurrentUser = currentUser?.id === u.id;
                 
                 return (
-                  <div key={member.userId} className="flex items-center justify-between p-3 rounded-xl border border-ip-outline-variant bg-ip-surface shadow-sm">
+                  <div key={member.userId} className="flex items-center justify-between p-3 rounded-xl border border-border bg-background shadow-sm">
                     <div className="flex items-center gap-3 min-w-0">
-                      <Avatar className="w-9 h-9 border border-ip-outline-variant shrink-0">
+                      <Avatar className="w-9 h-9 border border-border shrink-0">
                         <AvatarImage src={getAvatarUrl(u.avatarUrl) || ''} alt={u.name} className="object-cover" />
-                        <AvatarFallback className="bg-gradient-to-br from-ip-primary/80 to-ip-primary text-ip-on-primary font-bold text-[11px]">
+                        <AvatarFallback className="bg-gradient-to-br from-primary/80 to-ip-primary text-primary-foreground font-bold text-[11px]">
                           {getInitials(u.name)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <div className="font-bold text-ip-on-surface text-sm flex items-center gap-2 truncate">
+                        <div className="font-bold text-foreground text-sm flex items-center gap-2 truncate">
                           {u.name} 
-                          {isCurrentUser && <span className="px-1.5 py-0.5 rounded text-[9px] bg-ip-primary/10 text-ip-primary uppercase">You</span>}
-                          {project.createdById === u.id && <span className="px-1.5 py-0.5 rounded text-[9px] bg-ip-tertiary/10 text-ip-tertiary uppercase">Creator</span>}
+                          {isCurrentUser && <span className="px-1.5 py-0.5 rounded text-[9px] bg-primary/10 text-primary uppercase">You</span>}
+                          {project.createdById === u.id && <span className="px-1.5 py-0.5 rounded text-[9px] bg-accent/10 text-accent-foreground uppercase">Creator</span>}
                         </div>
-                        <div className="text-xs text-ip-on-surface-variant font-medium truncate">
+                        <div className="text-xs text-muted-foreground font-medium truncate">
                           {u.role === 'Admin' ? 'Project Lead' : u.role === 'ProjectManager' ? 'Manager' : 'Collaborator'} • {u.email}
                         </div>
                       </div>
@@ -163,7 +163,7 @@ export default function ManageTeamModal({ open, onOpenChange, project, onMutate 
                       <button 
                         onClick={() => handleRemoveUser(u.id, u.name)}
                         disabled={removeMember.isPending}
-                        className="p-2 rounded-lg text-ip-on-surface-variant hover:bg-ip-error-container hover:text-ip-on-error-container transition-colors disabled:opacity-50 disabled:pointer-events-none"
+                        className="p-2 rounded-lg text-muted-foreground hover:bg-destructive/20 hover:text-destructive transition-colors disabled:opacity-50 disabled:pointer-events-none"
                         title="Remove member"
                       >
                         {removeMember.isPending ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />}

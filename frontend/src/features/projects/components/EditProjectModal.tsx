@@ -170,10 +170,10 @@ export default function EditProjectModal({ open, onOpenChange, project }: EditPr
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[1000px] w-full border-ip-outline-variant bg-ip-surface-container-lowest font-jakarta shadow-2xl rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
-        <DialogHeader className="px-6 py-5 border-b border-ip-outline-variant bg-ip-surface shrink-0">
-          <DialogTitle className="text-2xl font-bold tracking-tight text-ip-on-surface">Edit Project Details</DialogTitle>
-          <DialogDescription className="text-ip-on-surface-variant">
+      <DialogContent className="sm:max-w-[1000px] w-full border-border bg-card font-jakarta shadow-2xl rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
+        <DialogHeader className="px-6 py-5 border-b border-border bg-background shrink-0">
+          <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">Edit Project Details</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
             Update your project's settings, links, and documents.
           </DialogDescription>
         </DialogHeader>
@@ -186,46 +186,46 @@ export default function EditProjectModal({ open, onOpenChange, project }: EditPr
               
               <div className="flex gap-4">
                 <div className="flex-1 space-y-1.5">
-                  <Label className="text-sm font-bold text-ip-on-surface">Project Name <span className="text-ip-error">*</span></Label>
+                  <Label className="text-sm font-bold text-foreground">Project Name <span className="text-destructive">*</span></Label>
                   <Input placeholder="e.g. Acme Redesign" {...register('name')} />
-                  {errors.name && <p className="text-xs text-ip-error">{errors.name.message}</p>}
+                  {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                 </div>
                 <div className="w-24 space-y-1.5">
-                  <Label className="text-sm font-bold text-ip-on-surface">Key <span className="text-ip-error">*</span></Label>
+                  <Label className="text-sm font-bold text-foreground">Key <span className="text-destructive">*</span></Label>
                   <Input placeholder="ACM" className="uppercase font-mono" {...register('projectKey')} />
-                  {errors.projectKey && <p className="text-xs text-ip-error">{errors.projectKey.message}</p>}
+                  {errors.projectKey && <p className="text-xs text-destructive">{errors.projectKey.message}</p>}
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface">Description</Label>
+                <Label className="text-sm font-bold text-foreground">Description</Label>
                 <textarea
                   rows={4}
                   placeholder="What is this project about?"
-                  className="w-full rounded-lg border border-ip-outline-variant bg-ip-surface px-3 py-2 text-sm outline-none focus-visible:border-ip-primary focus-visible:ring-1 focus-visible:ring-ip-primary resize-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary resize-none"
                   {...register('description')}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><Globe size={14} /> Visibility</Label>
-                  <div className="flex border border-ip-outline-variant rounded-lg overflow-hidden p-1 bg-ip-surface">
-                    <button type="button" onClick={() => setValue('visibility', 'PUBLIC')} className={`flex-1 text-xs font-bold py-1.5 rounded-md flex items-center justify-center gap-1.5 ${watch('visibility') === 'PUBLIC' ? 'bg-ip-surface-container-high text-ip-on-surface shadow-sm' : 'text-ip-on-surface-variant hover:bg-ip-surface-container-low'}`}>
+                  <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><Globe size={14} /> Visibility</Label>
+                  <div className="flex border border-border rounded-lg overflow-hidden p-1 bg-background">
+                    <button type="button" onClick={() => setValue('visibility', 'PUBLIC')} className={`flex-1 text-xs font-bold py-1.5 rounded-md flex items-center justify-center gap-1.5 ${watch('visibility') === 'PUBLIC' ? 'bg-muted text-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted/50'}`}>
                       <Globe size={12} /> Public
                     </button>
-                    <button type="button" onClick={() => setValue('visibility', 'PRIVATE')} className={`flex-1 text-xs font-bold py-1.5 rounded-md flex items-center justify-center gap-1.5 ${watch('visibility') === 'PRIVATE' ? 'bg-ip-surface-container-high text-ip-on-surface shadow-sm' : 'text-ip-on-surface-variant hover:bg-ip-surface-container-low'}`}>
+                    <button type="button" onClick={() => setValue('visibility', 'PRIVATE')} className={`flex-1 text-xs font-bold py-1.5 rounded-md flex items-center justify-center gap-1.5 ${watch('visibility') === 'PRIVATE' ? 'bg-muted text-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted/50'}`}>
                       <Lock size={12} /> Private
                     </button>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><CalendarIcon size={14} /> Target Date</Label>
+                  <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><CalendarIcon size={14} /> Target Date</Label>
                   <div className="flex gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal border-ip-outline-variant bg-ip-surface", !date && "text-ip-on-surface-variant")}>
+                        <Button variant="outline" className={cn("w-full justify-start text-left font-normal border-border bg-background", !date && "text-muted-foreground")}>
                           {date ? format(date, "PPP") : <span>Pick a date</span>}
                         </Button>
                       </PopoverTrigger>
@@ -243,12 +243,12 @@ export default function EditProjectModal({ open, onOpenChange, project }: EditPr
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><Palette size={14} /> Theme Color</Label>
+                <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><Palette size={14} /> Theme Color</Label>
                 <div className="flex flex-wrap gap-2">
                   {PRESET_COLORS.map(color => (
                     <button
                       key={color} type="button" onClick={() => setValue('colorCode', color)}
-                      className={cn("w-6 h-6 rounded-full flex items-center justify-center transition-transform hover:scale-110", watch('colorCode') === color ? "ring-2 ring-offset-2 ring-ip-primary" : "")}
+                      className={cn("w-6 h-6 rounded-full flex items-center justify-center transition-transform hover:scale-110", watch('colorCode') === color ? "ring-2 ring-offset-2 ring-primary" : "")}
                       style={{ backgroundColor: color }}
                     >
                       {watch('colorCode') === color && <Check size={12} className="text-white" />}
@@ -264,11 +264,11 @@ export default function EditProjectModal({ open, onOpenChange, project }: EditPr
               
               {/* Tags */}
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface">Tags</Label>
+                <Label className="text-sm font-bold text-foreground">Tags</Label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {tags.map(t => (
-                    <span key={t} className="flex items-center gap-1 bg-ip-surface-container px-2 py-1 rounded text-xs font-semibold text-ip-on-surface-variant">
-                      {t} <button type="button" onClick={() => removeTag(t)} className="hover:text-ip-error"><X size={12}/></button>
+                    <span key={t} className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs font-semibold text-muted-foreground">
+                      {t} <button type="button" onClick={() => removeTag(t)} className="hover:text-destructive"><X size={12}/></button>
                     </span>
                   ))}
                 </div>
@@ -277,12 +277,12 @@ export default function EditProjectModal({ open, onOpenChange, project }: EditPr
 
               {/* External Links */}
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><LinkIcon size={14} /> External Links</Label>
+                <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><LinkIcon size={14} /> External Links</Label>
                 <div className="space-y-2 mb-2">
                   {links.map(l => (
-                    <div key={l} className="flex items-center justify-between bg-ip-surface border border-ip-outline-variant px-3 py-2 rounded-lg text-sm">
+                    <div key={l} className="flex items-center justify-between bg-background border border-border px-3 py-2 rounded-lg text-sm">
                       <span className="truncate flex-1 font-medium">{l}</span>
-                      <button type="button" onClick={() => removeLink(l)} className="text-ip-on-surface-variant hover:text-ip-error"><X size={14}/></button>
+                      <button type="button" onClick={() => removeLink(l)} className="text-muted-foreground hover:text-destructive"><X size={14}/></button>
                     </div>
                   ))}
                 </div>
@@ -294,16 +294,16 @@ export default function EditProjectModal({ open, onOpenChange, project }: EditPr
 
               {/* Documents */}
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><FileText size={14} /> Add New Documents</Label>
-                <div className="text-xs text-ip-on-surface-variant mb-2">
+                <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><FileText size={14} /> Add New Documents</Label>
+                <div className="text-xs text-muted-foreground mb-2">
                   Currently attached documents cannot be removed from here yet.
                 </div>
                 <div className="space-y-2 mb-2">
                   {newFiles.map((f, i) => (
-                    <div key={i} className="flex items-center justify-between bg-ip-primary/5 border border-ip-primary/20 px-3 py-2 rounded-lg text-sm">
-                      <span className="truncate flex-1 font-medium text-ip-primary">{f.name}</span>
-                      <span className="text-xs text-ip-primary/60 font-mono mx-3">{(f.size/1024/1024).toFixed(1)}MB</span>
-                      <button type="button" onClick={() => removeNewFile(i)} className="text-ip-primary/60 hover:text-ip-error"><X size={14}/></button>
+                    <div key={i} className="flex items-center justify-between bg-primary/5 border border-primary/20 px-3 py-2 rounded-lg text-sm">
+                      <span className="truncate flex-1 font-medium text-primary">{f.name}</span>
+                      <span className="text-xs text-primary/60 font-mono mx-3">{(f.size/1024/1024).toFixed(1)}MB</span>
+                      <button type="button" onClick={() => removeNewFile(i)} className="text-primary/60 hover:text-destructive"><X size={14}/></button>
                     </div>
                   ))}
                 </div>
@@ -320,9 +320,9 @@ export default function EditProjectModal({ open, onOpenChange, project }: EditPr
           </form>
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t border-ip-outline-variant bg-ip-surface shrink-0">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0">
           <Button variant="outline" onClick={() => handleClose(false)} disabled={isPending}>Cancel</Button>
-          <Button type="submit" form="edit-project-form" disabled={isPending} className="bg-ip-primary hover:bg-ip-primary-fixed">
+          <Button type="submit" form="edit-project-form" disabled={isPending} className="bg-primary hover:bg-primary/20">
             {isPending ? 'Saving...' : 'Save Changes'}
           </Button>
         </DialogFooter>

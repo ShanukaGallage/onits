@@ -15,8 +15,8 @@ const PRIORITY_STYLES: Record<string, { label: string; color: string; bg: string
 };
 
 const STATUS_ICONS: Record<string, React.ReactNode> = {
-  ToDo:       <Circle      size={14} className="text-ip-outline" />,
-  InProgress: <Clock       size={14} className="text-ip-primary" />,
+  ToDo:       <Circle      size={14} className="text-muted-foreground" />,
+  InProgress: <Clock       size={14} className="text-primary" />,
   Completed:  <CheckCircle2 size={14} className="text-emerald-500" />,
 };
 
@@ -56,16 +56,16 @@ export default function RecentTasks() {
     .slice(0, 5);
 
   return (
-    <div className="bg-ip-surface-container-lowest border border-ip-outline-variant rounded-ip-lg overflow-hidden shadow-[0_2px_8px_rgba(70,72,212,0.04)] mb-6">
+    <div className="bg-card border border-border rounded-lg overflow-hidden shadow-[0_2px_8px_rgba(70,72,212,0.04)] mb-6">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-ip-outline-variant">
-        <h2 className="text-sm font-bold text-ip-on-surface tracking-tight">Recent Tasks</h2>
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border">
+        <h2 className="text-sm font-bold text-foreground tracking-tight">Recent Tasks</h2>
         <div className="flex items-center gap-3">
           {canCreateTask && (
             <button
               id="add-task-btn"
               onClick={() => setCreateTaskOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-ip-base bg-ip-secondary-container text-ip-on-surface text-xs font-semibold hover:bg-ip-primary-container/20 hover:text-ip-primary transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-secondary text-foreground text-xs font-semibold hover:bg-primary/20/20 hover:text-primary transition-colors"
             >
               <Plus size={13} />
               Add Task
@@ -73,7 +73,7 @@ export default function RecentTasks() {
           )}
           <button
             onClick={() => navigate('/tasks')}
-            className="flex items-center gap-1 text-ip-primary text-xs font-semibold hover:text-ip-on-primary-fixed-variant transition-colors"
+            className="flex items-center gap-1 text-primary text-xs font-semibold hover:text-primary/90 transition-colors"
           >
             View all <ArrowRight size={13} />
           </button>
@@ -90,12 +90,12 @@ export default function RecentTasks() {
         <div className="p-4 space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 px-2 py-1">
-              <Skeleton className="h-4 w-4 rounded-full bg-ip-surface-container" />
+              <Skeleton className="h-4 w-4 rounded-full bg-muted" />
               <div className="flex-1 space-y-1.5">
-                <Skeleton className="h-3.5 w-3/5 bg-ip-surface-container" />
-                <Skeleton className="h-3 w-1/4 bg-ip-surface-container" />
+                <Skeleton className="h-3.5 w-3/5 bg-muted" />
+                <Skeleton className="h-3 w-1/4 bg-muted" />
               </div>
-              <Skeleton className="h-5 w-14 rounded-full bg-ip-surface-container" />
+              <Skeleton className="h-5 w-14 rounded-full bg-muted" />
             </div>
           ))}
         </div>
@@ -103,7 +103,7 @@ export default function RecentTasks() {
 
       {/* Empty */}
       {!isLoading && recentTasks.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-10 text-ip-on-surface-variant">
+        <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
           <AlertCircle size={26} className="mb-2 opacity-40" />
           <p className="text-sm">No tasks yet. Create a task inside any project.</p>
         </div>
@@ -119,7 +119,7 @@ export default function RecentTasks() {
               <div
                 key={task.id}
                 onClick={() => navigate(`/projects/${task.projectId}`)}
-                className="flex items-center gap-3 px-6 py-3.5 hover:bg-ip-surface-container-low transition-colors cursor-pointer"
+                className="flex items-center gap-3 px-6 py-3.5 hover:bg-muted/50 transition-colors cursor-pointer"
               >
                 {/* Status icon */}
                 <span className="flex-shrink-0">{STATUS_ICONS[task.status]}</span>
@@ -128,15 +128,15 @@ export default function RecentTasks() {
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-medium truncate ${
                     task.status === 'Completed'
-                      ? 'text-ip-on-surface-variant line-through'
-                      : 'text-ip-on-surface'
+                      ? 'text-muted-foreground line-through'
+                      : 'text-foreground'
                   }`}>
                     {task.title}
                   </p>
-                  <p className="text-xs text-ip-on-surface-variant mt-0.5 truncate">
+                  <p className="text-xs text-muted-foreground mt-0.5 truncate">
                     {task.projectName}
                     {task.dueDate && (
-                      <span className={`ml-2 ${isOverdue ? 'text-ip-error' : 'text-ip-on-surface-variant'}`}>
+                      <span className={`ml-2 ${isOverdue ? 'text-destructive' : 'text-muted-foreground'}`}>
                         · Due {new Date(task.dueDate).toLocaleDateString()}
                       </span>
                     )}
