@@ -3,7 +3,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import { useState } from 'react';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+
 
 const routeTitles: Record<string, string> = {
   '/dashboard': 'Home',
@@ -16,7 +16,7 @@ const routeTitles: Record<string, string> = {
 
 export default function AppLayout() {
   const [isOpen, setIsOpen] = useState(true);
-  const { user } = useAuth();
+  
   const location = useLocation();
 
   let pageTitle = routeTitles[location.pathname] ?? 'Dashboard';
