@@ -13,16 +13,16 @@ export default function UsersPage() {
   const activeNow = users?.filter(u => u.status === 'Active').length || 0;
 
   return (
-    <div className="bg-background text-on-surface font-body-md w-full max-w-[1600px] flex flex-col gap-lg">
+    <div className="bg-background text-foreground font-body-md w-full max-w-[1600px] flex flex-col gap-lg">
       {/* Page Header & Global Actions */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface mb-xs">User Management</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">Manage platform access, roles, and administrative privileges.</p>
+          <h2 className="font-headline-lg text-headline-lg text-foreground mb-xs">User Management</h2>
+          <p className="font-body-md text-body-md text-muted-foreground">Manage platform access, roles, and administrative privileges.</p>
         </div>
         <button 
           onClick={() => setIsCreateOpen(true)}
-          className="flex items-center gap-sm bg-primary text-on-primary px-md py-sm rounded-lg hover:bg-on-primary-fixed-variant transition-colors font-body-md text-body-md font-medium shadow-sm hover:shadow-md"
+          className="flex items-center gap-sm bg-primary text-primary-foreground px-md py-sm rounded-lg hover:bg-primary/90 transition-colors font-body-md text-body-md font-medium shadow-sm hover:shadow-md"
         >
           <span className="material-symbols-outlined text-sm">person_add</span>
           Add New User
@@ -31,48 +31,48 @@ export default function UsersPage() {
 
       {/* Stats/Filters Bento Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-card-gap">
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col justify-between">
-          <span className="font-label-caps text-label-caps text-on-surface-variant">TOTAL USERS</span>
+        <div className="bg-card border border-border rounded-xl p-md flex flex-col justify-between">
+          <span className="font-label-caps text-label-caps text-muted-foreground">TOTAL USERS</span>
           <div className="flex items-baseline gap-sm mt-sm">
-            <span className="font-display text-display text-on-surface">{totalUsers}</span>
+            <span className="font-display text-display text-foreground">{totalUsers}</span>
             <span className="text-primary text-body-sm font-medium flex items-center"><span className="material-symbols-outlined text-sm">trending_up</span> 12%</span>
           </div>
         </div>
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col justify-between">
-          <span className="font-label-caps text-label-caps text-on-surface-variant">ACTIVE NOW</span>
+        <div className="bg-card border border-border rounded-xl p-md flex flex-col justify-between">
+          <span className="font-label-caps text-label-caps text-muted-foreground">ACTIVE NOW</span>
           <div className="flex items-baseline gap-sm mt-sm">
-            <span className="font-display text-display text-on-surface">{activeNow}</span>
+            <span className="font-display text-display text-foreground">{activeNow}</span>
             <span className="w-2 h-2 rounded-full bg-[#10b981]"></span>
           </div>
         </div>
-        <div className="md:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex items-center justify-between gap-md">
+        <div className="md:col-span-2 bg-card border border-border rounded-xl p-md flex items-center justify-between gap-md">
           <div className="flex gap-sm">
             <button 
               onClick={() => setRoleFilter('All')}
-              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'All' ? 'border-primary bg-primary-container text-on-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
+              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'All' ? 'border-primary bg-primary/20 text-primary-foreground' : 'border-border text-muted-foreground hover:bg-muted/50'}`}
             >
               All Roles
             </button>
             <button 
               onClick={() => setRoleFilter('Admin')}
-              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'Admin' ? 'border-primary bg-primary-container text-on-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
+              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'Admin' ? 'border-primary bg-primary/20 text-primary-foreground' : 'border-border text-muted-foreground hover:bg-muted/50'}`}
             >
               Admin
             </button>
             <button 
               onClick={() => setRoleFilter('ProjectManager')}
-              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'ProjectManager' ? 'border-primary bg-primary-container text-on-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
+              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'ProjectManager' ? 'border-primary bg-primary/20 text-primary-foreground' : 'border-border text-muted-foreground hover:bg-muted/50'}`}
             >
               PM
             </button>
             <button 
               onClick={() => setRoleFilter('Collaborator')}
-              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'Collaborator' ? 'border-primary bg-primary-container text-on-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low'}`}
+              className={`px-md py-xs rounded-full border font-label-caps text-label-caps transition-colors ${roleFilter === 'Collaborator' ? 'border-primary bg-primary/20 text-primary-foreground' : 'border-border text-muted-foreground hover:bg-muted/50'}`}
             >
               Collaborator
             </button>
           </div>
-          <div className="flex items-center gap-sm text-on-surface-variant">
+          <div className="flex items-center gap-sm text-muted-foreground">
             <span className="material-symbols-outlined">filter_list</span>
             <span className="font-body-sm text-body-sm">More Filters</span>
           </div>

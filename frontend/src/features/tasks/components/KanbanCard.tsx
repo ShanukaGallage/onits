@@ -36,13 +36,13 @@ export default function KanbanCard({ task, isOverlay = false }: KanbanCardProps)
   const tags = task.tags || [];
 
   // Priority UI
-  let prioBg = 'bg-ip-surface-container text-ip-on-surface-variant';
+  let prioBg = 'bg-muted text-muted-foreground';
   if (task.priority === 'High') {
-    prioBg = 'bg-ip-error-container text-ip-on-error-container';
+    prioBg = 'bg-destructive/20 text-destructive';
   } else if (task.priority === 'Medium') {
-    prioBg = 'bg-ip-secondary-container text-ip-on-secondary-container';
+    prioBg = 'bg-secondary text-secondary-foreground';
   } else if (task.priority === 'Low') {
-    prioBg = 'bg-ip-surface-variant text-ip-on-surface-variant';
+    prioBg = 'bg-muted text-muted-foreground';
   }
 
   // Date UI
@@ -56,19 +56,19 @@ export default function KanbanCard({ task, isOverlay = false }: KanbanCardProps)
       style={style}
       {...listeners}
       {...attributes}
-      className={`bg-ip-surface rounded-[16px] border border-ip-outline-variant p-4 shadow-sm hover:shadow-md transition-shadow cursor-grab group flex flex-col ${
+      className={`bg-background rounded-[16px] border border-border p-4 shadow-sm hover:shadow-md transition-shadow cursor-grab group flex flex-col ${
         isDragging && !isOverlay ? 'opacity-30' : 'opacity-100'
       } ${task.status === 'Completed' ? 'opacity-80' : ''} ${
         task.status === 'InProgress' ? 'border-l-4 border-l-ip-primary-container' : ''
       }`}
     >
       <div className="flex justify-between items-start mb-2">
-        <span className="text-[11px] font-mono font-medium text-ip-outline group-hover:text-ip-primary transition-colors">
+        <span className="text-[11px] font-mono font-medium text-muted-foreground group-hover:text-primary transition-colors">
           ON-{task.id.slice(0, 4)}
         </span>
         <div className="flex items-center gap-2">
           {isManagerOrAdmin && (
-            <button onClick={handleDeleteTask} className="text-ip-outline hover:text-ip-error transition-colors" title="Delete Task">
+            <button onClick={handleDeleteTask} className="text-muted-foreground hover:text-destructive transition-colors" title="Delete Task">
               <Trash2 size={12} />
             </button>
           )}
@@ -79,28 +79,28 @@ export default function KanbanCard({ task, isOverlay = false }: KanbanCardProps)
         </div>
       </div>
 
-      <h4 className="text-sm font-semibold text-ip-on-surface mb-1.5 leading-tight">
+      <h4 className="text-sm font-semibold text-foreground mb-1.5 leading-tight">
         {task.title}
       </h4>
 
       {task.description && (
-        <p className="text-xs text-ip-on-surface-variant line-clamp-2 mb-3">
+        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
           {task.description}
         </p>
       )}
 
       {task.status === 'Completed' && (
-        <div className="mt-1 mb-3 bg-ip-surface-container p-2 rounded border border-ip-outline-variant/30 flex items-center gap-2">
+        <div className="mt-1 mb-3 bg-muted p-2 rounded border border-border/30 flex items-center gap-2">
           <CheckCircle2 size={14} className="text-[#10b981]" />
-          <span className="text-xs text-ip-on-surface-variant italic">Done</span>
+          <span className="text-xs text-muted-foreground italic">Done</span>
         </div>
       )}
 
 
-      <div className="flex justify-between items-end mt-auto pt-3 border-t border-ip-outline-variant/30">
+      <div className="flex justify-between items-end mt-auto pt-3 border-t border-border/30">
         <div className="flex flex-wrap gap-1.5">
           {tags.map((t, i) => (
-            <span key={i} className="bg-ip-surface-variant text-ip-on-surface-variant text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md uppercase">
+            <span key={i} className="bg-muted text-muted-foreground text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded-md uppercase">
               {t}
             </span>
           ))}
@@ -109,7 +109,7 @@ export default function KanbanCard({ task, isOverlay = false }: KanbanCardProps)
         <div className="flex items-center gap-2">
           {dateStr && (
             <span className={`text-xs flex items-center gap-1 font-medium ${
-              task.status === 'InProgress' ? 'text-ip-error' : 'text-ip-on-surface-variant'
+              task.status === 'InProgress' ? 'text-destructive' : 'text-muted-foreground'
             }`}>
               <Calendar size={12} /> {dateStr}
             </span>
@@ -118,7 +118,7 @@ export default function KanbanCard({ task, isOverlay = false }: KanbanCardProps)
           {task.assignments && task.assignments.length > 0 && (
             <div className="flex -space-x-1.5 ml-1">
               {task.assignments.slice(0, 3).map((a) => a.user ? (
-                <div key={a.userId} className="w-5 h-5 rounded-full border-2 border-ip-surface bg-ip-surface-tint text-ip-on-primary flex items-center justify-center font-bold text-[9px] z-10">
+                <div key={a.userId} className="w-5 h-5 rounded-full border-2 border-ip-surface bg-primary text-primary-foreground flex items-center justify-center font-bold text-[9px] z-10">
                   {a.user.name.charAt(0).toUpperCase()}
                 </div>
               ) : null)}

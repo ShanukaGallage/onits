@@ -197,10 +197,10 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[1000px] w-full border-ip-outline-variant bg-ip-surface-container-lowest font-jakarta shadow-2xl rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
-        <DialogHeader className="px-6 py-5 border-b border-ip-outline-variant bg-ip-surface shrink-0">
-          <DialogTitle className="text-2xl font-bold tracking-tight text-ip-on-surface">Create New Project</DialogTitle>
-          <DialogDescription className="text-ip-on-surface-variant">
+      <DialogContent className="sm:max-w-[1000px] w-full border-border bg-card font-jakarta shadow-2xl rounded-2xl p-0 overflow-hidden flex flex-col max-h-[90vh]">
+        <DialogHeader className="px-6 py-5 border-b border-border bg-background shrink-0">
+          <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">Create New Project</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
             Set up a workspace, invite your core team, and attach initial resources.
           </DialogDescription>
         </DialogHeader>
@@ -213,45 +213,45 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
               
               <div className="flex gap-4">
                 <div className="flex-1 space-y-1.5">
-                  <Label className="text-sm font-bold text-ip-on-surface">Project Name <span className="text-ip-error">*</span></Label>
+                  <Label className="text-sm font-bold text-foreground">Project Name <span className="text-destructive">*</span></Label>
                   <Input placeholder="e.g. Acme Redesign" {...register('name')} />
-                  {errors.name && <p className="text-xs text-ip-error">{errors.name.message}</p>}
+                  {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
                 </div>
                 <div className="w-24 space-y-1.5">
-                  <Label className="text-sm font-bold text-ip-on-surface">Key <span className="text-ip-error">*</span></Label>
+                  <Label className="text-sm font-bold text-foreground">Key <span className="text-destructive">*</span></Label>
                   <Input placeholder="ACM" className="uppercase font-mono" {...register('projectKey')} />
-                  {errors.projectKey && <p className="text-xs text-ip-error">{errors.projectKey.message}</p>}
+                  {errors.projectKey && <p className="text-xs text-destructive">{errors.projectKey.message}</p>}
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface">Description</Label>
+                <Label className="text-sm font-bold text-foreground">Description</Label>
                 <textarea
                   rows={4}
                   placeholder="What is this project about?"
-                  className="w-full rounded-lg border border-ip-outline-variant bg-ip-surface px-3 py-2 text-sm outline-none focus-visible:border-ip-primary focus-visible:ring-1 focus-visible:ring-ip-primary resize-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary resize-none"
                   {...register('description')}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><Globe size={14} /> Visibility</Label>
-                  <div className="flex border border-ip-outline-variant rounded-lg overflow-hidden p-1 bg-ip-surface">
-                    <button type="button" onClick={() => setValue('visibility', 'PUBLIC')} className={`flex-1 text-xs font-bold py-1.5 rounded-md flex items-center justify-center gap-1.5 ${watch('visibility') === 'PUBLIC' ? 'bg-ip-surface-container-high text-ip-on-surface shadow-sm' : 'text-ip-on-surface-variant hover:bg-ip-surface-container-low'}`}>
+                  <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><Globe size={14} /> Visibility</Label>
+                  <div className="flex border border-border rounded-lg overflow-hidden p-1 bg-background">
+                    <button type="button" onClick={() => setValue('visibility', 'PUBLIC')} className={`flex-1 text-xs font-bold py-1.5 rounded-md flex items-center justify-center gap-1.5 ${watch('visibility') === 'PUBLIC' ? 'bg-muted text-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted/50'}`}>
                       <Globe size={12} /> Public
                     </button>
-                    <button type="button" onClick={() => setValue('visibility', 'PRIVATE')} className={`flex-1 text-xs font-bold py-1.5 rounded-md flex items-center justify-center gap-1.5 ${watch('visibility') === 'PRIVATE' ? 'bg-ip-surface-container-high text-ip-on-surface shadow-sm' : 'text-ip-on-surface-variant hover:bg-ip-surface-container-low'}`}>
+                    <button type="button" onClick={() => setValue('visibility', 'PRIVATE')} className={`flex-1 text-xs font-bold py-1.5 rounded-md flex items-center justify-center gap-1.5 ${watch('visibility') === 'PRIVATE' ? 'bg-muted text-foreground shadow-sm' : 'text-muted-foreground hover:bg-muted/50'}`}>
                       <Lock size={12} /> Private
                     </button>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><CalendarIcon size={14} /> Target Date</Label>
+                  <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><CalendarIcon size={14} /> Target Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal border-ip-outline-variant bg-ip-surface", !date && "text-ip-on-surface-variant")}>
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal border-border bg-background", !date && "text-muted-foreground")}>
                         {date ? format(date, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
@@ -263,12 +263,12 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><Palette size={14} /> Theme Color</Label>
+                <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><Palette size={14} /> Theme Color</Label>
                 <div className="flex flex-wrap gap-2">
                   {PRESET_COLORS.map(color => (
                     <button
                       key={color} type="button" onClick={() => setValue('colorCode', color)}
-                      className={cn("w-6 h-6 rounded-full flex items-center justify-center transition-transform hover:scale-110", watch('colorCode') === color ? "ring-2 ring-offset-2 ring-ip-primary" : "")}
+                      className={cn("w-6 h-6 rounded-full flex items-center justify-center transition-transform hover:scale-110", watch('colorCode') === color ? "ring-2 ring-offset-2 ring-primary" : "")}
                       style={{ backgroundColor: color }}
                     >
                       {watch('colorCode') === color && <Check size={12} className="text-white" />}
@@ -284,11 +284,11 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
               
               {/* Tags */}
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface">Tags</Label>
+                <Label className="text-sm font-bold text-foreground">Tags</Label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {tags.map(t => (
-                    <span key={t} className="flex items-center gap-1 bg-ip-surface-container px-2 py-1 rounded text-xs font-semibold text-ip-on-surface-variant">
-                      {t} <button type="button" onClick={() => removeTag(t)} className="hover:text-ip-error"><X size={12}/></button>
+                    <span key={t} className="flex items-center gap-1 bg-muted px-2 py-1 rounded text-xs font-semibold text-muted-foreground">
+                      {t} <button type="button" onClick={() => removeTag(t)} className="hover:text-destructive"><X size={12}/></button>
                     </span>
                   ))}
                 </div>
@@ -297,22 +297,22 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
               {/* Core Team */}
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><Users size={14} /> Core Team</Label>
+                <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><Users size={14} /> Core Team</Label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {selectedUsers.map(id => {
                     const u = users?.find(user => user.id === id);
                     return u ? (
-                      <span key={id} className="flex items-center gap-1.5 bg-ip-surface px-2 py-1 border border-ip-outline-variant rounded-full text-xs font-semibold text-ip-on-surface">
-                        <div className="w-4 h-4 rounded-full bg-ip-primary text-white flex items-center justify-center text-[8px]">{u.name[0]}</div>
+                      <span key={id} className="flex items-center gap-1.5 bg-background px-2 py-1 border border-border rounded-full text-xs font-semibold text-foreground">
+                        <div className="w-4 h-4 rounded-full bg-primary text-white flex items-center justify-center text-[8px]">{u.name[0]}</div>
                         {u.name}
-                        <button type="button" onClick={() => removeUser(id)} className="hover:text-ip-error"><X size={12}/></button>
+                        <button type="button" onClick={() => removeUser(id)} className="hover:text-destructive"><X size={12}/></button>
                       </span>
                     ) : null;
                   })}
                 </div>
                 <Popover open={userSearchOpen} onOpenChange={setUserSearchOpen}>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" role="combobox" aria-expanded={userSearchOpen} className="w-full justify-between bg-ip-surface border-ip-outline-variant">
+                    <Button variant="outline" role="combobox" aria-expanded={userSearchOpen} className="w-full justify-between bg-background border-border">
                       Invite team members...
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
@@ -345,12 +345,12 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
               {/* External Links */}
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><LinkIcon size={14} /> External Links</Label>
+                <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><LinkIcon size={14} /> External Links</Label>
                 <div className="space-y-2 mb-2">
                   {links.map(l => (
-                    <div key={l} className="flex items-center justify-between bg-ip-surface border border-ip-outline-variant px-3 py-2 rounded-lg text-sm">
+                    <div key={l} className="flex items-center justify-between bg-background border border-border px-3 py-2 rounded-lg text-sm">
                       <span className="truncate flex-1 font-medium">{l}</span>
-                      <button type="button" onClick={() => removeLink(l)} className="text-ip-on-surface-variant hover:text-ip-error"><X size={14}/></button>
+                      <button type="button" onClick={() => removeLink(l)} className="text-muted-foreground hover:text-destructive"><X size={14}/></button>
                     </div>
                   ))}
                 </div>
@@ -362,13 +362,13 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
 
               {/* Documents */}
               <div className="space-y-1.5">
-                <Label className="text-sm font-bold text-ip-on-surface flex items-center gap-1.5"><FileText size={14} /> Documents</Label>
+                <Label className="text-sm font-bold text-foreground flex items-center gap-1.5"><FileText size={14} /> Documents</Label>
                 <div className="space-y-2 mb-2">
                   {files.map((f, i) => (
-                    <div key={i} className="flex items-center justify-between bg-ip-surface border border-ip-outline-variant px-3 py-2 rounded-lg text-sm">
+                    <div key={i} className="flex items-center justify-between bg-background border border-border px-3 py-2 rounded-lg text-sm">
                       <span className="truncate flex-1 font-medium">{f.name}</span>
-                      <span className="text-xs text-ip-on-surface-variant font-mono mx-3">{(f.size/1024/1024).toFixed(1)}MB</span>
-                      <button type="button" onClick={() => removeFile(i)} className="text-ip-on-surface-variant hover:text-ip-error"><X size={14}/></button>
+                      <span className="text-xs text-muted-foreground font-mono mx-3">{(f.size/1024/1024).toFixed(1)}MB</span>
+                      <button type="button" onClick={() => removeFile(i)} className="text-muted-foreground hover:text-destructive"><X size={14}/></button>
                     </div>
                   ))}
                 </div>
@@ -385,9 +385,9 @@ export default function CreateProjectModal({ open, onOpenChange }: CreateProject
           </form>
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t border-ip-outline-variant bg-ip-surface shrink-0">
+        <DialogFooter className="px-6 py-4 border-t border-border bg-background shrink-0">
           <Button variant="outline" onClick={() => handleClose(false)} disabled={isPending}>Cancel</Button>
-          <Button type="submit" form="create-project-form" disabled={isPending} className="bg-ip-primary hover:bg-ip-primary-fixed">
+          <Button type="submit" form="create-project-form" disabled={isPending} className="bg-primary hover:bg-primary/20">
             {isPending ? 'Creating...' : 'Create Project'}
           </Button>
         </DialogFooter>
