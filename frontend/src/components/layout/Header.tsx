@@ -6,14 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useNotifications } from '@/features/notifications/hooks/useNotifications';
 import { useRealtimeNotifications } from '@/features/notifications/hooks/useRealtimeNotifications';
 
-const routeTitles: Record<string, string> = {
-  '/dashboard': 'Home',
-  '/my-tasks':  'My Tasks',
-  '/inbox':     'Inbox',
-  '/profile':   'Profile',
-  '/projects':  'Project Manage',
-  '/users':     'User Manage',
-};
+
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -50,8 +43,8 @@ export default function Header() {
   const currentTab = searchParams.get('tab') || 'list';
 
   // Match /projects/:id too
-  let pageTitle = routeTitles[location.pathname] ?? 'OnIts';
-  if (location.pathname.startsWith('/projects/')) pageTitle = 'Project';
+  
+  
 
   const handleLogout = async () => {
     try { await logout(); } finally { navigate('/login'); }

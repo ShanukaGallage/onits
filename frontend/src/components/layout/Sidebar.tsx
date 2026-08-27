@@ -4,8 +4,6 @@ import {
   LayoutDashboard, 
   FolderKanban, 
   Users, 
-  Settings, 
-  LogOut,
   ChevronDown,
   ChevronRight,
   Inbox,
